@@ -1,10 +1,14 @@
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "~/lib/supabase";
+import { getSupabaseClient } from "~/lib/supabase";
 
 export const useAuth = () => {
   const user = ref<User | null>(null);
   const session = ref<Session | null>(null);
   const loading = ref(true);
+  const userProfile = ref(null);
+
+  // Obter cliente Supabase
+  const supabase = getSupabaseClient();
 
   // Inicializar sessão
   const initAuth = async () => {
@@ -14,6 +18,7 @@ export const useAuth = () => {
       const {
         data: { session: currentSession },
       } = await supabase.auth.getSession();
+
       session.value = currentSession;
       user.value = currentSession?.user ?? null;
 
@@ -190,10 +195,6 @@ export const useAuth = () => {
     }
   };
 
-  // Computed
-  const isLoggedIn = computed(() => !!user.value);
-  const userProfile = ref(null);
-
   // Buscar perfil completo
   const fetchUserProfile = async () => {
     if (!user.value) return;
@@ -211,6 +212,9 @@ export const useAuth = () => {
       console.error("Erro ao buscar perfil:", error);
     }
   };
+
+  // Computed
+  const isLoggedIn = computed(() => !!user.value);
 
   return {
     user: readonly(user),
