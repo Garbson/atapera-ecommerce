@@ -61,155 +61,48 @@ export const useAuth = () => {
     }
   };
 
-  // Login com email/senha
+  // Resto dos métodos...
   const signIn = async (email: string, password: string) => {
     loading.value = true;
-
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-
       if (error) throw error;
-
       return { success: true, data };
     } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro no login",
-      };
+      return { success: false, error: error.message || "Erro no login" };
     } finally {
       loading.value = false;
     }
   };
 
-  // Cadastro
-  const signUp = async (
-    email: string,
-    password: string,
-    userData?: {
-      name?: string;
-      cpf?: string;
-      phone?: string;
-    }
-  ) => {
+  const signUp = async (email: string, password: string, userData?: any) => {
     loading.value = true;
-
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: userData || {},
-        },
+        options: { data: userData || {} },
       });
-
       if (error) throw error;
-
       return { success: true, data };
     } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro no cadastro",
-      };
+      return { success: false, error: error.message || "Erro no cadastro" };
     } finally {
       loading.value = false;
     }
   };
 
-  // Login com Google
-  const signInWithGoogle = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) throw error;
-      return { success: true };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro no login com Google",
-      };
-    }
-  };
-
-  // Logout
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-
       await navigateTo("/");
       return { success: true };
     } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro no logout",
-      };
-    }
-  };
-
-  // Reset senha
-  const resetPassword = async (email: string) => {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      });
-
-      if (error) throw error;
-      return { success: true };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro ao enviar email de reset",
-      };
-    }
-  };
-
-  // Atualizar perfil
-  const updateProfile = async (updates: {
-    name?: string;
-    cpf?: string;
-    phone?: string;
-  }) => {
-    if (!user.value) return { success: false, error: "Usuário não logado" };
-
-    try {
-      const { error } = await supabase
-        .from("user_profiles")
-        .update(updates)
-        .eq("id", user.value.id);
-
-      if (error) throw error;
-      return { success: true };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro ao atualizar perfil",
-      };
-    }
-  };
-
-  // Buscar perfil completo
-  const fetchUserProfile = async () => {
-    if (!user.value) return;
-
-    try {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .eq("id", user.value.id)
-        .single();
-
-      if (error) throw error;
-      userProfile.value = data;
-    } catch (error) {
-      console.error("Erro ao buscar perfil:", error);
+      return { success: false, error: error.message || "Erro no logout" };
     }
   };
 
@@ -225,10 +118,6 @@ export const useAuth = () => {
     initAuth,
     signIn,
     signUp,
-    signInWithGoogle,
     signOut,
-    resetPassword,
-    updateProfile,
-    fetchUserProfile,
   };
 };

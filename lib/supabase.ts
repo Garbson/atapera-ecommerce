@@ -34,7 +34,6 @@ export interface Database {
           category_id: string;
           stock: number;
           is_active: boolean;
-          // ... outros campos
         };
       };
       orders: {
@@ -45,7 +44,6 @@ export interface Database {
           status: string;
           total: number;
           created_at: string;
-          // ... outros campos
         };
       };
     };
@@ -58,15 +56,24 @@ let supabaseClient: ReturnType<typeof createClient<Database>> | null = null;
 // Função para criar/obter o cliente Supabase
 export const getSupabaseClient = () => {
   if (!supabaseClient) {
-    // Acessar variáveis de ambiente diretamente
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+    let supabaseUrl: string;
+    let supabaseAnonKey: string;
+
+    // Verificar se estamos no server ou client
+    if (process.server) {
+      // No server-side, usar process.env diretamente
+      supabaseUrl = process.env.SUPABASE_URL!;
+      supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
+    } else {
+      // No client-side, usar runtimeConfig
+      const config = useRuntimeConfig();
+      supabaseUrl = config.public.supabaseUrl as string;
+      supabaseAnonKey = config.public.supabaseAnonKey as string;
+    }
 
     // Verificação mais detalhada das variáveis
     if (!supabaseUrl || supabaseUrl === "undefined" || supabaseUrl === "") {
-      console.error("❌ SUPABASE_URL não está configurada no arquivo .env");
-      console.error("📝 Crie um arquivo .env na raiz do projeto com:");
-      console.error("   SUPABASE_URL=https://seu-projeto.supabase.co");
+      console.error("❌ SUPABASE_URL não está configurada");
       throw new Error(
         "SUPABASE_URL não está configurada. Verifique o arquivo .env"
       );
@@ -77,11 +84,7 @@ export const getSupabaseClient = () => {
       supabaseAnonKey === "undefined" ||
       supabaseAnonKey === ""
     ) {
-      console.error(
-        "❌ SUPABASE_ANON_KEY não está configurada no arquivo .env"
-      );
-      console.error("📝 Crie um arquivo .env na raiz do projeto com:");
-      console.error("   SUPABASE_ANON_KEY=sua-chave-anonima");
+      console.error("❌ SUPABASE_ANON_KEY não está configurada");
       throw new Error(
         "SUPABASE_ANON_KEY não está configurada. Verifique o arquivo .env"
       );

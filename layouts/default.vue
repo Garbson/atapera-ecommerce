@@ -17,12 +17,21 @@
 </template>
 
 <script setup lang="ts">
-// Inicializar auth e cart
+// Inicializar stores
 const { initAuth } = useAuth();
 const cartStore = useCartStore();
 
 onMounted(async () => {
-  await initAuth();
-  cartStore.loadFromLocalStorage();
+  try {
+    // Inicializar autenticação
+    await initAuth();
+
+    // Carregar carrinho do localStorage
+    cartStore.loadFromLocalStorage();
+
+    console.log("✅ Layout inicializado com sucesso");
+  } catch (error) {
+    console.error("❌ Erro ao inicializar layout:", error);
+  }
 });
 </script>

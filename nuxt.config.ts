@@ -1,5 +1,30 @@
 export default defineNuxtConfig({
-  modules: ["@nuxtjs/tailwindcss", "@nuxtjs/seo"],
+  modules: [
+    "@nuxtjs/tailwindcss",
+    "@nuxtjs/seo",
+    "@pinia/nuxt",
+    "@vueuse/nuxt",
+  ],
+
+  // Configuração das variáveis de runtime (necessário para client-side)
+  runtimeConfig: {
+    // Variáveis privadas (apenas server-side)
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
+
+    // Variáveis públicas (acessíveis no client-side)
+    public: {
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
+    },
+  },
+
+  // Configuração de componentes
+  components: [
+    {
+      path: "~/components",
+      pathPrefix: false,
+    },
+  ],
 
   // Configurações SEO globais
   site: {
@@ -23,5 +48,19 @@ export default defineNuxtConfig({
         },
       ],
     },
+  },
+
+  // CSS global
+  css: [],
+
+  // Configurações de desenvolvimento
+  devtools: { enabled: true },
+
+  // SSR
+  ssr: true,
+
+  // Configuração do Pinia
+  pinia: {
+    storesDirs: ["./stores/**"],
   },
 });
