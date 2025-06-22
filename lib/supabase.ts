@@ -1,6 +1,7 @@
+// lib/supabase.ts - VERSÃO CORRIGIDA
 import { createClient } from "@supabase/supabase-js";
 
-// Tipos TypeScript
+// Tipos TypeScript para o banco de dados
 export interface Database {
   public: {
     Tables: {
@@ -30,10 +31,130 @@ export interface Database {
         Row: {
           id: string;
           name: string;
+          slug: string;
+          description: string | null;
+          short_description: string | null;
+          sku: string | null;
           price: number;
-          category_id: string;
+          sale_price: number | null;
+          cost_price: number | null;
+          category_id: string | null;
+          subcategory_id: string | null;
+          brand: string | null;
+
+          // ESTOQUE - SEM track_stock
           stock: number;
+          min_stock: number;
+          manage_stock: boolean; // Esta é a coluna correta
+          stock_status: string;
+
+          // STATUS
           is_active: boolean;
+          is_featured: boolean;
+          status: string;
+
+          // DADOS FÍSICOS
+          weight: number | null;
+          length: number | null;
+          width: number | null;
+          height: number | null;
+
+          // CAMPOS ESPECÍFICOS
+          requires_license: boolean;
+          license_type: string | null;
+          age_restriction: number | null;
+
+          // JSON
+          specifications: any | null;
+          images: any[];
+          gallery: any[];
+
+          // SEO
+          meta_title: string | null;
+          meta_description: string | null;
+          meta_keywords: string | null;
+
+          // TIMESTAMPS
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          description?: string | null;
+          short_description?: string | null;
+          sku?: string | null;
+          price: number;
+          sale_price?: number | null;
+          cost_price?: number | null;
+          category_id?: string | null;
+          subcategory_id?: string | null;
+          brand?: string | null;
+          stock?: number;
+          min_stock?: number;
+          manage_stock?: boolean;
+          stock_status?: string;
+          is_active?: boolean;
+          is_featured?: boolean;
+          status?: string;
+          weight?: number | null;
+          length?: number | null;
+          width?: number | null;
+          height?: number | null;
+          requires_license?: boolean;
+          license_type?: string | null;
+          age_restriction?: number | null;
+          specifications?: any | null;
+          images?: any[];
+          gallery?: any[];
+          meta_title?: string | null;
+          meta_description?: string | null;
+          meta_keywords?: string | null;
+        };
+        Update: {
+          name?: string;
+          slug?: string;
+          description?: string | null;
+          short_description?: string | null;
+          sku?: string | null;
+          price?: number;
+          sale_price?: number | null;
+          cost_price?: number | null;
+          category_id?: string | null;
+          subcategory_id?: string | null;
+          brand?: string | null;
+          stock?: number;
+          min_stock?: number;
+          manage_stock?: boolean;
+          stock_status?: string;
+          is_active?: boolean;
+          is_featured?: boolean;
+          status?: string;
+          weight?: number | null;
+          length?: number | null;
+          width?: number | null;
+          height?: number | null;
+          requires_license?: boolean;
+          license_type?: string | null;
+          age_restriction?: number | null;
+          specifications?: any | null;
+          images?: any[];
+          gallery?: any[];
+          meta_title?: string | null;
+          meta_description?: string | null;
+          meta_keywords?: string | null;
+        };
+      };
+      categories: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          description: string | null;
+          parent_id: string | null;
+          is_active: boolean;
+          created_at: string;
         };
       };
       orders: {
@@ -50,73 +171,65 @@ export interface Database {
   };
 }
 
-// Variável para armazenar a instância do cliente
-let supabaseClient: ReturnType<typeof createClient<Database>> | null = null;
+// ✅ CORREÇÃO: Criar função para inicializar o cliente
+export function createSupabaseClient() {
+  // Buscar variáveis de ambiente
+  const supabaseUrl = process.env.NUXT_PUBLIC_SUPABASE_URL || "";
+  const supabaseAnonKey = process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-// Função para criar/obter o cliente Supabase
-export const getSupabaseClient = () => {
-  if (!supabaseClient) {
-    let supabaseUrl: string;
-    let supabaseAnonKey: string;
-
-    // Verificar se estamos no server ou client
-    if (process.server) {
-      // No server-side, usar process.env diretamente
-      supabaseUrl = process.env.SUPABASE_URL!;
-      supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
-    } else {
-      // No client-side, usar runtimeConfig
-      const config = useRuntimeConfig();
-      supabaseUrl = config.public.supabaseUrl as string;
-      supabaseAnonKey = config.public.supabaseAnonKey as string;
-    }
-
-    // Verificação mais detalhada das variáveis
-    if (!supabaseUrl || supabaseUrl === "undefined" || supabaseUrl === "") {
-      console.error("❌ SUPABASE_URL não está configurada");
-      throw new Error(
-        "SUPABASE_URL não está configurada. Verifique o arquivo .env"
-      );
-    }
-
-    if (
-      !supabaseAnonKey ||
-      supabaseAnonKey === "undefined" ||
-      supabaseAnonKey === ""
-    ) {
-      console.error("❌ SUPABASE_ANON_KEY não está configurada");
-      throw new Error(
-        "SUPABASE_ANON_KEY não está configurada. Verifique o arquivo .env"
-      );
-    }
-
-    supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-      },
-    });
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Supabase URL e Anon Key são obrigatórios");
   }
 
-  return supabaseClient;
+  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  });
+}
+
+// ✅ Cliente padrão (pode ser usado fora de contextos Nuxt)
+export const supabase = createSupabaseClient();
+
+// ✅ HELPER FUNCTIONS para substituir track_stock logic
+export const productHelpers = {
+  // Verifica se produto está disponível (substitui track_stock = true)
+  isAvailable: (product: Database["public"]["Tables"]["products"]["Row"]) => {
+    return product.manage_stock && product.is_active && product.stock > 0;
+  },
+
+  // Verifica se produto está em estoque
+  inStock: (product: Database["public"]["Tables"]["products"]["Row"]) => {
+    return product.stock > 0;
+  },
+
+  // Status do estoque
+  getStockStatus: (
+    product: Database["public"]["Tables"]["products"]["Row"]
+  ) => {
+    if (!product.is_active) return "inactive";
+    if (product.stock === 0) return "out_of_stock";
+    if (product.stock <= product.min_stock) return "low_stock";
+    return "in_stock";
+  },
 };
 
-// Export compatível com o código existente
-export const supabase = {
-  get auth() {
-    return getSupabaseClient().auth;
-  },
-  get from() {
-    return getSupabaseClient().from.bind(getSupabaseClient());
-  },
-  get storage() {
-    return getSupabaseClient().storage;
-  },
-  get functions() {
-    return getSupabaseClient().functions;
-  },
-  get realtime() {
-    return getSupabaseClient().realtime;
-  },
+// ✅ QUERY BUILDERS corretos
+export const productQueries = {
+  // Em vez de WHERE track_stock = true
+  getAvailableProducts: () =>
+    supabase
+      .from("products")
+      .select("*")
+      .eq("is_active", true)
+      .eq("manage_stock", true)
+      .gt("stock", 0),
+
+  // Produtos em estoque
+  getInStockProducts: () =>
+    supabase.from("products").select("*").eq("is_active", true).gt("stock", 0),
 };
+
+export default supabase;

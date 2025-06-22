@@ -1,123 +1,198 @@
-import type { Session, User } from "@supabase/supabase-js";
-import { getSupabaseClient } from "~/lib/supabase";
+// composables/useAuth.ts - VERSÃO CORRIGIDA
+import type { User } from "@supabase/supabase-js";
+import type { Database } from "~/lib/supabase";
 
 export const useAuth = () => {
+  // ✅ CORRETO: Usar composable dentro de função
+  const supabase = useSupabase();
+  const router = useRouter();
+
+  // Estados reativos
   const user = ref<User | null>(null);
-  const session = ref<Session | null>(null);
   const loading = ref(true);
-  const userProfile = ref(null);
+  const profile = ref<
+    Database["public"]["Tables"]["user_profiles"]["Row"] | null
+  >(null);
 
-  // Obter cliente Supabase
-  const supabase = getSupabaseClient();
-
-  // Inicializar sessão
-  const initAuth = async () => {
-    loading.value = true;
-
+  // Verificar sessão atual
+  const getCurrentUser = async () => {
     try {
       const {
-        data: { session: currentSession },
+        data: { session },
       } = await supabase.auth.getSession();
+      user.value = session?.user ?? null;
 
-      session.value = currentSession;
-      user.value = currentSession?.user ?? null;
-
-      // Listener para mudanças de autenticação
-      supabase.auth.onAuthStateChange(async (event, newSession) => {
-        session.value = newSession;
-        user.value = newSession?.user ?? null;
-
-        if (event === "SIGNED_IN" && newSession?.user) {
-          await createOrUpdateProfile(newSession.user);
-        }
-      });
+      if (user.value) {
+        await getUserProfile();
+      }
     } catch (error) {
-      console.error("Erro ao inicializar auth:", error);
+      console.error("Erro ao buscar usuário:", error);
     } finally {
       loading.value = false;
     }
   };
 
-  // Criar ou atualizar perfil do usuário
-  const createOrUpdateProfile = async (authUser: User) => {
+  // Buscar perfil do usuário
+  const getUserProfile = async () => {
+    if (!user.value) return;
+
     try {
-      const { data: existingProfile } = await supabase
+      const { data, error } = await supabase
         .from("user_profiles")
         .select("*")
-        .eq("id", authUser.id)
+        .eq("id", user.value.id)
         .single();
 
-      if (!existingProfile) {
-        const { error } = await supabase.from("user_profiles").insert({
-          id: authUser.id,
-          email: authUser.email!,
-          name: authUser.user_metadata?.name || null,
-        });
-
-        if (error) throw error;
+      if (error && error.code !== "PGRST116") {
+        throw error;
       }
+
+      profile.value = data;
     } catch (error) {
-      console.error("Erro ao criar/atualizar perfil:", error);
+      console.error("Erro ao buscar perfil:", error);
     }
   };
 
-  // Resto dos métodos...
+  // Login com email e senha
   const signIn = async (email: string, password: string) => {
-    loading.value = true;
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+
       if (error) throw error;
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, error: error.message || "Erro no login" };
-    } finally {
-      loading.value = false;
+
+      user.value = data.user;
+      await getUserProfile();
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Erro no login:", error);
+      return { data: null, error };
     }
   };
 
-  const signUp = async (email: string, password: string, userData?: any) => {
-    loading.value = true;
+  // Registro
+  const signUp = async (email: string, password: string, metadata?: any) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: userData || {} },
+        options: {
+          data: metadata,
+        },
       });
+
       if (error) throw error;
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, error: error.message || "Erro no cadastro" };
-    } finally {
-      loading.value = false;
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Erro no registro:", error);
+      return { data: null, error };
     }
   };
 
+  // Logout
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      await navigateTo("/");
-      return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message || "Erro no logout" };
+
+      user.value = null;
+      profile.value = null;
+
+      await router.push("/");
+    } catch (error) {
+      console.error("Erro no logout:", error);
     }
   };
 
-  // Computed
-  const isLoggedIn = computed(() => !!user.value);
+  // Atualizar perfil
+  const updateProfile = async (
+    updates: Database["public"]["Tables"]["user_profiles"]["Update"]
+  ) => {
+    if (!user.value) throw new Error("Usuário não autenticado");
+
+    try {
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .update(updates)
+        .eq("id", user.value.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      profile.value = data;
+      return { data, error: null };
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+      return { data: null, error };
+    }
+  };
+
+  // Resetar senha
+  const resetPassword = async (email: string) => {
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error("Erro ao resetar senha:", error);
+      return { data: null, error };
+    }
+  };
+
+  // Verificar se usuário é admin
+  const isAdmin = computed(() => {
+    return profile.value?.email?.includes("@atapera.shop") || false;
+  });
+
+  // Verificar se está autenticado
+  const isAuthenticated = computed(() => !!user.value);
+
+  // Inicializar auth listener
+  const initAuthListener = () => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      user.value = session?.user ?? null;
+
+      if (event === "SIGNED_IN") {
+        await getUserProfile();
+      }
+
+      if (event === "SIGNED_OUT") {
+        profile.value = null;
+      }
+    });
+  };
+
+  // Auto-inicializar quando composable é usado
+  if (process.client) {
+    getCurrentUser();
+    initAuthListener();
+  }
 
   return {
+    // Estados
     user: readonly(user),
-    session: readonly(session),
+    profile: readonly(profile),
     loading: readonly(loading),
-    isLoggedIn,
-    userProfile: readonly(userProfile),
-    initAuth,
+
+    // Computed
+    isAuthenticated,
+    isAdmin,
+
+    // Métodos
     signIn,
     signUp,
     signOut,
+    updateProfile,
+    resetPassword,
+    getCurrentUser,
+    getUserProfile,
   };
 };
