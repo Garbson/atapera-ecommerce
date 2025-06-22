@@ -190,7 +190,7 @@
             </blockquote>
             <div class="flex items-center justify-center gap-4">
               <img
-                src="https://via.placeholder.com/60x60/374151/ffffff?text=JS"
+                src="/images/joao.jpeg"
                 alt="João Silva"
                 class="w-12 h-12 rounded-full"
               />
