@@ -263,7 +263,7 @@
           </li>
           <li>
             <NuxtLink
-              to="/ofertas"
+              to="/categoria/ofertas"
               class="text-red-600 hover:text-red-700 font-medium transition-colors"
             >
               🔥 Ofertas
@@ -421,7 +421,7 @@
           </li>
           <li>
             <NuxtLink
-              to="/ofertas"
+              to="/categoria/ofertas"
               class="block text-red-600 hover:text-red-700 transition-colors"
               @click="showMobileMenu = false"
               >🔥 Ofertas</NuxtLink
