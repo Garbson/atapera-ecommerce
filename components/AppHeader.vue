@@ -1,4 +1,4 @@
-<!-- components/AppHeader.vue -->
+<!-- components/AppHeader.vue - ROTAS CORRIGIDAS -->
 <template>
   <header class="bg-white shadow-sm sticky top-0 z-40">
     <!-- Top Bar -->
@@ -97,14 +97,16 @@
             >
               <template v-if="authStore.isLoggedIn">
                 <NuxtLink
-                  to="/conta"
+                  to="/minha-conta"
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  @click="closeUserMenu"
                 >
                   Minha Conta
                 </NuxtLink>
                 <NuxtLink
-                  to="/pedidos"
+                  to="/minha-conta/pedidos"
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  @click="closeUserMenu"
                 >
                   Meus Pedidos
                 </NuxtLink>
@@ -117,17 +119,29 @@
                 </button>
               </template>
               <template v-else>
+                <!-- ✅ CORRIGIDO: Rotas corretas -->
                 <NuxtLink
                   to="/login"
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  @click="closeUserMenu"
                 >
                   Entrar
                 </NuxtLink>
                 <NuxtLink
                   to="/cadastro"
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  @click="closeUserMenu"
                 >
                   Criar Conta
+                </NuxtLink>
+                <hr class="my-2" />
+                <!-- Admin link separado -->
+                <NuxtLink
+                  to="/admin/login"
+                  class="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+                  @click="closeUserMenu"
+                >
+                  Acesso Admin
                 </NuxtLink>
               </template>
             </div>
@@ -318,10 +332,50 @@
               Buscar
             </button>
           </li>
+
+          <!-- ✅ Seção de login no mobile -->
+          <li v-if="!authStore.isLoggedIn" class="border-b pb-4">
+            <div class="space-y-2">
+              <NuxtLink
+                to="/login"
+                class="block text-gray-700 hover:text-red-600 transition-colors py-2"
+                @click="showMobileMenu = false"
+              >
+                👤 Entrar
+              </NuxtLink>
+              <NuxtLink
+                to="/cadastro"
+                class="block text-gray-700 hover:text-red-600 transition-colors py-2"
+                @click="showMobileMenu = false"
+              >
+                📝 Criar Conta
+              </NuxtLink>
+            </div>
+          </li>
+
+          <li v-else class="border-b pb-4">
+            <div class="space-y-2">
+              <NuxtLink
+                to="/minha-conta"
+                class="block text-gray-700 hover:text-red-600 transition-colors py-2"
+                @click="showMobileMenu = false"
+              >
+                👤 Minha Conta
+              </NuxtLink>
+              <button
+                @click="logout"
+                class="block text-red-600 hover:text-red-700 transition-colors py-2"
+              >
+                🚪 Sair
+              </button>
+            </div>
+          </li>
+
           <li>
             <NuxtLink
               to="/categoria/armas-fogo"
               class="block text-gray-700 hover:text-red-600 transition-colors"
+              @click="showMobileMenu = false"
               >Armas de Fogo</NuxtLink
             >
           </li>
@@ -329,6 +383,7 @@
             <NuxtLink
               to="/categoria/armas-pressao"
               class="block text-gray-700 hover:text-red-600 transition-colors"
+              @click="showMobileMenu = false"
               >Armas de Pressão</NuxtLink
             >
           </li>
@@ -336,6 +391,7 @@
             <NuxtLink
               to="/categoria/pesca"
               class="block text-gray-700 hover:text-red-600 transition-colors"
+              @click="showMobileMenu = false"
               >Pesca</NuxtLink
             >
           </li>
@@ -343,6 +399,7 @@
             <NuxtLink
               to="/categoria/airsoft"
               class="block text-gray-700 hover:text-red-600 transition-colors"
+              @click="showMobileMenu = false"
               >Airsoft</NuxtLink
             >
           </li>
@@ -350,6 +407,7 @@
             <NuxtLink
               to="/categoria/caca"
               class="block text-gray-700 hover:text-red-600 transition-colors"
+              @click="showMobileMenu = false"
               >Caça</NuxtLink
             >
           </li>
@@ -357,6 +415,7 @@
             <NuxtLink
               to="/categoria/vestuario"
               class="block text-gray-700 hover:text-red-600 transition-colors"
+              @click="showMobileMenu = false"
               >Vestuário</NuxtLink
             >
           </li>
@@ -364,6 +423,7 @@
             <NuxtLink
               to="/ofertas"
               class="block text-red-600 hover:text-red-700 transition-colors"
+              @click="showMobileMenu = false"
               >🔥 Ofertas</NuxtLink
             >
           </li>
@@ -374,6 +434,7 @@
 </template>
 
 <script setup lang="ts">
+// ✅ CORRIGIDO: Usar os composables corretos
 const cartStore = useCartStore();
 const authStore = useAuth();
 
@@ -410,6 +471,7 @@ const toggleMobileMenu = () => {
 const logout = async () => {
   await authStore.signOut();
   showUserMenu.value = false;
+  showMobileMenu.value = false;
 };
 
 // Click outside directive
@@ -433,6 +495,7 @@ watch(
   () => {
     showMobileMenu.value = false;
     showMobileSearch.value = false;
+    showUserMenu.value = false;
   }
 );
 </script>
