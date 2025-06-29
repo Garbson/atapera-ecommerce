@@ -7,8 +7,8 @@ export default defineNuxtRouteMiddleware((to, from) => {
     return;
   }
 
-  // Se já estiver logado, redirecionar para admin
+  // Redirecionar para minha conta se já estiver logado
   if (isLoggedIn.value) {
-    return navigateTo("/admin");
+    return navigateTo("/minha-conta");
   }
 });

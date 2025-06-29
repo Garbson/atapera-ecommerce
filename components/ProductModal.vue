@@ -1,653 +1,605 @@
 <!-- components/ProductModal.vue -->
 <template>
-  <Teleport to="body">
-    <div class="fixed inset-0 z-50 overflow-y-auto" @click="$emit('close')">
+  <div
+    class="fixed inset-0 backdrop-blur-md bg-amber-100 bg-opacity-10 flex items-center justify-center z-50 p-4"
+  >
+    <div
+      class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+    >
+      <!-- Header -->
       <div
-        class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0"
+        class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl"
       >
-        <!-- Background overlay -->
-        <div
-          class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-        ></div>
-
-        <!-- Modal panel -->
-        <div
-          class="inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl"
-          @click.stop
-        >
-          <!-- Header -->
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">
-              {{ isEditing ? "Editar Produto" : "Adicionar Novo Produto" }}
-            </h2>
-            <button
-              @click="$emit('close')"
-              class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-bold text-gray-800">
+            {{ isEditing ? "Editar Produto" : "Adicionar Produto" }}
+          </h2>
+          <button
+            @click="$emit('close')"
+            class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Form -->
-          <form @submit.prevent="handleSubmit">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <!-- Left Column -->
-              <div class="space-y-6">
-                <!-- Basic Info -->
-                <div class="bg-gray-50 rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                    Informações Básicas
-                  </h3>
-
-                  <div class="space-y-4">
-                    <!-- Product Name -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Nome do Produto *
-                      </label>
-                      <input
-                        v-model="form.name"
-                        type="text"
-                        required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="Ex: Pistola Glock G17 Gen5"
-                      />
-                    </div>
-
-                    <!-- SKU -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        SKU *
-                      </label>
-                      <input
-                        v-model="form.sku"
-                        type="text"
-                        required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent font-mono"
-                        placeholder="Ex: GLK-G17-001"
-                        @input="form.sku = form.sku.toUpperCase()"
-                      />
-                    </div>
-
-                    <!-- Category -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Categoria *
-                      </label>
-                      <select
-                        v-model="form.category"
-                        required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      >
-                        <option value="">Selecione uma categoria</option>
-                        <option value="armas-fogo">Armas de Fogo</option>
-                        <option value="armas-pressao">Armas de Pressão</option>
-                        <option value="pesca">Equipamentos de Pesca</option>
-                        <option value="airsoft">Airsoft</option>
-                        <option value="caca">Caça</option>
-                        <option value="vestuario">Vestuário Outdoor</option>
-                      </select>
-                    </div>
-
-                    <!-- Description -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Descrição *
-                      </label>
-                      <textarea
-                        v-model="form.description"
-                        required
-                        rows="4"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-                        placeholder="Descreva o produto detalhadamente..."
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Pricing -->
-                <div class="bg-gray-50 rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                    Preços e Estoque
-                  </h3>
-
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Price -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Preço (R$) *
-                      </label>
-                      <input
-                        v-model.number="form.price"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="0,00"
-                      />
-                    </div>
-
-                    <!-- Compare Price -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Preço Anterior (R$)
-                      </label>
-                      <input
-                        v-model.number="form.comparePrice"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="0,00"
-                      />
-                    </div>
-
-                    <!-- Stock -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Estoque *
-                      </label>
-                      <input
-                        v-model.number="form.stock"
-                        type="number"
-                        min="0"
-                        required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="0"
-                      />
-                    </div>
-
-                    <!-- Weight -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Peso (kg)
-                      </label>
-                      <input
-                        v-model.number="form.weight"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="0,00"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Right Column -->
-              <div class="space-y-6">
-                <!-- Images -->
-                <div class="bg-gray-50 rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                    Imagens do Produto
-                  </h3>
-
-                  <!-- Image Upload -->
-                  <div class="space-y-4">
-                    <div
-                      class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors"
-                    >
-                      <input
-                        ref="imageInput"
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        class="hidden"
-                        @change="handleImageUpload"
-                      />
-                      <svg
-                        class="mx-auto h-12 w-12 text-gray-400 mb-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        />
-                      </svg>
-                      <button
-                        type="button"
-                        @click="$refs.imageInput.click()"
-                        class="text-red-600 hover:text-red-700 font-medium"
-                      >
-                        Clique para fazer upload
-                      </button>
-                      <p class="text-sm text-gray-500 mt-2">
-                        PNG, JPG, GIF até 10MB
-                      </p>
-                    </div>
-
-                    <!-- Image Preview -->
-                    <div v-if="imagePreview" class="grid grid-cols-2 gap-4">
-                      <div class="relative">
-                        <img
-                          :src="imagePreview"
-                          alt="Preview"
-                          class="w-full h-32 object-cover rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          @click="removeImage"
-                          class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                        >
-                          <svg
-                            class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Product Settings -->
-                <div class="bg-gray-50 rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                    Configurações
-                  </h3>
-
-                  <div class="space-y-4">
-                    <!-- Status -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                        >Status</label
-                      >
-                      <select
-                        v-model="form.status"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      >
-                        <option value="active">Ativo</option>
-                        <option value="inactive">Inativo</option>
-                        <option value="draft">Rascunho</option>
-                      </select>
-                    </div>
-
-                    <!-- Featured -->
-                    <div class="flex items-center">
-                      <input
-                        v-model="form.featured"
-                        type="checkbox"
-                        class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-                      />
-                      <label class="ml-3 text-sm font-medium text-gray-700">
-                        Produto em destaque
-                      </label>
-                    </div>
-
-                    <!-- Requires License -->
-                    <div class="flex items-center">
-                      <input
-                        v-model="form.requiresLicense"
-                        type="checkbox"
-                        class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-                      />
-                      <label class="ml-3 text-sm font-medium text-gray-700">
-                        Requer licença/autorização
-                      </label>
-                    </div>
-
-                    <!-- Track Stock -->
-                    <div class="flex items-center">
-                      <input
-                        v-model="form.trackStock"
-                        type="checkbox"
-                        class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-                      />
-                      <label class="ml-3 text-sm font-medium text-gray-700">
-                        Controlar estoque
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- SEO -->
-                <div class="bg-gray-50 rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">SEO</h3>
-
-                  <div class="space-y-4">
-                    <!-- Meta Title -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Título SEO
-                      </label>
-                      <input
-                        v-model="form.metaTitle"
-                        type="text"
-                        maxlength="60"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="Título para mecanismos de busca"
-                      />
-                      <p class="text-xs text-gray-500 mt-1">
-                        {{ (form.metaTitle || "").length }}/60 caracteres
-                      </p>
-                    </div>
-
-                    <!-- Meta Description -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Descrição SEO
-                      </label>
-                      <textarea
-                        v-model="form.metaDescription"
-                        maxlength="160"
-                        rows="3"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-                        placeholder="Descrição para mecanismos de busca"
-                      ></textarea>
-                      <p class="text-xs text-gray-500 mt-1">
-                        {{ (form.metaDescription || "").length }}/160 caracteres
-                      </p>
-                    </div>
-
-                    <!-- Tags -->
-                    <div>
-                      <label
-                        class="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Tags (separadas por vírgula)
-                      </label>
-                      <input
-                        v-model="form.tags"
-                        type="text"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="Ex: glock, pistola, arma, fogo"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Actions -->
-            <div
-              class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200"
-            >
-              <div class="flex items-center gap-4">
-                <button
-                  type="button"
-                  @click="saveDraft"
-                  class="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Salvar como Rascunho
-                </button>
-              </div>
-
-              <div class="flex items-center gap-4">
-                <button
-                  type="button"
-                  @click="$emit('close')"
-                  class="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  :disabled="loading"
-                  class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                >
-                  <svg
-                    v-if="loading"
-                    class="w-5 h-5 animate-spin"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  {{
-                    loading
-                      ? "Salvando..."
-                      : isEditing
-                      ? "Atualizar Produto"
-                      : "Criar Produto"
-                  }}
-                </button>
-              </div>
-            </div>
-          </form>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
       </div>
+
+      <!-- Form -->
+      <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
+        <!-- Informações Básicas -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Nome -->
+          <div class="lg:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Nome do Produto *
+            </label>
+            <input
+              v-model="form.name"
+              type="text"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="Ex: Pistola Glock G17 Gen5"
+              @input="generateSlug"
+            />
+          </div>
+
+          <!-- Slug -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              URL (Slug) *
+            </label>
+            <input
+              v-model="form.slug"
+              type="text"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="pistola-glock-g17-gen5"
+            />
+          </div>
+
+          <!-- SKU -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              SKU *
+            </label>
+            <input
+              v-model="form.sku"
+              type="text"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="GLK-G17-001"
+            />
+          </div>
+
+          <!-- Marca -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Marca
+            </label>
+            <input
+              v-model="form.brand"
+              type="text"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="Ex: Glock"
+            />
+          </div>
+
+          <!-- Modelo -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Modelo
+            </label>
+            <input
+              v-model="form.model"
+              type="text"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="Ex: G17 Gen5"
+            />
+          </div>
+
+          <!-- Categoria -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Categoria *
+            </label>
+            <select
+              v-model="form.category_id"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            >
+              <option value="">Selecione uma categoria</option>
+              <option value="uuid-armas-fogo">Armas de Fogo</option>
+              <option value="uuid-armas-pressao">Armas de Pressão</option>
+              <option value="uuid-pesca">Pesca</option>
+              <option value="uuid-airsoft">Airsoft</option>
+              <option value="uuid-caca">Caça</option>
+              <option value="uuid-vestuario">Vestuário</option>
+            </select>
+          </div>
+
+          <!-- Calibre (se aplicável) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Calibre
+            </label>
+            <input
+              v-model="form.caliber"
+              type="text"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="Ex: 9mm, .40, .45"
+            />
+          </div>
+        </div>
+
+        <!-- Descrições -->
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Descrição Curta
+            </label>
+            <textarea
+              v-model="form.short_description"
+              rows="2"
+              maxlength="500"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="Descrição breve do produto (até 500 caracteres)"
+            ></textarea>
+            <p class="text-xs text-gray-500 mt-1">
+              {{ form.short_description?.length || 0 }}/500 caracteres
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Descrição Completa
+            </label>
+            <textarea
+              v-model="form.description"
+              rows="4"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="Descrição detalhada do produto"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Preços e Estoque -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Preço *
+            </label>
+            <div class="relative">
+              <span
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >R$</span
+              >
+              <input
+                v-model="form.price"
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="0,00"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Preço Promocional
+            </label>
+            <div class="relative">
+              <span
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >R$</span
+              >
+              <input
+                v-model="form.sale_price"
+                type="number"
+                step="0.01"
+                min="0"
+                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="0,00"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Estoque *
+            </label>
+            <input
+              v-model="form.stock"
+              type="number"
+              min="0"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="0"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Estoque Mínimo
+            </label>
+            <input
+              v-model="form.min_stock"
+              type="number"
+              min="0"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="5"
+            />
+          </div>
+        </div>
+
+        <!-- Dimensões e Peso -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Peso (kg)
+            </label>
+            <input
+              v-model="form.weight"
+              type="number"
+              step="0.01"
+              min="0"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="0.00"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Comprimento (cm)
+            </label>
+            <input
+              v-model="dimensions.length"
+              type="number"
+              step="0.1"
+              min="0"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="0.0"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Largura (cm)
+            </label>
+            <input
+              v-model="dimensions.width"
+              type="number"
+              step="0.1"
+              min="0"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="0.0"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Altura (cm)
+            </label>
+            <input
+              v-model="dimensions.height"
+              type="number"
+              step="0.1"
+              min="0"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="0.0"
+            />
+          </div>
+        </div>
+
+        <!-- Configurações -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-6">
+            <label class="flex items-center gap-2">
+              <input
+                v-model="form.is_active"
+                type="checkbox"
+                class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+              />
+              <span class="text-sm font-medium text-gray-700"
+                >Produto Ativo</span
+              >
+            </label>
+
+            <label class="flex items-center gap-2">
+              <input
+                v-model="form.is_featured"
+                type="checkbox"
+                class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+              />
+              <span class="text-sm font-medium text-gray-700"
+                >Produto Destaque</span
+              >
+            </label>
+
+            <label class="flex items-center gap-2">
+              <input
+                v-model="form.requires_license"
+                type="checkbox"
+                class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+              />
+              <span class="text-sm font-medium text-gray-700"
+                >Requer Licença</span
+              >
+            </label>
+          </div>
+
+          <!-- Tipo de Licença (se aplicável) -->
+          <div v-if="form.requires_license">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Tipo de Licença
+            </label>
+            <select
+              v-model="form.license_type"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            >
+              <option value="">Selecione o tipo</option>
+              <option value="cr">Certificado de Registro (CR)</option>
+              <option value="craf">
+                Certificado de Registro de Arma de Fogo (CRAF)
+              </option>
+              <option value="cac">Certificado de Atirador Civil (CAC)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- SEO -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-gray-800">SEO</h3>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Meta Título
+            </label>
+            <input
+              v-model="form.meta_title"
+              type="text"
+              maxlength="255"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="Título para SEO (até 255 caracteres)"
+            />
+            <p class="text-xs text-gray-500 mt-1">
+              {{ form.meta_title?.length || 0 }}/255 caracteres
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Meta Descrição
+            </label>
+            <textarea
+              v-model="form.meta_description"
+              rows="3"
+              maxlength="500"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="Descrição para SEO (até 500 caracteres)"
+            ></textarea>
+            <p class="text-xs text-gray-500 mt-1">
+              {{ form.meta_description?.length || 0 }}/500 caracteres
+            </p>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div
+          class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200"
+        >
+          <button
+            type="button"
+            @click="$emit('close')"
+            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            :disabled="loading"
+            class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+          >
+            <svg
+              v-if="loading"
+              class="animate-spin w-5 h-5"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            {{ loading ? "Salvando..." : isEditing ? "Atualizar" : "Criar" }}
+            Produto
+          </button>
+        </div>
+      </form>
     </div>
-  </Teleport>
+  </div>
 </template>
 
 <script setup lang="ts">
-interface Props {
-  product?: any;
+const supabase = useSupabaseClient();
+
+interface Product {
+  id?: string;
+  name: string;
+  slug: string;
+  description?: string;
+  short_description?: string;
+  price: number;
+  sale_price?: number;
+  category_id: string;
+  brand?: string;
+  model?: string;
+  sku: string;
+  stock: number;
+  min_stock: number;
+  weight?: number;
+  dimensions?: {
+    length?: number;
+    width?: number;
+    height?: number;
+  };
+  requires_license: boolean;
+  license_type?: string;
+  caliber?: string;
+  is_active: boolean;
+  is_featured: boolean;
+  meta_title?: string;
+  meta_description?: string;
 }
 
-const props = defineProps<Props>();
-const emit = defineEmits(["close", "save"]);
+const props = defineProps<{
+  product?: Product | null;
+}>();
 
-// Estados
+const emit = defineEmits<{
+  close: [];
+  save: [product: Product];
+}>();
+
 const loading = ref(false);
-const imagePreview = ref("");
-
-const form = ref({
-  name: "",
-  sku: "",
-  category: "",
-  description: "",
-  price: 0,
-  comparePrice: 0,
-  stock: 0,
-  weight: 0,
-  status: "active",
-  featured: false,
-  requiresLicense: false,
-  trackStock: true,
-  metaTitle: "",
-  metaDescription: "",
-  tags: "",
-  image: "",
-});
-
-// Computed
 const isEditing = computed(() => !!props.product);
 
-// Carregar dados do produto se estiver editando
-watch(
-  () => props.product,
-  (product) => {
-    if (product) {
-      form.value = { ...product };
-      if (product.image) {
-        imagePreview.value = product.image;
-      }
-    }
-  },
-  { immediate: true }
-);
-
-// Métodos
-const handleImageUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
-
-  if (file) {
-    if (file.size > 10 * 1024 * 1024) {
-      // 10MB
-      alert("Arquivo muito grande. Máximo 10MB.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imagePreview.value = e.target?.result as string;
-      form.value.image = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  }
-};
-
-const removeImage = () => {
-  imagePreview.value = "";
-  form.value.image = "";
-};
-
-const generateSKU = () => {
-  if (!form.value.name || !form.value.category) return;
-
-  const categoryPrefix = {
-    "armas-fogo": "AF",
-    "armas-pressao": "AP",
-    pesca: "PES",
-    airsoft: "AIR",
-    caca: "CAC",
-    vestuario: "VES",
-  };
-
-  const prefix = categoryPrefix[form.value.category] || "PROD";
-  const nameShort = form.value.name.substring(0, 3).toUpperCase();
-  const timestamp = Date.now().toString().slice(-3);
-
-  form.value.sku = `${prefix}-${nameShort}-${timestamp}`;
-};
-
-// Auto-gerar SKU quando nome e categoria mudam
-watch([() => form.value.name, () => form.value.category], () => {
-  if (
-    !isEditing.value &&
-    form.value.name &&
-    form.value.category &&
-    !form.value.sku
-  ) {
-    generateSKU();
-  }
+// Dimensões separadas para facilitar o binding
+const dimensions = reactive({
+  length: 0,
+  width: 0,
+  height: 0,
 });
 
-// Auto-preencher meta title
-watch(
-  () => form.value.name,
-  (newName) => {
-    if (!form.value.metaTitle && newName) {
-      form.value.metaTitle = newName;
-    }
+// Formulário
+const form = reactive<Product>({
+  name: "",
+  slug: "",
+  description: "",
+  short_description: "",
+  price: 0,
+  sale_price: 0,
+  category_id: "",
+  brand: "",
+  model: "",
+  sku: "",
+  stock: 0,
+  min_stock: 5,
+  weight: 0,
+  requires_license: false,
+  license_type: "",
+  caliber: "",
+  is_active: true,
+  is_featured: false,
+  meta_title: "",
+  meta_description: "",
+});
+
+// Inicializar formulário se estiver editando
+if (props.product) {
+  Object.assign(form, props.product);
+  if (props.product.dimensions) {
+    Object.assign(dimensions, props.product.dimensions);
   }
-);
+}
 
-// Auto-preencher meta description
-watch(
-  () => form.value.description,
-  (newDesc) => {
-    if (!form.value.metaDescription && newDesc) {
-      form.value.metaDescription = newDesc.substring(0, 160);
-    }
+// Gerar slug automaticamente
+const generateSlug = () => {
+  if (form.name && !isEditing.value) {
+    form.slug = form.name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+      .replace(/[^a-z0-9\s-]/g, "") // Remove caracteres especiais
+      .trim()
+      .replace(/\s+/g, "-") // Substitui espaços por hífens
+      .replace(/-+/g, "-"); // Remove hífens duplicados
   }
-);
-
-const validateForm = () => {
-  const required = ["name", "sku", "category", "description"];
-  const missing = required.filter((field) => !form.value[field]);
-
-  if (missing.length > 0) {
-    alert(`Campos obrigatórios: ${missing.join(", ")}`);
-    return false;
-  }
-
-  if (form.value.price <= 0) {
-    alert("Preço deve ser maior que zero");
-    return false;
-  }
-
-  if (form.value.stock < 0) {
-    alert("Estoque não pode ser negativo");
-    return false;
-  }
-
-  return true;
 };
 
+// Submit do formulário
 const handleSubmit = async () => {
-  if (!validateForm()) return;
-
   loading.value = true;
 
   try {
-    // Simular salvamento
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Preparar dados para o Supabase
+    const productData = {
+      name: form.name,
+      slug: form.slug,
+      description: form.description,
+      short_description: form.short_description,
+      price: parseFloat(form.price.toString()),
+      sale_price: form.sale_price
+        ? parseFloat(form.sale_price.toString())
+        : null,
+      category_id: form.category_id,
+      brand: form.brand || null,
+      model: form.model || null,
+      sku: form.sku,
+      stock: parseInt(form.stock.toString()),
+      min_stock: parseInt(form.min_stock.toString()),
+      weight: form.weight ? parseFloat(form.weight.toString()) : null,
+      dimensions: {
+        length: dimensions.length || null,
+        width: dimensions.width || null,
+        height: dimensions.height || null,
+      },
+      requires_license: form.requires_license,
+      license_type: form.license_type || null,
+      caliber: form.caliber || null,
+      is_active: form.is_active,
+      is_featured: form.is_featured,
+      meta_title: form.meta_title || null,
+      meta_description: form.meta_description || null,
+    };
 
-    // Em produção, aqui faria a chamada para o Supabase
-    // const { data, error } = await supabase.from('products').insert(form.value);
+    let result;
 
-    emit("save", form.value);
-  } catch (error) {
+    if (isEditing.value) {
+      // Atualizar produto existente
+      result = await supabase
+        .from("products")
+        .update(productData)
+        .eq("id", props.product!.id)
+        .select();
+    } else {
+      // Criar novo produto
+      result = await supabase.from("products").insert([productData]).select();
+    }
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    emit("save", result.data[0]);
+    emit("close");
+  } catch (error: any) {
     console.error("Erro ao salvar produto:", error);
-    alert("Erro ao salvar produto. Tente novamente.");
+    alert(`Erro ao salvar produto: ${error.message}`);
   } finally {
     loading.value = false;
   }
 };
-
-const saveDraft = async () => {
-  form.value.status = "draft";
-  await handleSubmit();
-};
-
-// Fechar modal com ESC
-onMounted(() => {
-  const handleEscape = (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      emit("close");
-    }
-  };
-
-  document.addEventListener("keydown", handleEscape);
-
-  onUnmounted(() => {
-    document.removeEventListener("keydown", handleEscape);
-  });
-});
 </script>
