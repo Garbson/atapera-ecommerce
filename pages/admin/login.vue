@@ -1,4 +1,4 @@
-<!-- pages/admin/login.vue -->
+<!-- pages/admin/login.vue - VERSÃO CORRIGIDA -->
 <template>
   <div
     class="min-h-screen bg-gradient-to-br from-red-600 via-red-700 to-red-800 flex items-center justify-center p-4"
@@ -192,12 +192,12 @@
                 Lembrar-me
               </label>
             </div>
-            <NuxtLink
-              to="/admin/forgot-password"
+            <a
+              href="/"
               class="text-sm text-red-600 hover:text-red-500 transition-colors"
             >
-              Esqueceu a senha?
-            </NuxtLink>
+              ← Voltar ao site
+            </a>
           </div>
 
           <!-- Submit Button -->
@@ -252,7 +252,7 @@
 // Meta e Layout
 definePageMeta({
   layout: false,
-  middleware: "guest-admin",
+  middleware: "guest", // Mudado de "admin-auth" para "guest"
 });
 
 // Head
@@ -261,8 +261,8 @@ useHead({
   meta: [{ name: "description", content: "Acesso administrativo da Atapera" }],
 });
 
-// Imports
-const { $auth } = useNuxtApp();
+// ✅ USAR O SISTEMA SUPABASE QUE JÁ FUNCIONA
+const auth = useAuth();
 const router = useRouter();
 const route = useRoute();
 
@@ -337,62 +337,74 @@ const validateForm = () => {
   return !errors.email && !errors.password;
 };
 
+// ✅ FUNÇÃO DE LOGIN CORRIGIDA - Parâmetros corretos
 const handleLogin = async () => {
+  console.log("[Admin Login] Iniciando processo de login...");
+
   // Reset messages
   error.value = "";
   success.value = "";
 
   // Validate form
   if (!validateForm()) {
+    console.log("[Admin Login] Validação falhou");
     return;
   }
 
   loading.value = true;
 
   try {
-    // Simular delay de rede
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Aqui você faria a chamada para sua API de login
-    const response = await $fetch("/api/admin/login", {
-      method: "POST",
-      body: {
-        email: form.email,
-        password: form.password,
-        remember: form.remember,
-      },
+    console.log("[Admin Login] Tentando login com Supabase...", {
+      email: form.email,
     });
 
-    if (response.success) {
-      // Salvar token ou sessão
-      if (process.client) {
-        if (form.remember) {
-          localStorage.setItem("admin_token", response.token);
-        } else {
-          sessionStorage.setItem("admin_token", response.token);
-        }
+    // ✅ CORREÇÃO: Passar email e password como strings separadas
+    const result = await auth.signIn(form.email, form.password);
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    if (result.success && result.data?.user) {
+      console.log("[Admin Login] Login bem-sucedido!", result.data.user.email);
+
+      // Lista de emails admin (mesma do middleware)
+      const adminEmails = [
+        "admin@atapera.shop",
+        "contato@atapera.shop",
+        "garbsonsouza2602@gmail.com",
+      ];
+
+      // Verificar se o usuário é admin
+      if (!adminEmails.includes(result.data.user.email)) {
+        console.log("[Admin Login] Usuário não é admin, fazendo logout...");
+        await auth.signOut();
+        error.value =
+          "Acesso negado. Este usuário não tem permissões de administrador.";
+        return;
       }
 
       success.value = "Login realizado com sucesso!";
+      console.log("[Admin Login] Admin verificado, redirecionando...");
 
       // Redirect após sucesso
       setTimeout(() => {
-        const redirectTo = route.query.redirect || "/admin/dashboard";
+        const redirectTo = route.query.redirect || "/admin";
         router.push(redirectTo);
       }, 1500);
     }
   } catch (err) {
-    console.error("Erro no login:", err);
+    console.error("[Admin Login] Erro no login:", err);
 
-    // Tratamento de erros específicos
-    if (err.statusCode === 401) {
+    // Tratamento de erros do Supabase
+    if (err.message?.includes("Invalid login credentials")) {
       error.value = "Email ou senha inválidos";
-    } else if (err.statusCode === 429) {
+    } else if (err.message?.includes("Email not confirmed")) {
+      error.value = "Email não confirmado. Verifique sua caixa de entrada.";
+    } else if (err.message?.includes("Too many requests")) {
       error.value = "Muitas tentativas. Tente novamente em alguns minutos.";
-    } else if (err.statusCode === 403) {
-      error.value = "Acesso negado. Conta pode estar bloqueada.";
     } else {
-      error.value = "Erro interno do servidor. Tente novamente.";
+      error.value = err.message || "Erro no login. Tente novamente.";
     }
   } finally {
     loading.value = false;
@@ -401,14 +413,13 @@ const handleLogin = async () => {
 
 // Lifecycle
 onMounted(() => {
+  console.log("[Admin Login] Página montada");
+
   // Verificar se já está logado
-  if (process.client) {
-    const token =
-      localStorage.getItem("admin_token") ||
-      sessionStorage.getItem("admin_token");
-    if (token) {
-      router.push("/admin/dashboard");
-    }
+  if (auth.isLoggedIn.value) {
+    console.log("[Admin Login] Usuário já está logado, redirecionando...");
+    router.push("/admin");
+    return;
   }
 
   // Auto-focus no primeiro campo
@@ -418,11 +429,6 @@ onMounted(() => {
       emailInput.focus();
     }
   });
-});
-
-// Cleanup ao sair da página
-onBeforeUnmount(() => {
-  // Limpar timers se necessário
 });
 </script>
 

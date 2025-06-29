@@ -1,9 +1,8 @@
-// composables/useAuth.ts - VERSÃO FINAL CORRIGIDA
+// composables/useAuth.ts - VERSÃO FINAL DEFINITIVA - CORRIGIDA PGRST116
 import type { Session, User } from "@supabase/supabase-js";
 
 export const useAuth = () => {
   const supabase = useSupabase();
-  const router = useRouter();
 
   // Estados reativos
   const user = ref<User | null>(null);
@@ -11,39 +10,78 @@ export const useAuth = () => {
   const loading = ref(true);
   const profile = ref<any>(null);
 
-  // Computed
-  const isLoggedIn = computed(() => !!user.value);
+  // ✅ COMPUTED CORRETO - retorna booleano diretamente
+  const isLoggedIn = computed(() => {
+    const result = !!user.value;
+    console.log("🔍 isLoggedIn computed:", {
+      user_exists: !!user.value,
+      user_id: user.value?.id || null,
+      result,
+    });
+    return result;
+  });
+
+  // ✅ COMPUTED para admin
   const isAdmin = computed(() => {
+    const adminEmails = [
+      "admin@atapera.shop",
+      "contato@atapera.shop",
+      "garbsonsouza2602@gmail.com",
+    ];
     return (
-      profile.value?.email?.includes("@atapera.shop") ||
-      user.value?.user_metadata?.role === "admin" ||
-      false
+      adminEmails.includes(user.value?.email || "") ||
+      user.value?.user_metadata?.role === "admin"
     );
   });
 
-  // Inicializar sessão
+  // ✅ Inicialização
   const initAuth = async () => {
+    console.log("🔄 initAuth: começando...");
     loading.value = true;
 
     try {
+      // Buscar sessão atual
       const {
         data: { session: currentSession },
+        error,
       } = await supabase.auth.getSession();
-      session.value = currentSession;
-      user.value = currentSession?.user ?? null;
 
+      if (error) {
+        console.error("❌ Erro ao buscar sessão:", error);
+        throw error;
+      }
+
+      console.log("📊 Sessão do Supabase:", {
+        has_session: !!currentSession,
+        has_user: !!currentSession?.user,
+        user_email: currentSession?.user?.email || null,
+      });
+
+      // ✅ Atualizar estados
+      session.value = currentSession;
+      user.value = currentSession?.user || null;
+
+      console.log("✅ Estados atualizados:", {
+        user_set: !!user.value,
+        session_set: !!session.value,
+        isLoggedIn_value: isLoggedIn.value,
+      });
+
+      // ✅ Buscar perfil se logado
       if (user.value) {
         await getUserProfile();
       }
 
-      // Listener para mudanças de autenticação
+      // ✅ Listener para mudanças
       supabase.auth.onAuthStateChange(async (event, newSession) => {
+        console.log("🔄 Auth mudou:", event, !!newSession);
+
         session.value = newSession;
-        user.value = newSession?.user ?? null;
+        user.value = newSession?.user || null;
 
         if (event === "SIGNED_IN" && newSession?.user) {
+          // ✅ Apenas criar/carregar perfil uma vez
           await createOrUpdateProfile(newSession.user);
-          await getUserProfile();
         }
 
         if (event === "SIGNED_OUT") {
@@ -51,60 +89,84 @@ export const useAuth = () => {
         }
       });
     } catch (error) {
-      console.error("Erro ao inicializar auth:", error);
+      console.error("❌ Erro initAuth:", error);
+      user.value = null;
+      session.value = null;
+      profile.value = null;
     } finally {
       loading.value = false;
+      console.log("🏁 initAuth: finalizado, isLoggedIn =", isLoggedIn.value);
     }
   };
 
-  // Buscar perfil do usuário
+  // ✅ CORRIGIDO - Buscar perfil SEM LOOP
   const getUserProfile = async () => {
     if (!user.value) return;
 
     try {
+      console.log("👤 Buscando perfil para:", user.value.email);
+
+      // ✅ USAR .maybeSingle() em vez de .single()
       const { data, error } = await supabase
         .from("user_profiles")
         .select("*")
         .eq("id", user.value.id)
-        .single();
+        .maybeSingle(); // ← Mudança aqui!
 
-      if (error && error.code !== "PGRST116") {
+      if (error) {
+        console.error("❌ Erro ao buscar perfil:", error);
         throw error;
       }
 
-      profile.value = data;
+      profile.value = data; // data será null se não encontrar
+      console.log("✅ Perfil carregado:", !!data);
     } catch (error) {
-      console.error("Erro ao buscar perfil:", error);
+      console.error("❌ Erro ao buscar perfil:", error);
+      profile.value = null;
     }
   };
 
-  // Criar ou atualizar perfil do usuário
+  // ✅ CORRIGIDO - Usar UPSERT para evitar duplicatas
   const createOrUpdateProfile = async (authUser: User) => {
     try {
-      const { data: existingProfile } = await supabase
+      console.log("👤 Criando/atualizando perfil para:", authUser.email);
+
+      // ✅ USAR UPSERT - Insert ou Update se já existir
+      const { data: profileData, error: upsertError } = await supabase
         .from("user_profiles")
-        .select("*")
-        .eq("id", authUser.id)
-        .single();
+        .upsert(
+          {
+            id: authUser.id,
+            email: authUser.email!,
+            name: authUser.user_metadata?.name || null,
+            cpf: authUser.user_metadata?.cpf || null,
+            phone: authUser.user_metadata?.phone || null,
+            updated_at: new Date().toISOString(),
+          },
+          {
+            onConflict: "id", // Se conflitar no ID, fazer UPDATE
+            ignoreDuplicates: false, // Não ignorar, fazer UPDATE
+          }
+        )
+        .select()
+        .maybeSingle();
 
-      if (!existingProfile) {
-        const { error } = await supabase.from("user_profiles").insert({
-          id: authUser.id,
-          email: authUser.email!,
-          name: authUser.user_metadata?.name || null,
-          cpf: authUser.user_metadata?.cpf || null,
-          phone: authUser.user_metadata?.phone || null,
-        });
-
-        if (error) throw error;
+      if (upsertError) {
+        console.error("❌ Erro no upsert do perfil:", upsertError);
+        return;
       }
+
+      // ✅ Atualizar o profile local
+      profile.value = profileData;
+      console.log("✅ Perfil criado/atualizado:", !!profileData);
     } catch (error) {
-      console.error("Erro ao criar/atualizar perfil:", error);
+      console.error("❌ Erro ao criar/atualizar perfil:", error);
     }
   };
 
-  // Login com email/senha
+  // ✅ Login
   const signIn = async (email: string, password: string) => {
+    console.log("🔑 signIn: tentando login...");
     loading.value = true;
 
     try {
@@ -115,18 +177,17 @@ export const useAuth = () => {
 
       if (error) throw error;
 
+      console.log("✅ signIn: sucesso");
       return { success: true, data };
     } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro no login",
-      };
+      console.error("❌ Erro signIn:", error);
+      return { success: false, error: error.message };
     } finally {
       loading.value = false;
     }
   };
 
-  // Cadastro
+  // ✅ Cadastro
   const signUp = async (
     email: string,
     password: string,
@@ -136,6 +197,7 @@ export const useAuth = () => {
       phone?: string;
     }
   ) => {
+    console.log("📝 signUp: tentando cadastro...");
     loading.value = true;
 
     try {
@@ -149,20 +211,21 @@ export const useAuth = () => {
 
       if (error) throw error;
 
+      console.log("✅ signUp: sucesso");
       return { success: true, data };
     } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro no cadastro",
-      };
+      console.error("❌ Erro signUp:", error);
+      return { success: false, error: error.message };
     } finally {
       loading.value = false;
     }
   };
 
-  // Login com Google
+  // ✅ Login com Google
   const signInWithGoogle = async () => {
     try {
+      console.log("🔑 signInWithGoogle: iniciando...");
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -171,64 +234,80 @@ export const useAuth = () => {
       });
 
       if (error) throw error;
+
+      console.log("✅ signInWithGoogle: redirecionando");
       return { success: true };
     } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro no login com Google",
-      };
+      console.error("❌ Erro signInWithGoogle:", error);
+      return { success: false, error: error.message };
     }
   };
 
-  // Logout
+  // ✅ Logout
   const signOut = async () => {
+    console.log("🚪 signOut: começando...");
+
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
+      // ✅ Limpar estados imediatamente
       user.value = null;
       session.value = null;
       profile.value = null;
 
-      await router.push("/");
+      console.log("✅ signOut: concluído, isLoggedIn =", isLoggedIn.value);
+
+      await navigateTo("/");
       return { success: true };
     } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro no logout",
-      };
+      console.error("❌ Erro signOut:", error);
+      // Em caso de erro, forçar limpeza
+      user.value = null;
+      session.value = null;
+      profile.value = null;
+      return { success: false, error: error.message };
     }
   };
 
-  // Reset senha
+  // ✅ Reset senha
   const resetPassword = async (email: string) => {
     try {
+      console.log("📧 resetPassword: enviando email...");
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
 
       if (error) throw error;
+
+      console.log("✅ resetPassword: email enviado");
       return { success: true };
     } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro ao enviar email de reset",
-      };
+      console.error("❌ Erro resetPassword:", error);
+      return { success: false, error: error.message };
     }
   };
 
-  // Atualizar perfil
+  // ✅ CORRIGIDO - Atualizar perfil
   const updateProfile = async (updates: {
     name?: string;
     cpf?: string;
     phone?: string;
   }) => {
-    if (!user.value) return { success: false, error: "Usuário não logado" };
+    if (!user.value) {
+      return { success: false, error: "Usuário não logado" };
+    }
 
     try {
+      console.log("📝 updateProfile: atualizando...");
+
       const { error } = await supabase
         .from("user_profiles")
-        .update(updates)
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", user.value.id);
 
       if (error) throw error;
@@ -238,17 +317,16 @@ export const useAuth = () => {
         profile.value = { ...profile.value, ...updates };
       }
 
+      console.log("✅ updateProfile: concluído");
       return { success: true };
     } catch (error: any) {
-      return {
-        success: false,
-        error: error.message || "Erro ao atualizar perfil",
-      };
+      console.error("❌ Erro updateProfile:", error);
+      return { success: false, error: error.message };
     }
   };
 
   return {
-    // Estados
+    // Estados (readonly para proteger)
     user: readonly(user),
     session: readonly(session),
     profile: readonly(profile),

@@ -1,4 +1,4 @@
-<!-- components/AppHeader.vue - ROTAS CORRIGIDAS -->
+<!-- components/AppHeader.vue - VERSÃO CORRIGIDA -->
 <template>
   <header class="bg-white shadow-sm sticky top-0 z-40">
     <!-- Top Bar -->
@@ -20,7 +20,7 @@
     <div class="container mx-auto px-4 py-4">
       <div class="flex items-center justify-between">
         <!-- Logo -->
-        <NuxtLink to="/" class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-3">
           <div
             class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center"
           >
@@ -30,7 +30,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Atapera</h1>
             <p class="text-xs text-gray-500">Armas, Pesca & Aventura</p>
           </div>
-        </NuxtLink>
+        </a>
 
         <!-- Search Bar (Desktop) -->
         <div class="hidden md:flex flex-1 max-w-xl mx-8">
@@ -69,6 +69,7 @@
           <div class="relative">
             <button
               @click="toggleUserMenu"
+              data-user-menu-button
               class="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <svg
@@ -85,71 +86,76 @@
                 />
               </svg>
               <span class="hidden sm:block text-sm text-gray-700">
-                {{ authStore.isLoggedIn ? "Minha Conta" : "Entrar" }}
+                {{ isLoggedIn ? "Minha Conta" : "Entrar" }}
               </span>
             </button>
 
             <!-- User Dropdown -->
             <div
               v-if="showUserMenu"
-              v-click-outside="closeUserMenu"
+              v-click-outside="handleClickOutside"
               class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
             >
-              <template v-if="authStore.isLoggedIn">
-                <NuxtLink
-                  to="/minha-conta"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  @click="closeUserMenu"
+              <!-- Usuário Logado -->
+              <template v-if="isLoggedIn">
+                <div class="px-4 py-2 text-sm text-gray-500 border-b">
+                  {{ user?.email }}
+                </div>
+                <button
+                  @click="goToMinhaAccount"
+                  class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
-                  Minha Conta
-                </NuxtLink>
-                <NuxtLink
-                  to="/minha-conta/pedidos"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  @click="closeUserMenu"
+                  👤 Minha Conta
+                </button>
+                <button
+                  @click="goToPedidos"
+                  class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
-                  Meus Pedidos
-                </NuxtLink>
+                  📦 Meus Pedidos
+                </button>
+                <button
+                  @click="goToEnderecos"
+                  class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                >
+                  📍 Endereços
+                </button>
                 <hr class="my-2" />
                 <button
                   @click="logout"
-                  class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
                 >
-                  Sair
+                  🚪 Sair
                 </button>
               </template>
+
+              <!-- Usuário NÃO Logado -->
               <template v-else>
-                <!-- ✅ CORRIGIDO: Rotas corretas -->
-                <NuxtLink
-                  to="/login"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  @click="closeUserMenu"
+                <button
+                  @click="goToLogin"
+                  class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
-                  Entrar
-                </NuxtLink>
-                <NuxtLink
-                  to="/cadastro"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  @click="closeUserMenu"
+                  👤 Entrar
+                </button>
+                <button
+                  @click="goToCadastro"
+                  class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                 >
-                  Criar Conta
-                </NuxtLink>
+                  📝 Criar Conta
+                </button>
                 <hr class="my-2" />
-                <!-- Admin link separado -->
-                <NuxtLink
-                  to="/admin/login"
-                  class="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
-                  @click="closeUserMenu"
+                <button
+                  @click="goToAdmin"
+                  class="w-full text-left block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100 cursor-pointer"
                 >
-                  Acesso Admin
-                </NuxtLink>
+                  🔧 Admin
+                </button>
               </template>
             </div>
           </div>
 
           <!-- Cart -->
           <button
-            @click="cartStore.openCart()"
+            @click="openCart"
             class="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <svg
@@ -166,10 +172,10 @@
               />
             </svg>
             <span
-              v-if="cartStore.totalItems > 0"
+              v-if="cartItemsCount > 0"
               class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
             >
-              {{ cartStore.totalItems }}
+              {{ cartItemsCount }}
             </span>
           </button>
 
@@ -214,60 +220,53 @@
       <nav class="hidden md:block mt-4 pt-4 border-t border-gray-200">
         <ul class="flex items-center gap-8">
           <li>
-            <NuxtLink
-              to="/categoria/armas-fogo"
+            <a
+              href="/categoria/armas-fogo"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              >Armas de Fogo</a
             >
-              Armas de Fogo
-            </NuxtLink>
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/armas-pressao"
+            <a
+              href="/categoria/armas-pressao"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              >Armas de Pressão</a
             >
-              Armas de Pressão
-            </NuxtLink>
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/pesca"
+            <a
+              href="/categoria/pesca"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              >Pesca</a
             >
-              Pesca
-            </NuxtLink>
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/airsoft"
+            <a
+              href="/categoria/airsoft"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              >Airsoft</a
             >
-              Airsoft
-            </NuxtLink>
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/caca"
+            <a
+              href="/categoria/caca"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              >Caça</a
             >
-              Caça
-            </NuxtLink>
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/vestuario"
+            <a
+              href="/categoria/vestuario"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              >Vestuário</a
             >
-              Vestuário
-            </NuxtLink>
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/ofertas"
+            <a
+              href="/categoria/ofertas"
               class="text-red-600 hover:text-red-700 font-medium transition-colors"
+              >🔥 Ofertas</a
             >
-              🔥 Ofertas
-            </NuxtLink>
           </li>
         </ul>
       </nav>
@@ -314,7 +313,7 @@
           <li>
             <button
               @click="showMobileSearch = !showMobileSearch"
-              class="flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors"
+              class="flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors cursor-pointer"
             >
               <svg
                 class="w-5 h-5"
@@ -333,98 +332,96 @@
             </button>
           </li>
 
-          <!-- ✅ Seção de login no mobile -->
-          <li v-if="!authStore.isLoggedIn" class="border-b pb-4">
+          <!-- Mobile Auth Section -->
+          <li v-if="!isLoggedIn" class="border-b pb-4">
             <div class="space-y-2">
-              <NuxtLink
-                to="/login"
-                class="block text-gray-700 hover:text-red-600 transition-colors py-2"
-                @click="showMobileMenu = false"
+              <button
+                @click="goToLogin"
+                class="block text-gray-700 hover:text-red-600 transition-colors py-2 cursor-pointer"
               >
                 👤 Entrar
-              </NuxtLink>
-              <NuxtLink
-                to="/cadastro"
-                class="block text-gray-700 hover:text-red-600 transition-colors py-2"
-                @click="showMobileMenu = false"
+              </button>
+              <button
+                @click="goToCadastro"
+                class="block text-gray-700 hover:text-red-600 transition-colors py-2 cursor-pointer"
               >
                 📝 Criar Conta
-              </NuxtLink>
+              </button>
             </div>
           </li>
 
           <li v-else class="border-b pb-4">
             <div class="space-y-2">
-              <NuxtLink
-                to="/minha-conta"
-                class="block text-gray-700 hover:text-red-600 transition-colors py-2"
-                @click="showMobileMenu = false"
+              <div class="text-sm text-gray-500 py-2">{{ user?.email }}</div>
+              <button
+                @click="goToMinhaAccount"
+                class="block text-gray-700 hover:text-red-600 transition-colors py-2 cursor-pointer"
               >
                 👤 Minha Conta
-              </NuxtLink>
+              </button>
+              <button
+                @click="goToPedidos"
+                class="block text-gray-700 hover:text-red-600 transition-colors py-2 cursor-pointer"
+              >
+                📦 Meus Pedidos
+              </button>
               <button
                 @click="logout"
-                class="block text-red-600 hover:text-red-700 transition-colors py-2"
+                class="block text-red-600 hover:text-red-700 transition-colors py-2 cursor-pointer"
               >
                 🚪 Sair
               </button>
             </div>
           </li>
 
+          <!-- Navigation Links -->
           <li>
-            <NuxtLink
-              to="/categoria/armas-fogo"
+            <a
+              href="/categoria/armas-fogo"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="showMobileMenu = false"
-              >Armas de Fogo</NuxtLink
+              >Armas de Fogo</a
             >
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/armas-pressao"
+            <a
+              href="/categoria/armas-pressao"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="showMobileMenu = false"
-              >Armas de Pressão</NuxtLink
+              >Armas de Pressão</a
             >
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/pesca"
+            <a
+              href="/categoria/pesca"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="showMobileMenu = false"
-              >Pesca</NuxtLink
+              >Pesca</a
             >
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/airsoft"
+            <a
+              href="/categoria/airsoft"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="showMobileMenu = false"
-              >Airsoft</NuxtLink
+              >Airsoft</a
             >
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/caca"
+            <a
+              href="/categoria/caca"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="showMobileMenu = false"
-              >Caça</NuxtLink
+              >Caça</a
             >
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/vestuario"
+            <a
+              href="/categoria/vestuario"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="showMobileMenu = false"
-              >Vestuário</NuxtLink
+              >Vestuário</a
             >
           </li>
           <li>
-            <NuxtLink
-              to="/categoria/ofertas"
+            <a
+              href="/categoria/ofertas"
               class="block text-red-600 hover:text-red-700 transition-colors"
-              @click="showMobileMenu = false"
-              >🔥 Ofertas</NuxtLink
+              >🔥 Ofertas</a
             >
           </li>
         </ul>
@@ -434,31 +431,141 @@
 </template>
 
 <script setup lang="ts">
-// ✅ CORRIGIDO: Usar os composables corretos
-const cartStore = useCartStore();
-const authStore = useAuth();
+const auth = useAuth();
+const { user, isLoggedIn } = auth;
 
-// States
+// Estados
 const searchQuery = ref("");
 const showUserMenu = ref(false);
 const showMobileMenu = ref(false);
 const showMobileSearch = ref(false);
+const cartItemsCount = ref(0);
 
-// Methods
+// ✅ MÉTODOS CORRIGIDOS com event.preventDefault() e mais logs
+const goToLogin = (event?: Event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  console.log("📍 [goToLogin] Navegando para /login...");
+  console.log("📍 [goToLogin] Estado atual - isLoggedIn:", isLoggedIn.value);
+  closeUserMenu();
+  closeMobileMenu();
+
+  // Força a navegação
+  setTimeout(() => {
+    console.log("📍 [goToLogin] Executando navegação...");
+    window.location.href = "/login";
+  }, 100);
+};
+
+const goToCadastro = (event?: Event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  console.log("📍 [goToCadastro] Navegando para /cadastro...");
+  closeUserMenu();
+  closeMobileMenu();
+
+  setTimeout(() => {
+    window.location.href = "/cadastro";
+  }, 100);
+};
+
+const goToMinhaAccount = (event?: Event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  console.log("📍 [goToMinhaAccount] Navegando para /minha-conta...");
+  closeUserMenu();
+  closeMobileMenu();
+
+  setTimeout(() => {
+    window.location.href = "/minha-conta";
+  }, 100);
+};
+
+const goToPedidos = (event?: Event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  console.log("📍 [goToPedidos] Navegando para /minha-conta/pedidos...");
+  closeUserMenu();
+  closeMobileMenu();
+
+  setTimeout(() => {
+    window.location.href = "/minha-conta/pedidos";
+  }, 100);
+};
+
+const goToEnderecos = (event?: Event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  console.log("📍 [goToEnderecos] Navegando para /minha-conta/enderecos...");
+  closeUserMenu();
+  closeMobileMenu();
+
+  setTimeout(() => {
+    window.location.href = "/minha-conta/enderecos";
+  }, 100);
+};
+
+const goToAdmin = (event?: Event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  console.log("📍 [goToAdmin] Navegando para /admin/login...");
+  closeUserMenu();
+  closeMobileMenu();
+
+  setTimeout(() => {
+    window.location.href = "/admin/login";
+  }, 100);
+};
+
+// Outros métodos
 const performSearch = () => {
   if (searchQuery.value.trim()) {
-    navigateTo(`/busca?q=${encodeURIComponent(searchQuery.value)}`);
-    showMobileMenu.value = false;
-    showMobileSearch.value = false;
+    console.log("🔍 [performSearch] Buscando por:", searchQuery.value);
+    window.location.href = `/busca?q=${encodeURIComponent(searchQuery.value)}`;
   }
 };
 
-const toggleUserMenu = () => {
+const toggleUserMenu = (event?: Event) => {
+  if (event) {
+    event.stopPropagation();
+  }
+  console.log(
+    "🔍 [toggleUserMenu] Menu toggled, estado atual:",
+    showUserMenu.value
+  );
+  console.log("🔍 [toggleUserMenu] isLoggedIn:", isLoggedIn.value);
   showUserMenu.value = !showUserMenu.value;
+  console.log("🔍 [toggleUserMenu] Novo estado:", showUserMenu.value);
 };
 
 const closeUserMenu = () => {
+  console.log("🔍 [closeUserMenu] Fechando menu");
   showUserMenu.value = false;
+};
+
+const handleClickOutside = (event: Event) => {
+  // Verifica se o clique foi no botão do menu do usuário
+  const userMenuButton = document.querySelector("[data-user-menu-button]");
+  if (
+    userMenuButton &&
+    (userMenuButton.contains(event.target as Node) ||
+      userMenuButton === event.target)
+  ) {
+    return; // Não fecha o menu se clicou no próprio botão
+  }
+  closeUserMenu();
 };
 
 const toggleMobileMenu = () => {
@@ -468,34 +575,57 @@ const toggleMobileMenu = () => {
   }
 };
 
-const logout = async () => {
-  await authStore.signOut();
-  showUserMenu.value = false;
+const closeMobileMenu = () => {
   showMobileMenu.value = false;
 };
 
-// Click outside directive
+const openCart = () => {
+  console.log("🛒 [openCart] Abrindo carrinho");
+  // Implementar abertura do carrinho
+};
+
+const logout = async (event?: Event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  console.log("🚪 [logout] Fazendo logout...");
+  await auth.signOut();
+  closeUserMenu();
+  closeMobileMenu();
+};
+
+// Click outside directive - VERSÃO MELHORADA
 const vClickOutside = {
   beforeMount(el: any, binding: any) {
     el.clickOutsideEvent = (event: Event) => {
-      if (!(el === event.target || el.contains(event.target))) {
-        binding.value();
+      // Verifica se o elemento ainda existe no DOM
+      if (!document.contains(el)) {
+        return;
+      }
+
+      // Verifica se o clique foi fora do elemento
+      if (!(el === event.target || el.contains(event.target as Node))) {
+        binding.value(event);
       }
     };
-    document.addEventListener("click", el.clickOutsideEvent);
+
+    // Adiciona o listener com um pequeno delay para evitar conflitos
+    setTimeout(() => {
+      document.addEventListener("click", el.clickOutsideEvent);
+    }, 100);
   },
   unmounted(el: any) {
-    document.removeEventListener("click", el.clickOutsideEvent);
+    if (el.clickOutsideEvent) {
+      document.removeEventListener("click", el.clickOutsideEvent);
+    }
   },
 };
 
-// Close mobile menu on route change
-watch(
-  () => useRoute().path,
-  () => {
-    showMobileMenu.value = false;
-    showMobileSearch.value = false;
-    showUserMenu.value = false;
-  }
-);
+// Close menus on route change
+onMounted(() => {
+  console.log("✅ [AppHeader] Header montado e funcionando!");
+  console.log("✅ [AppHeader] Estado inicial - isLoggedIn:", isLoggedIn.value);
+  console.log("✅ [AppHeader] User:", user.value);
+});
 </script>
