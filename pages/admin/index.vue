@@ -519,8 +519,8 @@ definePageMeta({
   middleware: "admin-auth",
 });
 
-const supabase = useSupabaseClient();
-const user = useSupabaseUser();
+const supabase = useSupabase();
+const user = useSupabase();
 
 // Estados
 const loading = ref(true);
