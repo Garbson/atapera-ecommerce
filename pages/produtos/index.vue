@@ -184,27 +184,70 @@ const updateURL = () => {
   router.push({ query });
 };
 
+// ✅ SUBSTITUIR a função fetchProducts em pages/produtos/index.vue
 const fetchProducts = async () => {
   loading.value = true;
 
   try {
-    // Implementar busca de produtos com filtros
-    const { data } = await $fetch("/api/products", {
-      query: {
-        page: currentPage.value,
-        sort: sortBy.value,
-        categories: filters.categories.join(","),
-        brands: filters.brands.join(","),
-        min_price: filters.minPrice,
-        max_price: filters.maxPrice,
-        search: filters.search,
-      },
-    });
+    // ✅ USAR SUPABASE DIRETAMENTE em vez da API
+    const supabase = useSupabase();
 
-    products.value = data.products;
-    totalPages.value = data.totalPages;
+    let query = supabase
+      .from("products")
+      .select("*", { count: "exact" })
+      .eq("is_active", true);
+
+    // Aplicar filtros
+    if (filters.categories.length > 0) {
+      query = query.in("category_id", filters.categories);
+    }
+
+    if (filters.brands.length > 0) {
+      query = query.in("brand", filters.brands);
+    }
+
+    if (filters.minPrice) {
+      query = query.gte("price", parseFloat(filters.minPrice));
+    }
+
+    if (filters.maxPrice) {
+      query = query.lte("price", parseFloat(filters.maxPrice));
+    }
+
+    if (filters.search) {
+      query = query.or(
+        `name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`
+      );
+    }
+
+    // Ordenação
+    const orderColumn =
+      sortBy.value === "price_asc"
+        ? "price"
+        : sortBy.value === "price_desc"
+        ? "price"
+        : sortBy.value === "name"
+        ? "name"
+        : "created_at";
+
+    const orderDirection = sortBy.value === "price_desc" ? "desc" : "asc";
+    query = query.order(orderColumn, { ascending: orderDirection === "asc" });
+
+    // Paginação
+    const limit = 12;
+    const offset = (currentPage.value - 1) * limit;
+    query = query.range(offset, offset + limit - 1);
+
+    // Executar
+    const { data, error, count } = await query;
+
+    if (error) throw error;
+
+    products.value = data || [];
+    totalPages.value = Math.ceil(count / limit);
   } catch (error) {
     console.error("Erro ao buscar produtos:", error);
+    products.value = [];
   } finally {
     loading.value = false;
   }

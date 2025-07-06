@@ -6,19 +6,41 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
   ],
 
-  // Configuração das variáveis de runtime (necessário para client-side)
-  runtimeConfig: {
-    // Variáveis privadas (apenas server-side)
-    supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
-
-    // Variáveis públicas (acessíveis no client-side)
-    public: {
-      supabaseUrl: process.env.SUPABASE_URL,
-      supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
+  // ✅ ADICIONAR: Configuração do Vite para hot reload
+  vite: {
+    server: {
+      watch: {
+        usePolling: true,
+        interval: 1000,
+      },
+      hmr: {
+        port: 24678,
+        overlay: true,
+      },
     },
   },
 
-  // Configuração de componentes
+  // ✅ ADICIONAR: Configuração experimental para watcher
+  experimental: {
+    watcher: "chokidar",
+  },
+
+  // Configuração das variáveis de runtime (necessário para client-side)
+  runtimeConfig: {
+    // ... suas configurações existentes ...
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
+    cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+    cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+
+    public: {
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
+      cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    },
+  },
+
+  // ... resto das suas configurações permanecem iguais ...
   components: [
     {
       path: "~/components",
@@ -26,7 +48,6 @@ export default defineNuxtConfig({
     },
   ],
 
-  // Configurações SEO globais
   site: {
     url: "https://atapera.shop",
     name: "Atapera",
@@ -34,7 +55,6 @@ export default defineNuxtConfig({
     defaultLocale: "pt-BR",
   },
 
-  // Meta tags padrão
   app: {
     head: {
       charset: "utf-8",
@@ -44,22 +64,18 @@ export default defineNuxtConfig({
         {
           name: "description",
           content:
-            "Armas registradas, equipamentos de pesca e acessórios para caça esportiva",
+            "Armas registradas, equipamentos de pesca e equipamentos para caça esportiva",
         },
       ],
     },
   },
 
-  // CSS global
   css: [],
 
-  // Configurações de desenvolvimento
   devtools: { enabled: true },
 
-  // SSR
   ssr: true,
 
-  // Configuração do Pinia
   pinia: {
     storesDirs: ["./stores/**"],
   },

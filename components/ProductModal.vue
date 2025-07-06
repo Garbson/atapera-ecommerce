@@ -4,7 +4,7 @@
     class="fixed inset-0 backdrop-blur-md bg-amber-100 bg-opacity-10 flex items-center justify-center z-50 p-4"
   >
     <div
-      class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+      class="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto"
     >
       <!-- Header -->
       <div
@@ -37,6 +37,104 @@
 
       <!-- Form -->
       <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
+        
+        <!-- SEÇÃO DE IMAGENS -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-gray-800">Imagens do Produto</h3>
+          
+          <!-- Upload de Imagens -->
+          <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-red-500 transition-colors">
+            <div class="text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              
+              <div class="mt-4">
+                <label for="file-upload" class="cursor-pointer">
+                  <span class="mt-2 block text-sm font-medium text-gray-900">
+                    Clique para selecionar imagens ou arraste aqui
+                  </span>
+                  <input 
+                    id="file-upload" 
+                    name="file-upload" 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    class="sr-only" 
+                    @change="handleFileSelect"
+                    :disabled="uploadingImages"
+                  />
+                </label>
+                <p class="mt-1 text-xs text-gray-500">PNG, JPG, WebP até 10MB cada</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview das Imagens Selecionadas -->
+          <div v-if="selectedFiles.length > 0" class="space-y-3">
+            <h4 class="text-sm font-medium text-gray-700">Imagens Selecionadas:</h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div 
+                v-for="(file, index) in selectedFiles" 
+                :key="index"
+                class="relative group"
+              >
+                <img 
+                  :src="getFilePreview(file)" 
+                  :alt="`Preview ${index + 1}`"
+                  class="w-full h-24 object-cover rounded-lg border"
+                />
+                <button
+                  type="button"
+                  @click="removeFile(index)"
+                  class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                >
+                  ×
+                </button>
+                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg">
+                  {{ file.name }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Imagens Existentes (para edição) -->
+          <div v-if="form.images && form.images.length > 0" class="space-y-3">
+            <h4 class="text-sm font-medium text-gray-700">Imagens Atuais:</h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div 
+                v-for="(imagePublicId, index) in form.images" 
+                :key="index"
+                class="relative group"
+              >
+                <img 
+                  :src="getProductImage(imagePublicId, 'small')" 
+                  :alt="`Imagem ${index + 1}`"
+                  class="w-full h-24 object-cover rounded-lg border"
+                />
+                <button
+                  type="button"
+                  @click="removeExistingImage(index)"
+                  class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status do Upload -->
+          <div v-if="uploadingImages" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center gap-3">
+              <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="text-blue-800">Fazendo upload das imagens...</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Informações Básicas -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Nome -->
@@ -119,12 +217,22 @@
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
             >
               <option value="">Selecione uma categoria</option>
-              <option value="uuid-armas-fogo">Armas de Fogo</option>
-              <option value="uuid-armas-pressao">Armas de Pressão</option>
-              <option value="uuid-pesca">Pesca</option>
-              <option value="uuid-airsoft">Airsoft</option>
-              <option value="uuid-caca">Caça</option>
-              <option value="uuid-vestuario">Vestuário</option>
+              <option value="3eebaee1-c85d-4b67-9af1-5619764b7307">
+                Armas de Fogo
+              </option>
+              <option value="d3f1376d-92ea-4a9b-a367-80456b9f0063">
+                Armas de Pressão
+              </option>
+              <option value="3b6c5fb9-e0f3-474b-8cc2-e36dd327d2aa">
+                Pesca
+              </option>
+              <option value="b8ce0b20-63ad-44a2-b0a0-f383d5f8ec32">
+                Airsoft
+              </option>
+              <option value="e3afc893-b4c0-43a6-9900-c1208b1372ed">Caça</option>
+              <option value="2a6c0a33-0025-4cce-a306-db578a19a4f2">
+                Vestuário
+              </option>
             </select>
           </div>
 
@@ -409,7 +517,7 @@
           </button>
           <button
             type="submit"
-            :disabled="loading"
+            :disabled="loading || uploadingImages"
             class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             <svg
@@ -443,7 +551,8 @@
 </template>
 
 <script setup lang="ts">
-const supabase = useSupabaseClient();
+const supabase = useSupabase();
+const { uploadImages, getProductImage } = useCloudinary();
 
 interface Product {
   id?: string;
@@ -465,6 +574,7 @@ interface Product {
     width?: number;
     height?: number;
   };
+  images?: string[];
   requires_license: boolean;
   license_type?: string;
   caliber?: string;
@@ -484,6 +594,8 @@ const emit = defineEmits<{
 }>();
 
 const loading = ref(false);
+const uploadingImages = ref(false);
+const selectedFiles = ref<File[]>([]);
 const isEditing = computed(() => !!props.product);
 
 // Dimensões separadas para facilitar o binding
@@ -508,6 +620,7 @@ const form = reactive<Product>({
   stock: 0,
   min_stock: 5,
   weight: 0,
+  images: [],
   requires_license: false,
   license_type: "",
   caliber: "",
@@ -524,6 +637,48 @@ if (props.product) {
     Object.assign(dimensions, props.product.dimensions);
   }
 }
+
+// Funções para manipulação de arquivos
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files) {
+    const files = Array.from(target.files);
+    
+    // Validar arquivos
+    const validFiles = files.filter(file => {
+      const isImage = file.type.startsWith('image/');
+      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB
+      
+      if (!isImage) {
+        alert(`${file.name} não é uma imagem válida`);
+        return false;
+      }
+      
+      if (!isValidSize) {
+        alert(`${file.name} é muito grande. Máximo 10MB`);
+        return false;
+      }
+      
+      return true;
+    });
+    
+    selectedFiles.value = [...selectedFiles.value, ...validFiles];
+  }
+};
+
+const removeFile = (index: number) => {
+  selectedFiles.value.splice(index, 1);
+};
+
+const removeExistingImage = (index: number) => {
+  if (form.images) {
+    form.images.splice(index, 1);
+  }
+};
+
+const getFilePreview = (file: File): string => {
+  return URL.createObjectURL(file);
+};
 
 // Gerar slug automaticamente
 const generateSlug = () => {
@@ -544,7 +699,29 @@ const handleSubmit = async () => {
   loading.value = true;
 
   try {
-    // Preparar dados para o Supabase
+    // Gerar ID temporário para produto novo (usado na pasta do Cloudinary)
+    const productId = props.product?.id || crypto.randomUUID();
+    
+    // 1. Fazer upload das novas imagens se houver
+    let newImageUrls: string[] = [];
+    if (selectedFiles.value.length > 0) {
+      uploadingImages.value = true;
+      
+      try {
+        newImageUrls = await uploadImages(selectedFiles.value, productId);
+      } catch (error) {
+        console.error('Erro no upload:', error);
+        alert('Erro no upload das imagens. Tente novamente.');
+        return;
+      } finally {
+        uploadingImages.value = false;
+      }
+    }
+    
+    // 2. Combinar imagens existentes com as novas
+    const allImages = [...(form.images || []), ...newImageUrls];
+
+    // 3. Preparar dados para o Supabase
     const productData = {
       name: form.name,
       slug: form.slug,
@@ -566,6 +743,7 @@ const handleSubmit = async () => {
         width: dimensions.width || null,
         height: dimensions.height || null,
       },
+      images: allImages, // Array com URLs do Cloudinary
       requires_license: form.requires_license,
       license_type: form.license_type || null,
       caliber: form.caliber || null,
@@ -585,21 +763,29 @@ const handleSubmit = async () => {
         .eq("id", props.product!.id)
         .select();
     } else {
-      // Criar novo produto
-      result = await supabase.from("products").insert([productData]).select();
+      // Criar novo produto com o ID gerado
+      result = await supabase
+        .from("products")
+        .insert([{ ...productData, id: productId }])
+        .select();
     }
 
     if (result.error) {
       throw result.error;
     }
 
+    // Limpar arquivos selecionados
+    selectedFiles.value = [];
+    
     emit("save", result.data[0]);
     emit("close");
+    
   } catch (error: any) {
     console.error("Erro ao salvar produto:", error);
     alert(`Erro ao salvar produto: ${error.message}`);
   } finally {
     loading.value = false;
+    uploadingImages.value = false;
   }
 };
 </script>

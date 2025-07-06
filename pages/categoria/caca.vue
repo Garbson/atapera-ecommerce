@@ -218,7 +218,7 @@
           >
             <NuxtLink :to="`/produtos/${product.slug}`">
               <img
-                :src="product.image"
+                :src="product.image || '/placeholder-product.jpg'"
                 :alt="product.name"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -233,7 +233,7 @@
                 Novo
               </span>
               <span
-                v-if="product.on_sale"
+                v-if="product.sale_price"
                 class="bg-red-500 text-white px-2 py-1 text-xs rounded-full"
               >
                 Oferta
@@ -438,6 +438,8 @@
 </template>
 
 <script setup lang="ts">
+// ✅ IMPORTAR SUPABASE
+const supabase = useSupabase();
 const route = useRoute();
 const router = useRouter();
 
@@ -494,29 +496,92 @@ const addToCart = (product) => {
   console.log("Adicionar ao carrinho:", product);
 };
 
+// ✅ FUNÇÃO CORRIGIDA - Usar Supabase diretamente
 const fetchProducts = async () => {
   loading.value = true;
 
   try {
-    const { data } = await $fetch("/api/products", {
-      query: {
-        category: "caca",
-        page: currentPage.value,
-        sort: sortBy.value,
-        subcategory: filters.subcategory,
-        brand: filters.brand,
-        material: filters.material,
-        use: filters.use,
-        min_price: filters.minPrice,
-        max_price: filters.maxPrice,
-      },
-    });
+    console.log("🔍 Buscando produtos de caça...");
 
-    products.value = data.products || [];
-    totalPages.value = data.totalPages || 1;
-    totalProducts.value = data.total || 0;
+    // ✅ USAR SUPABASE DIRETAMENTE
+    let query = supabase
+      .from("products")
+      .select("*", { count: "exact" })
+      .eq("is_active", true);
+
+    // ✅ FILTRAR POR CATEGORIA "CAÇA" - Usando category_id correto
+    // Você precisa descobrir qual é o ID da categoria "caça"
+    // Por enquanto, vamos buscar todos os produtos ativos
+    // Depois você pode ajustar para o category_id correto da caça
+
+    // Se você souber o category_id da caça, descomente a linha abaixo:
+    // query = query.eq('category_id', 'UUID_DA_CATEGORIA_CACA');
+
+    // Aplicar filtros
+    if (filters.subcategory) {
+      // Adapte conforme os campos reais da sua tabela
+      query = query.ilike("name", `%${filters.subcategory}%`);
+    }
+
+    if (filters.brand) {
+      query = query.eq("brand", filters.brand);
+    }
+
+    if (filters.material) {
+      // Adapte conforme os campos reais da sua tabela
+      query = query.ilike("description", `%${filters.material}%`);
+    }
+
+    if (filters.use) {
+      // Adapte conforme os campos reais da sua tabela
+      query = query.ilike("description", `%${filters.use}%`);
+    }
+
+    if (filters.minPrice) {
+      query = query.gte("price", parseFloat(filters.minPrice));
+    }
+
+    if (filters.maxPrice) {
+      query = query.lte("price", parseFloat(filters.maxPrice));
+    }
+
+    // Ordenação
+    const orderColumn =
+      sortBy.value === "price_asc"
+        ? "price"
+        : sortBy.value === "price_desc"
+        ? "price"
+        : sortBy.value === "name"
+        ? "name"
+        : "created_at";
+
+    const orderDirection = sortBy.value === "price_desc" ? "desc" : "asc";
+    query = query.order(orderColumn, { ascending: orderDirection === "asc" });
+
+    // Paginação
+    const limit = 12;
+    const offset = (currentPage.value - 1) * limit;
+    query = query.range(offset, offset + limit - 1);
+
+    // Executar query
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error("❌ Erro do Supabase:", error);
+      throw error;
+    }
+
+    console.log("✅ Produtos encontrados:", data?.length || 0);
+    console.log("📋 Estrutura do primeiro produto:", data?.[0]);
+
+    products.value = data || [];
+    totalPages.value = Math.ceil((count || 0) / limit);
+    totalProducts.value = count || 0;
   } catch (error) {
-    console.error("Erro ao buscar produtos:", error);
+    console.error("❌ Erro ao buscar produtos:", error);
+    products.value = [];
+    totalPages.value = 1;
+    totalProducts.value = 0;
   } finally {
     loading.value = false;
   }

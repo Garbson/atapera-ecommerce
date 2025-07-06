@@ -544,12 +544,12 @@ const formatCurrency = (value: number) => {
 
 const getCategoryName = (categoryId: string) => {
   const categories = {
-    "uuid-armas-fogo": "Armas de Fogo",
-    "uuid-armas-pressao": "Armas de Pressão",
-    "uuid-pesca": "Pesca",
+    "3eebaee1-c85d-4b67-9af1-5619764b7307": "Armas de Fogo",
+    "d3f1376d-92ea-4a9b-a367-80456b9f0063": "Armas de Pressão",
+    "3b6c5fb9-e0f3-474b-8cc2-e36dd327d2aa": "Pesca",
     "uuid-airsoft": "Airsoft",
-    "uuid-caca": "Caça",
-    "uuid-vestuario": "Vestuário",
+    "e3afc893-b4c0-43a6-9900-c1208b1372ed": "Caça",
+    "2a6c0a33-0025-4cce-a306-db578a19a4f2": "Vestuário",
   };
   return categories[categoryId] || categoryId;
 };

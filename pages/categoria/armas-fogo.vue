@@ -180,7 +180,7 @@
           >
             <NuxtLink :to="`/produtos/${product.slug}`">
               <img
-                :src="product.image"
+                :src="getFirstProductImage(product.images)"
                 :alt="product.name"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -189,13 +189,13 @@
             <!-- Badge de Novo/Promoção -->
             <div class="absolute top-2 left-2 flex flex-col gap-1">
               <span
-                v-if="product.is_new"
+                v-if="product.is_featured"
                 class="bg-green-500 text-white px-2 py-1 text-xs rounded-full"
               >
                 Novo
               </span>
               <span
-                v-if="product.on_sale"
+                v-if="product.sale_price"
                 class="bg-red-500 text-white px-2 py-1 text-xs rounded-full"
               >
                 Oferta
@@ -223,10 +223,10 @@
           <div class="p-4">
             <div class="mb-2">
               <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                {{ product.caliber }}
+                {{ product.caliber || "Calibre não informado" }}
               </span>
               <span class="text-xs text-gray-500 ml-2">
-                {{ product.brand }}
+                {{ product.brand || "Marca não informada" }}
               </span>
             </div>
 
@@ -402,6 +402,9 @@
 </template>
 
 <script setup lang="ts">
+// ✅ IMPORTAR SUPABASE E CLOUDINARY
+const supabase = useSupabase();
+const { getProductImage } = useCloudinary();
 const route = useRoute();
 const router = useRouter();
 
@@ -447,28 +450,96 @@ const addToCart = (product) => {
   console.log("Adicionar ao carrinho:", product);
 };
 
+// ✅ FUNÇÃO PARA EXIBIR PRIMEIRA IMAGEM DO CLOUDINARY
+const getFirstProductImage = (images: string[]) => {
+  if (!images || images.length === 0) {
+    return "/placeholder-product.jpg";
+  }
+
+  // Se for URL do Cloudinary (public_id), usar nosso helper
+  if (typeof images[0] === "string" && !images[0].startsWith("http")) {
+    return getProductImage(images[0], "medium");
+  }
+
+  // Se for URL completa, usar diretamente
+  return images[0];
+};
+
+// ✅ FUNÇÃO CORRIGIDA - Usar Supabase diretamente
 const fetchProducts = async () => {
   loading.value = true;
 
   try {
-    const { data } = await $fetch("/api/products", {
-      query: {
-        category: "armas-fogo",
-        page: currentPage.value,
-        sort: sortBy.value,
-        subcategory: filters.subcategory,
-        caliber: filters.caliber,
-        brand: filters.brand,
-        min_price: filters.minPrice,
-        max_price: filters.maxPrice,
-      },
-    });
+    console.log("🔍 Buscando produtos de armas de fogo...");
 
-    products.value = data.products || [];
-    totalPages.value = data.totalPages || 1;
-    totalProducts.value = data.total || 0;
+    // ✅ USAR SUPABASE DIRETAMENTE
+    let query = supabase
+      .from("products")
+      .select("*", { count: "exact" })
+      .eq("is_active", true);
+
+    // ✅ FILTRAR POR CATEGORIA "ARMAS DE FOGO" - Usando category_id correto
+    // ID da categoria "Armas de Fogo" do seu modal
+    query = query.eq("category_id", "3eebaee1-c85d-4b67-9af1-5619764b7307");
+
+    // Aplicar filtros
+    if (filters.subcategory) {
+      query = query.ilike("name", `%${filters.subcategory}%`);
+    }
+
+    if (filters.caliber) {
+      query = query.eq("caliber", filters.caliber);
+    }
+
+    if (filters.brand) {
+      query = query.eq("brand", filters.brand);
+    }
+
+    if (filters.minPrice) {
+      query = query.gte("price", parseFloat(filters.minPrice));
+    }
+
+    if (filters.maxPrice) {
+      query = query.lte("price", parseFloat(filters.maxPrice));
+    }
+
+    // Ordenação
+    const orderColumn =
+      sortBy.value === "price_asc"
+        ? "price"
+        : sortBy.value === "price_desc"
+        ? "price"
+        : sortBy.value === "name"
+        ? "name"
+        : "created_at";
+
+    const orderDirection = sortBy.value === "price_desc" ? "desc" : "asc";
+    query = query.order(orderColumn, { ascending: orderDirection === "asc" });
+
+    // Paginação
+    const limit = 12;
+    const offset = (currentPage.value - 1) * limit;
+    query = query.range(offset, offset + limit - 1);
+
+    // Executar query
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error("❌ Erro do Supabase:", error);
+      throw error;
+    }
+
+    console.log("✅ Produtos encontrados:", data?.length || 0);
+    console.log("📋 Estrutura do primeiro produto:", data?.[0]);
+
+    products.value = data || [];
+    totalPages.value = Math.ceil((count || 0) / limit);
+    totalProducts.value = count || 0;
   } catch (error) {
-    console.error("Erro ao buscar produtos:", error);
+    console.error("❌ Erro ao buscar produtos:", error);
+    products.value = [];
+    totalPages.value = 1;
+    totalProducts.value = 0;
   } finally {
     loading.value = false;
   }
