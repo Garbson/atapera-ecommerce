@@ -4,6 +4,7 @@ export default defineNuxtConfig({
     "@nuxtjs/seo",
     "@pinia/nuxt",
     "@vueuse/nuxt",
+    "@pinia/nuxt",
   ],
 
   // ✅ ADICIONAR: Configuração do Vite para hot reload
@@ -65,6 +66,12 @@ export default defineNuxtConfig({
           name: "description",
           content:
             "Armas registradas, equipamentos de pesca e equipamentos para caça esportiva",
+        },
+      ],
+      link: [
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/icon?family=Material+Icons",
         },
       ],
     },

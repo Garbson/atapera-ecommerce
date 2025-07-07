@@ -1,26 +1,11 @@
-<!-- components/AppHeader.vue - VERSÃO CORRIGIDA -->
+<!-- components/AppHeader.vue - VERSÃO COMPLETA CORRIGIDA -->
 <template>
   <header class="bg-white shadow-sm sticky top-0 z-40">
-    <!-- Top Bar -->
-    <div class="bg-red-600 text-white text-sm">
-      <div class="container mx-auto px-4 py-2">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center gap-6">
-            <span>📞 (11) 99999-9999</span>
-            <span>📧 contato@atapera.shop</span>
-          </div>
-          <div class="flex items-center gap-4">
-            <span>🚚 Frete grátis acima de R$ 299</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Main Header -->
     <div class="container mx-auto px-4 py-4">
       <div class="flex items-center justify-between">
         <!-- Logo -->
-        <a href="/" class="flex items-center gap-3">
+        <NuxtLink to="/" class="flex items-center gap-3">
           <div
             class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center"
           >
@@ -30,7 +15,7 @@
             <h1 class="text-2xl font-bold text-gray-800">Atapera</h1>
             <p class="text-xs text-gray-500">Armas, Pesca & Aventura</p>
           </div>
-        </a>
+        </NuxtLink>
 
         <!-- Search Bar (Desktop) -->
         <div class="hidden md:flex flex-1 max-w-xl mx-8">
@@ -154,8 +139,8 @@
           </div>
 
           <!-- Cart -->
-          <button
-            @click="openCart"
+          <NuxtLink
+            to="/carrinho"
             class="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <svg
@@ -177,7 +162,7 @@
             >
               {{ cartItemsCount }}
             </span>
-          </button>
+          </NuxtLink>
 
           <!-- Mobile Menu Toggle -->
           <button
@@ -220,52 +205,52 @@
       <nav class="hidden md:block mt-4 pt-4 border-t border-gray-200">
         <ul class="flex items-center gap-8">
           <li>
-            <a
-              href="/categoria/armas-fogo"
+            <NuxtLink
+              to="/categoria/armas-fogo"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
-              >Armas de Fogo</a
+              >Armas de Fogo</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/armas-pressao"
+            <NuxtLink
+              to="/categoria/armas-pressao"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
-              >Armas de Pressão</a
+              >Armas de Pressão</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/pesca"
+            <NuxtLink
+              to="/categoria/pesca"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
-              >Pesca</a
+              >Pesca</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/airsoft"
+            <NuxtLink
+              to="/categoria/airsoft"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
-              >Airsoft</a
+              >Airsoft</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/caca"
+            <NuxtLink
+              to="/categoria/caca"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
-              >Caça</a
+              >Caça</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/vestuario"
+            <NuxtLink
+              to="/categoria/vestuario"
               class="text-gray-700 hover:text-red-600 font-medium transition-colors"
-              >Vestuário</a
+              >Vestuário</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/ofertas"
+            <NuxtLink
+              to="/categoria/ofertas"
               class="text-red-600 hover:text-red-700 font-medium transition-colors"
-              >🔥 Ofertas</a
+              >🔥 Ofertas</NuxtLink
             >
           </li>
         </ul>
@@ -352,7 +337,9 @@
 
           <li v-else class="border-b pb-4">
             <div class="space-y-2">
-              <div class="text-sm text-gray-500 py-2">{{ user?.email }}</div>
+              <div class="text-sm text-gray-500 py-2">
+                {{ user.value?.email }}
+              </div>
               <button
                 @click="goToMinhaAccount"
                 class="block text-gray-700 hover:text-red-600 transition-colors py-2 cursor-pointer"
@@ -376,52 +363,59 @@
 
           <!-- Navigation Links -->
           <li>
-            <a
-              href="/categoria/armas-fogo"
+            <NuxtLink
+              to="/categoria/armas-fogo"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              >Armas de Fogo</a
+              @click="closeMobileMenu"
+              >Armas de Fogo</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/armas-pressao"
+            <NuxtLink
+              to="/categoria/armas-pressao"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              >Armas de Pressão</a
+              @click="closeMobileMenu"
+              >Armas de Pressão</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/pesca"
+            <NuxtLink
+              to="/categoria/pesca"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              >Pesca</a
+              @click="closeMobileMenu"
+              >Pesca</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/airsoft"
+            <NuxtLink
+              to="/categoria/airsoft"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              >Airsoft</a
+              @click="closeMobileMenu"
+              >Airsoft</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/caca"
+            <NuxtLink
+              to="/categoria/caca"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              >Caça</a
+              @click="closeMobileMenu"
+              >Caça</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/vestuario"
+            <NuxtLink
+              to="/categoria/vestuario"
               class="block text-gray-700 hover:text-red-600 transition-colors"
-              >Vestuário</a
+              @click="closeMobileMenu"
+              >Vestuário</NuxtLink
             >
           </li>
           <li>
-            <a
-              href="/categoria/ofertas"
+            <NuxtLink
+              to="/categoria/ofertas"
               class="block text-red-600 hover:text-red-700 transition-colors"
-              >🔥 Ofertas</a
+              @click="closeMobileMenu"
+              >🔥 Ofertas</NuxtLink
             >
           </li>
         </ul>
@@ -431,35 +425,36 @@
 </template>
 
 <script setup lang="ts">
+// 🔧 SOLUÇÃO: Usar o auth diretamente e reagir às mudanças
 const auth = useAuth();
-const { user, isLoggedIn } = auth;
+const cartStore = useCartStore();
+
+// 🔧 VERSÃO REATIVA - não usar .value nos computed
+const isLoggedIn = computed(() => auth.isLoggedIn.value);
+const user = computed(() => auth.user.value);
 
 // Estados
 const searchQuery = ref("");
 const showUserMenu = ref(false);
 const showMobileMenu = ref(false);
 const showMobileSearch = ref(false);
-const cartItemsCount = ref(0);
 
-// ✅ MÉTODOS CORRIGIDOS com event.preventDefault() e mais logs
-const goToLogin = (event?: Event) => {
+// 🔧 USAR STORE DO CARRINHO
+const cartItemsCount = computed(() => cartStore.totalItems);
+
+// 🔧 CORRIGIDO: Métodos de navegação usando navigateTo
+const goToLogin = async (event?: Event) => {
   if (event) {
     event.preventDefault();
     event.stopPropagation();
   }
   console.log("📍 [goToLogin] Navegando para /login...");
-  console.log("📍 [goToLogin] Estado atual - isLoggedIn:", isLoggedIn.value);
   closeUserMenu();
   closeMobileMenu();
-
-  // Força a navegação
-  setTimeout(() => {
-    console.log("📍 [goToLogin] Executando navegação...");
-    window.location.href = "/login";
-  }, 100);
+  await navigateTo("/login");
 };
 
-const goToCadastro = (event?: Event) => {
+const goToCadastro = async (event?: Event) => {
   if (event) {
     event.preventDefault();
     event.stopPropagation();
@@ -467,13 +462,10 @@ const goToCadastro = (event?: Event) => {
   console.log("📍 [goToCadastro] Navegando para /cadastro...");
   closeUserMenu();
   closeMobileMenu();
-
-  setTimeout(() => {
-    window.location.href = "/cadastro";
-  }, 100);
+  await navigateTo("/cadastro");
 };
 
-const goToMinhaAccount = (event?: Event) => {
+const goToMinhaAccount = async (event?: Event) => {
   if (event) {
     event.preventDefault();
     event.stopPropagation();
@@ -481,13 +473,10 @@ const goToMinhaAccount = (event?: Event) => {
   console.log("📍 [goToMinhaAccount] Navegando para /minha-conta...");
   closeUserMenu();
   closeMobileMenu();
-
-  setTimeout(() => {
-    window.location.href = "/minha-conta";
-  }, 100);
+  await navigateTo("/minha-conta");
 };
 
-const goToPedidos = (event?: Event) => {
+const goToPedidos = async (event?: Event) => {
   if (event) {
     event.preventDefault();
     event.stopPropagation();
@@ -495,13 +484,10 @@ const goToPedidos = (event?: Event) => {
   console.log("📍 [goToPedidos] Navegando para /minha-conta/pedidos...");
   closeUserMenu();
   closeMobileMenu();
-
-  setTimeout(() => {
-    window.location.href = "/minha-conta/pedidos";
-  }, 100);
+  await navigateTo("/minha-conta/pedidos");
 };
 
-const goToEnderecos = (event?: Event) => {
+const goToEnderecos = async (event?: Event) => {
   if (event) {
     event.preventDefault();
     event.stopPropagation();
@@ -509,13 +495,10 @@ const goToEnderecos = (event?: Event) => {
   console.log("📍 [goToEnderecos] Navegando para /minha-conta/enderecos...");
   closeUserMenu();
   closeMobileMenu();
-
-  setTimeout(() => {
-    window.location.href = "/minha-conta/enderecos";
-  }, 100);
+  await navigateTo("/minha-conta/enderecos");
 };
 
-const goToAdmin = (event?: Event) => {
+const goToAdmin = async (event?: Event) => {
   if (event) {
     event.preventDefault();
     event.stopPropagation();
@@ -523,17 +506,14 @@ const goToAdmin = (event?: Event) => {
   console.log("📍 [goToAdmin] Navegando para /admin/login...");
   closeUserMenu();
   closeMobileMenu();
-
-  setTimeout(() => {
-    window.location.href = "/admin/login";
-  }, 100);
+  await navigateTo("/admin/login");
 };
 
 // Outros métodos
-const performSearch = () => {
+const performSearch = async () => {
   if (searchQuery.value.trim()) {
     console.log("🔍 [performSearch] Buscando por:", searchQuery.value);
-    window.location.href = `/busca?q=${encodeURIComponent(searchQuery.value)}`;
+    await navigateTo(`/busca?q=${encodeURIComponent(searchQuery.value)}`);
   }
 };
 
@@ -546,6 +526,11 @@ const toggleUserMenu = (event?: Event) => {
     showUserMenu.value
   );
   console.log("🔍 [toggleUserMenu] isLoggedIn:", isLoggedIn.value);
+  console.log(
+    "🔍 [toggleUserMenu] auth.isLoggedIn.value:",
+    auth.isLoggedIn.value
+  );
+  console.log("🔍 [toggleUserMenu] auth.user.value:", auth.user.value);
   showUserMenu.value = !showUserMenu.value;
   console.log("🔍 [toggleUserMenu] Novo estado:", showUserMenu.value);
 };
@@ -556,14 +541,13 @@ const closeUserMenu = () => {
 };
 
 const handleClickOutside = (event: Event) => {
-  // Verifica se o clique foi no botão do menu do usuário
   const userMenuButton = document.querySelector("[data-user-menu-button]");
   if (
     userMenuButton &&
     (userMenuButton.contains(event.target as Node) ||
       userMenuButton === event.target)
   ) {
-    return; // Não fecha o menu se clicou no próprio botão
+    return;
   }
   closeUserMenu();
 };
@@ -577,11 +561,7 @@ const toggleMobileMenu = () => {
 
 const closeMobileMenu = () => {
   showMobileMenu.value = false;
-};
-
-const openCart = () => {
-  console.log("🛒 [openCart] Abrindo carrinho");
-  // Implementar abertura do carrinho
+  showMobileSearch.value = false;
 };
 
 const logout = async (event?: Event) => {
@@ -593,24 +573,21 @@ const logout = async (event?: Event) => {
   await auth.signOut();
   closeUserMenu();
   closeMobileMenu();
+  // Redirecionar para home após logout
+  await navigateTo("/");
 };
 
-// Click outside directive - VERSÃO MELHORADA
+// Click outside directive
 const vClickOutside = {
   beforeMount(el: any, binding: any) {
     el.clickOutsideEvent = (event: Event) => {
-      // Verifica se o elemento ainda existe no DOM
       if (!document.contains(el)) {
         return;
       }
-
-      // Verifica se o clique foi fora do elemento
       if (!(el === event.target || el.contains(event.target as Node))) {
         binding.value(event);
       }
     };
-
-    // Adiciona o listener com um pequeno delay para evitar conflitos
     setTimeout(() => {
       document.addEventListener("click", el.clickOutsideEvent);
     }, 100);
@@ -622,10 +599,44 @@ const vClickOutside = {
   },
 };
 
-// Close menus on route change
+// Fechar menus quando a rota mudar
+const route = useRoute();
+watch(
+  () => route.path,
+  () => {
+    closeUserMenu();
+    closeMobileMenu();
+  }
+);
+
+// Debug no mount
 onMounted(() => {
-  console.log("✅ [AppHeader] Header montado e funcionando!");
-  console.log("✅ [AppHeader] Estado inicial - isLoggedIn:", isLoggedIn.value);
-  console.log("✅ [AppHeader] User:", user.value);
+  console.log("✅ [AppHeader] Header montado!");
+  console.log("✅ [AppHeader] isLoggedIn.value:", isLoggedIn.value);
+  console.log("✅ [AppHeader] user.value:", user.value);
+  console.log("✅ [AppHeader] auth.isLoggedIn.value:", auth.isLoggedIn.value);
+  console.log("✅ [AppHeader] auth.user.value:", auth.user.value);
+
+  // Garantir que auth inicializa
+  if (!auth.user.value) {
+    console.log("🔄 [AppHeader] Chamando initAuth...");
+    auth.initAuth();
+  }
+
+  // Watch para mudanças no estado de autenticação - DIRETO DO AUTH
+  watch(
+    [() => auth.isLoggedIn.value, () => auth.user.value],
+    ([newIsLoggedIn, newUser]) => {
+      console.log("🔄 [AppHeader] Auth state changed:", {
+        isLoggedIn: newIsLoggedIn,
+        user: newUser?.email,
+      });
+    },
+    { immediate: true }
+  );
 });
+
+// TODO: Implementar contagem real do carrinho
+// const cartStore = useCartStore();
+// cartItemsCount.value = cartStore.itemCount;
 </script>
