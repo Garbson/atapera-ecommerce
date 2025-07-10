@@ -79,61 +79,109 @@
             <div
               v-if="showUserMenu"
               v-click-outside="handleClickOutside"
-              class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+              class="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
             >
               <!-- Usuário Logado -->
               <template v-if="isLoggedIn">
-                <div class="px-4 py-2 text-sm text-gray-500 border-b">
-                  {{ user?.email }}
+                <div class="px-4 py-3 border-b border-gray-100">
+                  <div
+                    class="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1"
+                  >
+                    Conta
+                  </div>
+                  <div class="text-sm text-gray-900 font-medium break-all">
+                    {{ user?.email }}
+                  </div>
                 </div>
-                <button
-                  @click="goToMinhaAccount"
-                  class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                >
-                  👤 Minha Conta
-                </button>
-                <button
-                  @click="goToPedidos"
-                  class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                >
-                  📦 Meus Pedidos
-                </button>
-                <button
-                  @click="goToEnderecos"
-                  class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                >
-                  📍 Endereços
-                </button>
-                <hr class="my-2" />
-                <button
-                  @click="logout"
-                  class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
-                >
-                  🚪 Sair
-                </button>
+
+                <div class="py-1">
+                  <button
+                    @click="goToMinhaAccount"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <span
+                      class="material-icons-outlined text-gray-400 mr-3 text-lg"
+                      >person</span
+                    >
+                    Minha Conta
+                  </button>
+                  <button
+                    @click="goToPedidos"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <span
+                      class="material-icons-outlined text-gray-400 mr-3 text-lg"
+                      >inventory_2</span
+                    >
+                    Meus Pedidos
+                  </button>
+                  <button
+                    @click="goToEnderecos"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <span
+                      class="material-icons-outlined text-gray-400 mr-3 text-lg"
+                      >location_on</span
+                    >
+                    Endereços
+                  </button>
+                </div>
+
+                <hr class="my-1 border-gray-100" />
+
+                <div class="py-1">
+                  <button
+                    @click="logout"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+                  >
+                    <span
+                      class="material-icons-outlined text-red-400 mr-3 text-lg"
+                      >logout</span
+                    >
+                    Sair
+                  </button>
+                </div>
               </template>
 
               <!-- Usuário NÃO Logado -->
               <template v-else>
-                <button
-                  @click="goToLogin"
-                  class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                >
-                  👤 Entrar
-                </button>
-                <button
-                  @click="goToCadastro"
-                  class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                >
-                  📝 Criar Conta
-                </button>
-                <hr class="my-2" />
-                <button
-                  @click="goToAdmin"
-                  class="w-full text-left block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100 cursor-pointer"
-                >
-                  🔧 Admin
-                </button>
+                <div class="py-1">
+                  <button
+                    @click="goToLogin"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <span
+                      class="material-icons-outlined text-gray-400 mr-3 text-lg"
+                      >login</span
+                    >
+                    Entrar
+                  </button>
+                  <button
+                    @click="goToCadastro"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <span
+                      class="material-icons-outlined text-gray-400 mr-3 text-lg"
+                      >person_add</span
+                    >
+                    Criar Conta
+                  </button>
+                </div>
+
+                <hr class="my-1 border-gray-100" />
+
+                <div class="py-1">
+                  <button
+                    @click="goToAdmin"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-150"
+                  >
+                    <span
+                      class="material-icons-outlined text-blue-400 mr-3 text-lg"
+                      >admin_panel_settings</span
+                    >
+                    Admin
+                  </button>
+                </div>
               </template>
             </div>
           </div>
@@ -143,19 +191,9 @@
             to="/carrinho"
             class="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <svg
-              class="w-6 h-6 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <span class="material-icons-outlined text-gray-700"
+              >shopping_cart</span
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6.5-5v5a2 2 0 01-2 2H9a2 2 0 01-2-2v-5m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
-              />
-            </svg>
             <span
               v-if="cartItemsCount > 0"
               class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
@@ -432,6 +470,7 @@ const cartStore = useCartStore();
 // 🔧 VERSÃO REATIVA - não usar .value nos computed
 const isLoggedIn = computed(() => auth.isLoggedIn.value);
 const user = computed(() => auth.user.value);
+const authStore = useAuth();
 
 // Estados
 const searchQuery = ref("");
@@ -564,17 +603,15 @@ const closeMobileMenu = () => {
   showMobileSearch.value = false;
 };
 
-const logout = async (event?: Event) => {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
+const logout = async () => {
+  console.log("🐛 MINHA-CONTA - Fazendo logout...");
+
+  try {
+    await authStore.signOut();
+    console.log("🐛 MINHA-CONTA - Logout realizado com sucesso");
+  } catch (error) {
+    console.error("🐛 MINHA-CONTA - Erro no logout:", error);
   }
-  console.log("🚪 [logout] Fazendo logout...");
-  await auth.signOut();
-  closeUserMenu();
-  closeMobileMenu();
-  // Redirecionar para home após logout
-  await navigateTo("/");
 };
 
 // Click outside directive

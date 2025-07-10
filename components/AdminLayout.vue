@@ -351,6 +351,7 @@
 <script setup lang="ts">
 const { user, signOut } = useAuth();
 const route = useRoute();
+const authStore = useAuth();
 
 // Estados
 const showUserMenu = ref(false);
@@ -392,8 +393,14 @@ const formatCurrency = (value: number) => {
 };
 
 const logout = async () => {
-  await signOut();
-  await navigateTo("/admin/login");
+  console.log("🐛 MINHA-CONTA - Fazendo logout...");
+
+  try {
+    await authStore.signOut();
+    console.log("🐛 MINHA-CONTA - Logout realizado com sucesso");
+  } catch (error) {
+    console.error("🐛 MINHA-CONTA - Erro no logout:", error);
+  }
 };
 
 // Click outside directive

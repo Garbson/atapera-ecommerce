@@ -521,6 +521,7 @@ definePageMeta({
 
 const supabase = useSupabase();
 const user = useSupabase();
+const authStore = useAuth();
 
 // Estados
 const loading = ref(true);
@@ -561,11 +562,13 @@ const getStockClass = (stock: number) => {
 };
 
 const logout = async () => {
+  console.log("🐛 MINHA-CONTA - Fazendo logout...");
+
   try {
-    await supabase.auth.signOut();
-    await navigateTo("/admin/login");
+    await authStore.signOut();
+    console.log("🐛 MINHA-CONTA - Logout realizado com sucesso");
   } catch (error) {
-    console.error("Erro ao fazer logout:", error);
+    console.error("🐛 MINHA-CONTA - Erro no logout:", error);
   }
 };
 

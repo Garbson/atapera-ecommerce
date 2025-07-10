@@ -44,6 +44,27 @@
         </ol>
       </nav>
 
+      <!-- Categorias Rápidas -->
+      <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">Categorias</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <button
+            v-for="category in quickCategories"
+            :key="category.id"
+            @click="filters.subcategory = category.value"
+            :class="[
+              'p-4 rounded-lg border text-center hover:border-orange-500 transition-colors',
+              filters.subcategory === category.value
+                ? 'border-orange-500 bg-orange-50'
+                : 'border-gray-200',
+            ]"
+          >
+            <div class="text-2xl mb-2">{{ category.icon }}</div>
+            <div class="text-sm font-medium">{{ category.name }}</div>
+          </button>
+        </div>
+      </div>
+
       <!-- Filtros e Ordenação -->
       <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
         <div class="flex flex-wrap gap-4 items-center justify-between">
@@ -449,6 +470,15 @@ const addToCart = (product) => {
   // Implementar adição ao carrinho
   console.log("Adicionar ao carrinho:", product);
 };
+
+const quickCategories = [
+  { id: 1, name: "Carabinas", icon: "🔫", value: "carabinas" },
+  { id: 2, name: "Pistolas", icon: "🔫", value: "pistolas" },
+  { id: 3, name: "Rifles", icon: "🔫", value: "rifles" },
+  { id: 4, name: "Chumbos", icon: "⚫", value: "chumbo" },
+  { id: 5, name: "CO2", icon: "🧪", value: "co2" },
+  { id: 6, name: "Acessórios", icon: "🔧", value: "acessorios" },
+];
 
 // ✅ FUNÇÃO PARA EXIBIR PRIMEIRA IMAGEM DO CLOUDINARY
 const getFirstProductImage = (images: string[]) => {

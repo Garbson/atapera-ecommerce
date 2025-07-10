@@ -228,7 +228,7 @@
           >
             <NuxtLink :to="`/produtos/${product.slug}`">
               <img
-                :src="product.image"
+                :src="getFirstProductImage(product.images)"
                 :alt="product.name"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -452,6 +452,9 @@
 </template>
 
 <script setup lang="ts">
+// ✅ IMPORTAR SUPABASE E CLOUDINARY
+const supabase = useSupabase();
+const { getProductImage } = useCloudinary();
 const route = useRoute();
 const router = useRouter();
 
@@ -509,30 +512,104 @@ const addToCart = (product) => {
   console.log("Adicionar ao carrinho:", product);
 };
 
+// ✅ FUNÇÃO PARA EXIBIR PRIMEIRA IMAGEM DO CLOUDINARY
+const getFirstProductImage = (images: string[]) => {
+  if (!images || images.length === 0) {
+    return "/placeholder-product.jpg";
+  }
+
+  // Se for URL do Cloudinary (public_id), usar nosso helper
+  if (typeof images[0] === "string" && !images[0].startsWith("http")) {
+    return getProductImage(images[0], "medium");
+  }
+
+  // Se for URL completa, usar diretamente
+  return images[0];
+};
+
+// ✅ FUNÇÃO CORRIGIDA - Usar Supabase diretamente
 const fetchProducts = async () => {
   loading.value = true;
 
   try {
-    const { data } = await $fetch("/api/products", {
-      query: {
-        category: "armas-pressao",
-        page: currentPage.value,
-        sort: sortBy.value,
-        subcategory: filters.subcategory,
-        system: filters.system,
-        caliber: filters.caliber,
-        brand: filters.brand,
-        power: filters.power,
-        min_price: filters.minPrice,
-        max_price: filters.maxPrice,
-      },
-    });
+    console.log("🔍 Buscando produtos de armas de pressão...");
 
-    products.value = data.products || [];
-    totalPages.value = data.totalPages || 1;
-    totalProducts.value = data.total || 0;
+    // ✅ USAR SUPABASE DIRETAMENTE
+    let query = supabase
+      .from("products")
+      .select("*", { count: "exact" })
+      .eq("is_active", true);
+
+    // ✅ FILTRAR POR CATEGORIA "ARMAS DE PRESSÃO" - Use o category_id correto
+    // Substitua pelo ID correto da categoria "Armas de Pressão"
+    query = query.eq("category_id", "d3f1376d-92ea-4a9b-a367-80456b9f0063");
+
+    // Aplicar filtros
+    if (filters.subcategory) {
+      query = query.ilike("name", `%${filters.subcategory}%`);
+    }
+
+    if (filters.system) {
+      query = query.eq("system", filters.system);
+    }
+
+    if (filters.caliber) {
+      query = query.eq("caliber", filters.caliber);
+    }
+
+    if (filters.brand) {
+      query = query.eq("brand", filters.brand);
+    }
+
+    if (filters.power) {
+      query = query.eq("power_category", filters.power);
+    }
+
+    if (filters.minPrice) {
+      query = query.gte("price", parseFloat(filters.minPrice));
+    }
+
+    if (filters.maxPrice) {
+      query = query.lte("price", parseFloat(filters.maxPrice));
+    }
+
+    // Ordenação
+    const orderColumn =
+      sortBy.value === "price_asc"
+        ? "price"
+        : sortBy.value === "price_desc"
+        ? "price"
+        : sortBy.value === "name"
+        ? "name"
+        : "created_at";
+
+    const orderDirection = sortBy.value === "price_desc" ? "desc" : "asc";
+    query = query.order(orderColumn, { ascending: orderDirection === "asc" });
+
+    // Paginação
+    const limit = 12;
+    const offset = (currentPage.value - 1) * limit;
+    query = query.range(offset, offset + limit - 1);
+
+    // Executar query
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error("❌ Erro do Supabase:", error);
+      throw error;
+    }
+
+    console.log("✅ Produtos encontrados:", data?.length || 0);
+    console.log("📋 Estrutura do primeiro produto:", data?.[0]);
+
+    products.value = data || [];
+    totalPages.value = Math.ceil((count || 0) / limit);
+    totalProducts.value = count || 0;
   } catch (error) {
-    console.error("Erro ao buscar produtos:", error);
+    console.error("❌ Erro ao buscar produtos:", error);
+    products.value = [];
+    totalPages.value = 1;
+    totalProducts.value = 0;
   } finally {
     loading.value = false;
   }
