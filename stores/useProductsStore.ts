@@ -84,13 +84,15 @@ export const useProductsStore = defineStore("products", () => {
   });
 
   // Actions
-  const fetchProducts = async (filters: ProductFilters = {}) => {
+  const fetchProducts = async (filters: ProductFilters = {}) => { 
     try {
       loading.value = true;
       error.value = null;
 
       const supabase = getSupabaseClient();
-      let query = supabase.from("products").select("*", { count: "exact" });
+      const config = useRuntimeConfig();
+      // ✅ FORÇAR CHAMADA SEMPRE - SEM CACHE
+      let query = supabase.from("products").select("*", { count: "exact", head: false });
 
       // Aplicar filtros
       if (filters.search) {
@@ -125,9 +127,14 @@ export const useProductsStore = defineStore("products", () => {
         query = query.order("created_at", { ascending: false });
       }
 
+      
       const { data, error: fetchError, count } = await query;
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error("❌ [ProductsStore] ERRO na query do Supabase:", fetchError);
+        throw fetchError;
+      }
+
 
       products.value = data || [];
       
@@ -497,6 +504,11 @@ export const useProductsStore = defineStore("products", () => {
     currentProduct.value = null;
   };
 
+  // ✅ FUNÇÃO PARA LIMPAR CACHE DE PRODUTOS
+  const clearProductsCache = () => {
+    products.value = [];
+  };
+
   return {
     // Estado
     products: readonly(products),
@@ -530,5 +542,6 @@ export const useProductsStore = defineStore("products", () => {
     validateSlug,
     clearError,
     clearCurrentProduct,
+    clearProductsCache,
   };
 });

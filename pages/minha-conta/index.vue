@@ -567,8 +567,6 @@ const updateProfileHandler = async () => {
       profileData.phone = editProfileData.phone;
 
       showEditProfile.value = false;
-      // Aqui você pode adicionar um toast de sucesso
-      console.log("Perfil atualizado com sucesso!");
     } else {
       console.error("Erro ao atualizar perfil:", result.error);
     }

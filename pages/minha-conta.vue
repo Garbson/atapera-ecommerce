@@ -97,8 +97,7 @@
 </template>
 
 <script setup lang="ts">
-// ✅ DEBUG: Log quando a página é montada
-console.log("🐛 MINHA-CONTA - Página sendo montada");
+
 
 definePageMeta({
   middleware: "auth",
@@ -116,40 +115,14 @@ const hasChildRoutes = computed(() => {
 });
 
 const handleLogout = async () => {
-  console.log("🐛 MINHA-CONTA - Fazendo logout...");
 
   try {
     await authStore.signOut();
-    console.log("🐛 MINHA-CONTA - Logout realizado com sucesso");
   } catch (error) {
     console.error("🐛 MINHA-CONTA - Erro no logout:", error);
   }
 };
 
-// ✅ DEBUG: Monitorar mudanças no estado
-watch(
-  () => authStore.isLoggedIn,
-  (newValue) => {
-    console.log("🐛 MINHA-CONTA - Auth state mudou:", newValue);
-    if (!newValue) {
-      console.log("🐛 MINHA-CONTA - Usuário deslogou, deveria redirecionar");
-    }
-  }
-);
 
-// ✅ DEBUG: Log inicial
-onMounted(() => {
-  console.log("🐛 MINHA-CONTA - Componente montado");
-  console.log("🐛 MINHA-CONTA - Estado inicial:", {
-    isLoggedIn: authStore.isLoggedIn,
-    loading: authStore.loading,
-    user: authStore.user,
-    route: route.path,
-  });
-});
 
-// ✅ DEBUG: Log quando desmontado
-onUnmounted(() => {
-  console.log("🐛 MINHA-CONTA - Componente desmontado");
-});
 </script>

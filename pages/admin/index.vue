@@ -612,11 +612,9 @@ const getStockClass = (stock: number) => {
 };
 
 const logout = async () => {
-  console.log("🐛 MINHA-CONTA - Fazendo logout...");
 
   try {
     await authStore.signOut();
-    console.log("🐛 MINHA-CONTA - Logout realizado com sucesso");
   } catch (error) {
     console.error("🐛 MINHA-CONTA - Erro no logout:", error);
   }

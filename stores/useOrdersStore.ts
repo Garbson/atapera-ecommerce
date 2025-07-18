@@ -160,7 +160,12 @@ export const useOrdersStore = defineStore('orders', () => {
       // Adicionar itens ao carrinho (assumindo que existe uma store de carrinho)
       const cartStore = useCartStore();
       for (const item of orderItems) {
-        await cartStore.addToCart(item.product_id, item.quantity);
+        await cartStore.addItem({
+          id: item.product_id,
+          name: item.product_name,
+          price: item.price,
+          product_id: item.product_id,
+        }, item.quantity);
       }
 
       return { data: { success: true }, error: null };

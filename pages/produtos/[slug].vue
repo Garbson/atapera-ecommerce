@@ -338,7 +338,6 @@ const addToCart = async () => {
 
 const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value;
-  console.log("Favorito:", isFavorite.value);
 };
 
 // ✅ FUNÇÃO PARA EXIBIR PRIMEIRA IMAGEM DO CLOUDINARY
@@ -357,7 +356,6 @@ const getFirstProductImage = (images: string[]) => {
 // ✅ FUNÇÃO CORRIGIDA - Buscar produto usando Supabase
 const fetchProduct = async () => {
   try {
-    console.log("🔍 Buscando produto com slug:", route.params.slug);
 
     // ✅ USAR SUPABASE DIRETAMENTE
     const { data, error } = await supabase
@@ -379,7 +377,6 @@ const fetchProduct = async () => {
       });
     }
 
-    console.log("✅ Produto encontrado:", data);
     product.value = data;
 
     // Definir imagem selecionada
@@ -420,7 +417,6 @@ const fetchRelatedProducts = async (
     }
 
     relatedProducts.value = data || [];
-    console.log("✅ Produtos relacionados:", data?.length || 0);
   } catch (error) {
     console.error("❌ Erro ao buscar produtos relacionados:", error);
   }

@@ -67,9 +67,6 @@ const handleSubmit = async () => {
     // Simular envio da newsletter
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // TODO: Implementar integração com serviço de newsletter
-    console.log('Newsletter subscription:', email.value);
-    
     success.value = true;
     email.value = '';
     

@@ -317,20 +317,7 @@ watch(() => props.product, (newProduct) => {
   }
 }, { immediate: true });
 
-// Debug - log do produto quando monta
 onMounted(() => {
-  console.log("🖼️ ProductCard montado:", {
-    name: props.product.name,
-    images: props.product.images,
-    imagesType: typeof props.product.images,
-    isArray: Array.isArray(props.product.images),
-    hasImages: props.product.images && props.product.images.length > 0,
-    firstImage: props.product.images?.[0],
-    selectedImage: selectedImage.value,
-    product: props.product
-  });
-  
-  // Verificar se é array mas está como string
   if (typeof props.product.images === 'string') {
     console.warn('⚠️ Imagens estão como string, não como array:', props.product.images);
   }

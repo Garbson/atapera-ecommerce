@@ -14,7 +14,6 @@ const route = useRoute();
 // Configuração da categoria reativa baseada na rota
 const categoryConfig = computed(() => {
   const slug = route.params.slug as string;
-  console.log('🔄 Atualizando categoria config para:', slug);
   return getCategoryConfig(slug);
 });
 

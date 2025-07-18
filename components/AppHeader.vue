@@ -487,7 +487,6 @@ const goToLogin = async (event?: Event) => {
     event.preventDefault();
     event.stopPropagation();
   }
-  console.log("📍 [goToLogin] Navegando para /login...");
   closeUserMenu();
   closeMobileMenu();
   await navigateTo("/login");
@@ -498,7 +497,6 @@ const goToCadastro = async (event?: Event) => {
     event.preventDefault();
     event.stopPropagation();
   }
-  console.log("📍 [goToCadastro] Navegando para /cadastro...");
   closeUserMenu();
   closeMobileMenu();
   await navigateTo("/cadastro");
@@ -509,7 +507,6 @@ const goToMinhaAccount = async (event?: Event) => {
     event.preventDefault();
     event.stopPropagation();
   }
-  console.log("📍 [goToMinhaAccount] Navegando para /minha-conta...");
   closeUserMenu();
   closeMobileMenu();
   await navigateTo("/minha-conta");
@@ -520,7 +517,6 @@ const goToPedidos = async (event?: Event) => {
     event.preventDefault();
     event.stopPropagation();
   }
-  console.log("📍 [goToPedidos] Navegando para /minha-conta/pedidos...");
   closeUserMenu();
   closeMobileMenu();
   await navigateTo("/minha-conta/pedidos");
@@ -531,7 +527,6 @@ const goToEnderecos = async (event?: Event) => {
     event.preventDefault();
     event.stopPropagation();
   }
-  console.log("📍 [goToEnderecos] Navegando para /minha-conta/enderecos...");
   closeUserMenu();
   closeMobileMenu();
   await navigateTo("/minha-conta/enderecos");
@@ -542,7 +537,6 @@ const goToAdmin = async (event?: Event) => {
     event.preventDefault();
     event.stopPropagation();
   }
-  console.log("📍 [goToAdmin] Navegando para /admin/login...");
   closeUserMenu();
   closeMobileMenu();
   await navigateTo("/admin/login");
@@ -551,7 +545,6 @@ const goToAdmin = async (event?: Event) => {
 // Outros métodos
 const performSearch = async () => {
   if (searchQuery.value.trim()) {
-    console.log("🔍 [performSearch] Buscando por:", searchQuery.value);
     await navigateTo(`/busca?q=${encodeURIComponent(searchQuery.value)}`);
   }
 };
@@ -560,22 +553,10 @@ const toggleUserMenu = (event?: Event) => {
   if (event) {
     event.stopPropagation();
   }
-  console.log(
-    "🔍 [toggleUserMenu] Menu toggled, estado atual:",
-    showUserMenu.value
-  );
-  console.log("🔍 [toggleUserMenu] isLoggedIn:", isLoggedIn.value);
-  console.log(
-    "🔍 [toggleUserMenu] auth.isLoggedIn.value:",
-    auth.isLoggedIn.value
-  );
-  console.log("🔍 [toggleUserMenu] auth.user.value:", auth.user.value);
   showUserMenu.value = !showUserMenu.value;
-  console.log("🔍 [toggleUserMenu] Novo estado:", showUserMenu.value);
 };
 
 const closeUserMenu = () => {
-  console.log("🔍 [closeUserMenu] Fechando menu");
   showUserMenu.value = false;
 };
 
@@ -604,11 +585,8 @@ const closeMobileMenu = () => {
 };
 
 const logout = async () => {
-  console.log("🐛 MINHA-CONTA - Fazendo logout...");
-
   try {
     await authStore.signOut();
-    console.log("🐛 MINHA-CONTA - Logout realizado com sucesso");
   } catch (error) {
     console.error("🐛 MINHA-CONTA - Erro no logout:", error);
   }
@@ -648,32 +626,11 @@ watch(
 
 // Debug no mount
 onMounted(() => {
-  console.log("✅ [AppHeader] Header montado!");
-  console.log("✅ [AppHeader] isLoggedIn.value:", isLoggedIn.value);
-  console.log("✅ [AppHeader] user.value:", user.value);
-  console.log("✅ [AppHeader] auth.isLoggedIn.value:", auth.isLoggedIn.value);
-  console.log("✅ [AppHeader] auth.user.value:", auth.user.value);
-
   // Garantir que auth inicializa
   if (!auth.user.value) {
-    console.log("🔄 [AppHeader] Chamando initAuth...");
+
     auth.initAuth();
   }
-
-  // Watch para mudanças no estado de autenticação - DIRETO DO AUTH
-  watch(
-    [() => auth.isLoggedIn.value, () => auth.user.value],
-    ([newIsLoggedIn, newUser]) => {
-      console.log("🔄 [AppHeader] Auth state changed:", {
-        isLoggedIn: newIsLoggedIn,
-        user: newUser?.email,
-      });
-    },
-    { immediate: true }
-  );
 });
 
-// TODO: Implementar contagem real do carrinho
-// const cartStore = useCartStore();
-// cartItemsCount.value = cartStore.itemCount;
 </script>
