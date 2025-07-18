@@ -1,6 +1,7 @@
 // stores/useOrdersStore.ts
 export const useOrdersStore = defineStore('orders', () => {
-  const supabase = useSupabaseClient()
+  // Obter cliente Supabase diretamente na store
+  const getSupabaseClient = () => { return useSupabase(); };
 
   // Estado
   const orders = ref([])
@@ -105,11 +106,121 @@ export const useOrdersStore = defineStore('orders', () => {
       .reduce((sum, order: Order) => sum + order.total_amount, 0)
   })
 
-  // Actions
+  // Actions específicas para pedidos
+  const cancelOrderById = async (orderId: string) => {
+    try {
+      loading.value = true;
+      error.value = null;
+
+      const { data, error: updateError } = await supabase
+        .from('orders')
+        .update({ 
+          status: 'cancelled',
+          payment_status: 'refunded',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', orderId)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      // Atualizar estado local
+      const index = orders.value.findIndex((order: Order) => order.id === orderId);
+      if (index !== -1) {
+        orders.value[index] = { ...orders.value[index], ...data };
+      }
+
+      return { data, error: null };
+    } catch (err: any) {
+      error.value = err.message;
+      console.error('Erro ao cancelar pedido:', err);
+      return { data: null, error: err.message };
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const reorderItems = async (orderId: string) => {
+    try {
+      loading.value = true;
+      error.value = null;
+
+      // Buscar itens do pedido original
+      const { data: orderItems, error: fetchError } = await supabase
+        .from('order_items')
+        .select('product_id, quantity')
+        .eq('order_id', orderId);
+
+      if (fetchError) throw fetchError;
+      if (!orderItems) {
+        throw new Error('Pedido não encontrado');
+      }
+
+      // Adicionar itens ao carrinho (assumindo que existe uma store de carrinho)
+      const cartStore = useCartStore();
+      for (const item of orderItems) {
+        await cartStore.addToCart(item.product_id, item.quantity);
+      }
+
+      return { data: { success: true }, error: null };
+    } catch (err: any) {
+      error.value = err.message;
+      console.error('Erro ao reordenar itens:', err);
+      return { data: null, error: err.message };
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const fetchUserOrders = async () => {
+    try {
+      loading.value = true;
+      error.value = null;
+
+      const { data: userState } = useAuth();
+      if (!userState.value?.id) {
+        return { data: [], error: 'Usuário não autenticado' };
+      }
+
+      const { data, error: fetchError } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            id,
+            product_id,
+            product_name,
+            product_sku,
+            quantity,
+            unit_price,
+            total_price
+          )
+        `)
+        .eq('customer_id', userState.value.id)
+        .order('created_at', { ascending: false });
+
+      if (fetchError) throw fetchError;
+
+      orders.value = data.map((order: any) => ({
+        ...order,
+        items: order.order_items || []
+      }));
+
+      return { data: orders.value, error: null };
+    } catch (err: any) {
+      error.value = err.message;
+      console.error('Erro ao buscar pedidos do usuário:', err);
+      return { data: [], error: err.message };
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const fetchOrders = async (filters: OrderFilters = {}) => {
     try {
-      loading.value = true
-      error.value = null
+      loading.value = true;
+      error.value = null;
 
       let query = supabase
         .from('orders')
@@ -124,61 +235,60 @@ export const useOrdersStore = defineStore('orders', () => {
             unit_price,
             total_price
           )
-        `)
+        `);
 
       // Aplicar filtros
       if (filters.search) {
-        query = query.or(`number.ilike.%${filters.search}%,customer_name.ilike.%${filters.search}%,customer_email.ilike.%${filters.search}%`)
+        query = query.or(`number.ilike.%${filters.search}%,customer_name.ilike.%${filters.search}%,customer_email.ilike.%${filters.search}%`);
       }
 
       if (filters.status) {
-        query = query.eq('status', filters.status)
+        query = query.eq('status', filters.status);
       }
 
       if (filters.payment_status) {
-        query = query.eq('payment_status', filters.payment_status)
+        query = query.eq('payment_status', filters.payment_status);
       }
 
       if (filters.date_from) {
-        query = query.gte('created_at', filters.date_from)
+        query = query.gte('created_at', filters.date_from);
       }
 
       if (filters.date_to) {
-        query = query.lte('created_at', filters.date_to)
+        query = query.lte('created_at', filters.date_to);
       }
 
       if (filters.customer) {
-        query = query.or(`customer_name.ilike.%${filters.customer}%,customer_email.ilike.%${filters.customer}%`)
+        query = query.or(`customer_name.ilike.%${filters.customer}%,customer_email.ilike.%${filters.customer}%`);
       }
 
       // Paginação
       if (filters.page && filters.limit) {
-        const from = (filters.page - 1) * filters.limit
-        const to = from + filters.limit - 1
-        query = query.range(from, to)
+        const from = (filters.page - 1) * filters.limit;
+        const to = from + filters.limit - 1;
+        query = query.range(from, to);
       }
 
       // Ordenação
-      query = query.order('created_at', { ascending: false })
+      query = query.order('created_at', { ascending: false });
 
-      const { data, error: fetchError } = await query
-
-      if (fetchError) throw fetchError
+      const { data, error: fetchError } = await query;
+      
+      if (fetchError) throw fetchError;
 
       // Processar dados dos pedidos
-      orders.value = (data || []).map((order: any) => ({
+      orders.value = data.map((order: any) => ({
         ...order,
         items: order.order_items || []
-      }))
+      }));
 
-      return { data: orders.value, error: null }
-
+      return { data: orders.value, error: null };
     } catch (err: any) {
-      error.value = err.message
-      console.error('Erro ao buscar pedidos:', err)
-      return { data: null, error: err.message }
+      error.value = err.message;
+      console.error('Erro ao buscar pedidos:', err);
+      return { data: [], error: err.message };
     } finally {
-      loading.value = false
+      loading.value = false;
     }
   }
 
@@ -471,6 +581,7 @@ export const useOrdersStore = defineStore('orders', () => {
         updated_at: new Date().toISOString(),
       }
 
+      const supabase = getSupabaseClient();
       const { data, error: updateError } = await supabase
         .from('orders')
         .update(updateData)

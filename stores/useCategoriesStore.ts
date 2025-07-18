@@ -1,6 +1,6 @@
 // stores/useCategoriesStore.ts
 export const useCategoriesStore = defineStore("categories", () => {
-  const supabase = useSupabaseClient();
+  const getSupabaseClient = () => { return useSupabase(); };
 
   // Estado
   const categories = ref([]);
@@ -63,6 +63,7 @@ export const useCategoriesStore = defineStore("categories", () => {
       loading.value = true;
       error.value = null;
 
+      const supabase = getSupabaseClient();
       let query = supabase
         .from("categories")
         .select("*")
@@ -317,6 +318,7 @@ export const useCategoriesStore = defineStore("categories", () => {
       loading.value = true;
       error.value = null;
 
+      const supabase = getSupabaseClient();
       const updates = categoriesOrder.map(({ id, sort_order }) =>
         supabase
           .from("categories")

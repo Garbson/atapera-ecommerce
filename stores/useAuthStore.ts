@@ -1,6 +1,6 @@
 // stores/useAuthStore.ts
 export const useAuthStore = defineStore("auth", () => {
-  const supabase = useSupabaseClient();
+  const getSupabaseClient = () => { return useSupabase(); };
   const user = useSupabaseUser();
 
   // Estado

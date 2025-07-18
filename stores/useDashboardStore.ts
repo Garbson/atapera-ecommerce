@@ -1,6 +1,6 @@
 // stores/useDashboardStore.ts
 export const useDashboardStore = defineStore("dashboard", () => {
-  const supabase = useSupabaseClient();
+  const getSupabaseClient = () => { return useSupabase(); };
 
   // Estado
   const loading = ref(false);
@@ -103,6 +103,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
 
   const loadProductStats = async () => {
     try {
+      const supabase = getSupabaseClient();
       const { data: products, error: productsError } = await supabase
         .from("products")
         .select("id, stock, min_stock, is_active, price, category_id");
@@ -131,6 +132,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
 
   const loadRecentProducts = async () => {
     try {
+      const supabase = getSupabaseClient();
       const { data, error: productsError } = await supabase
         .from("products")
         .select(
@@ -233,6 +235,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
 
   const loadTopProducts = async () => {
     try {
+      const supabase = getSupabaseClient();
       // Quando tiver dados de vendas, implementar consulta real
       // Por enquanto, buscar produtos e simular vendas
       const { data: products, error } = await supabase
