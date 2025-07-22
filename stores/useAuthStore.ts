@@ -174,7 +174,7 @@ export const useAuthStore = defineStore("auth", () => {
       if (!user.value) return;
 
       const { data, error: profileError } = await supabase
-        .from("profiles")
+        .from("user_profiles")
         .select("*")
         .eq("id", user.value.id)
         .single();
@@ -186,7 +186,7 @@ export const useAuthStore = defineStore("auth", () => {
       profile.value = data || {
         id: user.value.id,
         email: user.value.email,
-        full_name: user.value.user_metadata?.full_name,
+        name: user.value.user_metadata?.full_name,
       };
 
       return { data, error: null };
@@ -210,7 +210,7 @@ export const useAuthStore = defineStore("auth", () => {
       };
 
       const { data, error: updateError } = await supabase
-        .from("profiles")
+        .from("user_profiles")
         .upsert(updateData)
         .select()
         .single();
@@ -243,15 +243,19 @@ export const useAuthStore = defineStore("auth", () => {
         return false;
       }
 
-      // Verificar se o usuário tem role de admin
+      // Verificar se o usuário tem role de admin na tabela user_profiles
       const { data, error: roleError } = await supabase
-        .from("user_roles")
+        .from("user_profiles")
         .select("role")
-        .eq("user_id", user.value.id)
-        .eq("role", "admin")
+        .eq("id", user.value.id)
         .single();
 
-      isAdmin.value = !!data && !roleError;
+      if (roleError && roleError.code !== "PGRST116") {
+        throw roleError;
+      }
+
+      // role é um boolean, true = admin
+      isAdmin.value = !!data?.role;
 
       return isAdmin.value;
     } catch (err: any) {

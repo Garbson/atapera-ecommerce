@@ -59,10 +59,10 @@ export const useAuth = () => {
 
 
 
-      // ✅ Buscar perfil se logado
-      if (user.value) {
-        await getUserProfile();
-      }
+      // 🚧 TEMPORARIAMENTE DESABILITADO para debug
+      // if (user.value) {
+      //   await getUserProfile();
+      // }
 
       // ✅ Listener para mudanças
       supabase.auth.onAuthStateChange(async (event, newSession) => {
@@ -71,8 +71,8 @@ export const useAuth = () => {
         
 
         if (event === "SIGNED_IN" && newSession?.user) {
-          // ✅ Apenas criar/carregar perfil uma vez
-          await createOrUpdateProfile(newSession.user);
+          // 🚧 TEMPORARIAMENTE DESABILITADO para debug
+          // await createOrUpdateProfile(newSession.user);
         }
 
         if (event === "SIGNED_OUT") {
@@ -151,20 +151,31 @@ export const useAuth = () => {
 
   // ✅ Login
   const signIn = async (email: string, password: string) => {
+    const { success: notify, error } = useNotifications();
     loading.value = true;
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (signInError) throw signInError;
+
+      notify(
+        'Login realizado!',
+        `Bem-vindo de volta, ${user.value?.email}!`
+      );
 
       return { success: true, data };
-    } catch (error: any) {
-      console.error("❌ Erro signIn:", error);
-      return { success: false, error: error.message };
+    } catch (signInError: any) {
+      console.error("❌ Erro signIn:", signInError);
+      error(
+        'Erro no login',
+        signInError.message === 'Invalid login credentials' ? 
+          'Email ou senha incorretos' : signInError.message
+      );
+      return { success: false, error: signInError.message };
     } finally {
       loading.value = false;
     }
@@ -180,10 +191,11 @@ export const useAuth = () => {
       phone?: string;
     }
   ) => {
+    const { success: notify, error } = useNotifications();
     loading.value = true;
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -191,12 +203,21 @@ export const useAuth = () => {
         },
       });
 
-      if (error) throw error;
+      if (signUpError) throw signUpError;
+
+      notify(
+        'Conta criada!',
+        'Verifique seu email para ativar sua conta'
+      );
 
       return { success: true, data };
-    } catch (error: any) {
-      console.error("❌ Erro signUp:", error);
-      return { success: false, error: error.message };
+    } catch (signUpError: any) {
+      console.error("❌ Erro signUp:", signUpError);
+      error(
+        'Erro no cadastro',
+        signUpError.message
+      );
+      return { success: false, error: signUpError.message };
     } finally {
       loading.value = false;
     }
@@ -224,6 +245,7 @@ export const useAuth = () => {
 
   // ✅ Logout
   const signOut = async () => {
+    const { success: notify } = useNotifications();
 
     try {
       const { error } = await supabase.auth.signOut();
@@ -234,6 +256,10 @@ export const useAuth = () => {
       session.value = null;
       profile.value = null;
 
+      notify(
+        'Logout realizado!',
+        'Você foi desconectado com sucesso'
+      );
 
       await navigateTo("/");
       return { success: true };

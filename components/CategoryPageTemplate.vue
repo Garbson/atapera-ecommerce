@@ -4,8 +4,16 @@
     class="min-h-screen bg-gray-50"
   >
     <!-- Hero Section -->
-    <div :class="heroClass" class="text-white py-16">
-      <div class="container mx-auto px-4">
+    <div
+      :class="heroClass"
+      :style="heroStyle"
+      class="relative text-white py-16 bg-cover bg-center bg-no-repeat min-h-[500px]"
+    >
+      <div
+        class="absolute inset-0"
+        style="background-color: rgba(0, 0, 0, 0.3)"
+      ></div>
+      <div class="container mx-auto px-4 relative z-10">
         <div class="max-w-3xl">
           <h1 class="text-4xl md:text-5xl font-bold mb-4">
             {{ categoryData?.title || "" }}
@@ -379,6 +387,12 @@ const filters = reactive({
 
 // Computed
 const heroClass = computed(() => {
+  // Se há uma imagem de background, não aplicar gradient
+  if (props.categoryData?.backgroundImage) {
+    return "";
+  }
+
+  // Fallback para cores se não houver imagem
   if (!props.categoryData?.color) {
     return "bg-gradient-to-r from-gray-900 to-gray-700";
   }
@@ -395,6 +409,15 @@ const heroClass = computed(() => {
     colorMap[props.categoryData.color] ||
     "bg-gradient-to-r from-gray-900 to-gray-700"
   );
+});
+
+const heroStyle = computed(() => {
+  if (props.categoryData?.backgroundImage) {
+    return {
+      backgroundImage: `url('${props.categoryData.backgroundImage}')`,
+    };
+  }
+  return {};
 });
 
 const warningClass = computed(() => {
@@ -435,7 +458,6 @@ const fetchProducts = async () => {
     return;
   }
 
-  // ✅ LIMPAR CACHE LOCAL ANTES DE BUSCAR
   productsStore.clearProductsCache();
 
   // Buscar category_id pelo slug
@@ -545,51 +567,45 @@ watch(
   { deep: true }
 );
 
-// Watcher para quando categoryData mudar
 watch(
-  () => props.categoryData,
-  async (newCategoryData, oldCategoryData) => {
-    if (
-      newCategoryData?.slug &&
-      newCategoryData?.title &&
-      productsStore &&
-      categoriesStore
-    ) {
-      // ✅ LIMPAR CACHE E RESETAR PÁGINA
-      productsStore.clearProductsCache();
+  () => route.path,
+  async () => {
+    console.log("🔄 Mudança de rota detectada:", route.path);
 
-      // ✅ GARANTIR QUE AS CATEGORIAS ESTEJAM CARREGADAS PRIMEIRO (igual onMounted)
-      if (categories.value.length === 0) {
-        await categoriesStore.fetchCategories();
-      }
+    // Extrair slug da rota diretamente
+    const routeSlug = route.params.slug || route.path.split("/").pop();
+    console.log("🔍 Slug extraído da rota:", routeSlug);
 
+    if (!productsStore || !categoriesStore || !routeSlug) {
+      console.error("❌ Dados insuficientes para fetch");
+      return;
+    }
+
+    productsStore.clearProductsCache();
+    await categoriesStore.fetchCategories();
+
+    // Buscar categoria pelo slug da rota
+    const category = categoriesStore.getCategoryBySlug(routeSlug);
+    console.log("🔍 Categoria encontrada pela rota:", category);
+
+    if (category) {
       currentPage.value = 1;
       await fetchProducts();
     }
-  },
-  { immediate: true, deep: true }
+  }
 );
 
 // Watcher para route changes (importante para navegação entre categorias)
 watch(
   () => route.path,
-  async (newPath, oldPath) => {
-    if (
-      newPath !== oldPath &&
-      newPath.includes("/categoria/") &&
-      props.categoryData?.slug
-    ) {
-      // ✅ LIMPAR CACHE AO MUDAR ROTA
-      productsStore.clearProductsCache();
-
-      // ✅ GARANTIR QUE AS CATEGORIAS ESTEJAM CARREGADAS PRIMEIRO (igual onMounted)
-      if (categories.value.length === 0) {
-        await categoriesStore.fetchCategories();
-      }
-
-      currentPage.value = 1;
-      await fetchProducts();
-    }
+  async () => {
+    console.log("🔄 Mudança de rota detectada:", route.path);
+    productsStore.clearProductsCache();
+    await categoriesStore.fetchCategories();
+    console.log("🔄 Resetando filtros e página...");
+    currentPage.value = 1;
+    await fetchProducts();
+    console.log("🔄 Produtos recarregados após mudança de rota");
   }
 );
 

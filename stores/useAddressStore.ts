@@ -13,16 +13,17 @@ export const useAddressStore = defineStore('addresses', () => {
   interface Address {
     id?: string;
     user_id: string;
+    label?: string;
+    name?: string;
     street: string;
     number: string;
     complement?: string;
     neighborhood: string;
     city: string;
     state: string;
-    postal_code: string;
+    zip_code: string;
     is_default: boolean;
     created_at?: string;
-    updated_at?: string;
   }
 
   interface CEPData {
@@ -54,8 +55,8 @@ export const useAddressStore = defineStore('addresses', () => {
       loading.value = true;
       error.value = null;
 
-      const { data: userState } = useAuth();
-      if (!userState.value?.id) {
+      const { user } = useAuth();
+      if (!user.value?.id) {
         return { data: [], error: 'Usuário não autenticado' };
       }
 
@@ -63,7 +64,7 @@ export const useAddressStore = defineStore('addresses', () => {
       const { data, error: fetchError } = await supabase
         .from('addresses')
         .select('*')
-        .eq('user_id', userState.value.id)
+        .eq('user_id', user.value.id)
         .order('is_default', { ascending: false })
         .order('created_at', { ascending: false });
 
@@ -81,19 +82,22 @@ export const useAddressStore = defineStore('addresses', () => {
   };
 
   const createAddress = async (addressData: Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    const { success, error: notify } = useNotifications();
+    
     try {
       loading.value = true;
       error.value = null;
 
-      const { data: userState } = useAuth();
-      if (!userState.value?.id) {
+      const { user } = useAuth();
+      if (!user.value?.id) {
+        notify('Erro de autenticação', 'Usuário não autenticado');
         return { data: null, error: 'Usuário não autenticado' };
       }
 
       const newAddress = {
         ...addressData,
-        user_id: userState.value.id,
-        postal_code: addressData.postal_code.replace(/\D/g, ''), // Remove formatação
+        user_id: user.value.id,
+        zip_code: addressData.zip_code.replace(/\D/g, ''), // Remove formatação
       };
 
       // Se for o primeiro endereço ou marcado como padrão, definir como padrão
@@ -115,10 +119,18 @@ export const useAddressStore = defineStore('addresses', () => {
       if (createError) throw createError;
 
       addresses.value.unshift(data);
+      
+      // Notificação de sucesso
+      success(
+        'Endereço salvo!',
+        `${addressData.label || 'Novo endereço'} foi adicionado com sucesso`
+      );
+      
       return { data, error: null };
     } catch (err: any) {
       error.value = err.message;
       console.error('Erro ao criar endereço:', err);
+      notify('Erro ao salvar endereço', err.message || 'Não foi possível salvar o endereço');
       return { data: null, error: err.message };
     } finally {
       loading.value = false;
@@ -126,13 +138,15 @@ export const useAddressStore = defineStore('addresses', () => {
   };
 
   const updateAddress = async (id: string, addressData: Partial<Address>) => {
+    const { success, error: notify } = useNotifications();
+    
     try {
       loading.value = true;
       error.value = null;
 
       const cleanData = {
         ...addressData,
-        postal_code: addressData.postal_code?.replace(/\D/g, ''), // Remove formatação
+        zip_code: addressData.zip_code?.replace(/\D/g, ''), // Remove formatação
       };
 
       // Se marcando como padrão, remover padrão de outros
@@ -159,10 +173,17 @@ export const useAddressStore = defineStore('addresses', () => {
         currentAddress.value = data;
       }
 
+      // Notificação de sucesso
+      success(
+        'Endereço atualizado!',
+        `${data.label || 'Endereço'} foi atualizado com sucesso`
+      );
+
       return { data, error: null };
     } catch (err: any) {
       error.value = err.message;
       console.error('Erro ao atualizar endereço:', err);
+      notify('Erro ao atualizar endereço', err.message || 'Não foi possível atualizar o endereço');
       return { data: null, error: err.message };
     } finally {
       loading.value = false;
@@ -211,14 +232,14 @@ export const useAddressStore = defineStore('addresses', () => {
       loading.value = true;
       error.value = null;
 
-      const { data: userState } = useAuth();
+      const { user } = useAuth();
       const supabase = getSupabaseClient();
       
       // Primeiro, remover padrão de todos os endereços do usuário
       await supabase
         .from('addresses')
         .update({ is_default: false })
-        .eq('user_id', userState.value.id);
+        .eq('user_id', user.value.id);
 
       // Depois, definir o endereço selecionado como padrão
       const { data, error: updateError } = await supabase
@@ -280,13 +301,13 @@ export const useAddressStore = defineStore('addresses', () => {
   // Método auxiliar para atualizar endereços padrão
   const updateDefaultAddress = async (excludeId: string | null) => {
     try {
-      const { data: userState } = useAuth();
+      const { user } = useAuth();
       const supabase = getSupabaseClient();
       
       let query = supabase
         .from('addresses')
         .update({ is_default: false })
-        .eq('user_id', userState.value.id);
+        .eq('user_id', user.value.id);
 
       if (excludeId) {
         query = query.neq('id', excludeId);

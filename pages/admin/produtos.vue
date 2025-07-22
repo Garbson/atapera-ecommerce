@@ -75,12 +75,13 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
             >
               <option value="">Todas as categorias</option>
-              <option value="armas-fogo">Armas de Fogo</option>
-              <option value="armas-pressao">Armas de Pressão</option>
-              <option value="pesca">Pesca</option>
-              <option value="airsoft">Airsoft</option>
-              <option value="caca">Caça</option>
-              <option value="vestuario">Vestuário</option>
+              <option 
+                v-for="category in categories" 
+                :key="category.id" 
+                :value="category.id"
+              >
+                {{ category.name }}
+              </option>
             </select>
           </div>
           <div>
@@ -149,8 +150,19 @@
               </tr>
             </thead>
             <tbody>
+              <tr v-if="loading" class="border-b border-gray-100">
+                <td colspan="8" class="py-8 text-center">
+                  <div class="flex items-center justify-center gap-3">
+                    <svg class="animate-spin h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-gray-600">Carregando produtos...</span>
+                  </div>
+                </td>
+              </tr>
               <tr
-                v-for="product in filteredProducts"
+                v-for="product in products"
                 :key="product.id"
                 class="border-b border-gray-100 hover:bg-gray-50"
               >
@@ -165,7 +177,7 @@
                 <td class="py-4 px-6">
                   <div class="flex items-center gap-4">
                     <img
-                      :src="product.image"
+                      :src="product.images?.[0] ? getProductImage(product.images[0], 'small') : '/placeholder-product.jpg'"
                       :alt="product.name"
                       class="w-12 h-12 rounded-lg object-cover"
                     />
@@ -174,7 +186,7 @@
                         {{ product.name }}
                       </p>
                       <p class="text-sm text-gray-600 line-clamp-1">
-                        {{ product.description }}
+                        {{ product.short_description || product.description }}
                       </p>
                     </div>
                   </div>
@@ -186,7 +198,7 @@
                   <span
                     class="inline-block px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"
                   >
-                    {{ getCategoryName(product.category) }}
+                    {{ getCategoryName(product) }}
                   </span>
                 </td>
                 <td class="py-4 px-6 font-semibold text-gray-800">
@@ -195,17 +207,17 @@
                 <td class="py-4 px-6">
                   <span
                     class="inline-block px-2 py-1 text-xs rounded-full"
-                    :class="getStockClass(product.stock)"
+                    :class="getStockClass(product.stock || 0)"
                   >
-                    {{ product.stock }} un.
+                    {{ product.stock || 0 }} un.
                   </span>
                 </td>
                 <td class="py-4 px-6">
                   <span
                     class="inline-block px-2 py-1 text-xs rounded-full"
-                    :class="getStatusClass(product.status)"
+                    :class="getStatusClass(product)"
                   >
-                    {{ getStatusLabel(product.status) }}
+                    {{ getStatusLabel(product) }}
                   </span>
                 </td>
                 <td class="py-4 px-6">
@@ -233,11 +245,11 @@
                       @click="toggleProductStatus(product)"
                       class="p-2 text-yellow-600 hover:bg-yellow-100 rounded-lg transition-colors"
                       :title="
-                        product.status === 'active' ? 'Desativar' : 'Ativar'
+                        product.is_active ? 'Desativar' : 'Ativar'
                       "
                     >
                       <svg
-                        v-if="product.status === 'active'"
+                        v-if="product.is_active"
                         class="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
@@ -338,13 +350,13 @@
         >
         <div class="flex items-center gap-2">
           <button
-            @click="bulkUpdateStatus('active')"
+            @click="bulkUpdateStatus(true)"
             class="px-3 py-2 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
           >
             Ativar
           </button>
           <button
-            @click="bulkUpdateStatus('inactive')"
+            @click="bulkUpdateStatus(false)"
             class="px-3 py-2 text-sm bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors"
           >
             Desativar
@@ -381,43 +393,14 @@ definePageMeta({
   middleware: "admin-auth",
 });
 
+// Composables
+const supabase = useSupabase();
+const { getProductImage } = useCloudinary();
+
 // Estados
-const products = ref([
-  {
-    id: 1,
-    name: "Pistola Glock G17 Gen5",
-    description:
-      "Pistola semi-automática calibre 9mm com sistema de segurança avançado",
-    sku: "GLK-G17-001",
-    category: "armas-fogo",
-    price: 1500.0,
-    stock: 8,
-    status: "active",
-    image: "https://via.placeholder.com/60x60/374151/ffffff?text=G17",
-  },
-  {
-    id: 2,
-    name: "Vara Telescópica Shimano 3.6m",
-    description: "Vara de pescar telescópica ideal para pesca em rios e lagos",
-    sku: "SHI-VAR-360",
-    category: "pesca",
-    price: 189.9,
-    stock: 23,
-    status: "active",
-    image: "https://via.placeholder.com/60x60/059669/ffffff?text=VAR",
-  },
-  {
-    id: 3,
-    name: "Carabina de Pressão CBC B12-6",
-    description: "Carabina de pressão calibre 4.5mm com mira telescópica",
-    sku: "CBC-B12-001",
-    category: "armas-pressao",
-    price: 750.0,
-    stock: 0,
-    status: "out-of-stock",
-    image: "https://via.placeholder.com/60x60/2563eb/ffffff?text=CBC",
-  },
-]);
+const products = ref([]);
+const categories = ref([]);
+const loading = ref(false);
 
 const filters = ref({
   search: "",
@@ -433,34 +416,67 @@ const currentPage = ref(1);
 const itemsPerPage = ref(10);
 
 // Computed
-const filteredProducts = computed(() => {
-  let filtered = products.value;
-
-  if (filters.value.search) {
-    const search = filters.value.search.toLowerCase();
-    filtered = filtered.filter(
-      (p) =>
-        p.name.toLowerCase().includes(search) ||
-        p.sku.toLowerCase().includes(search) ||
-        p.description.toLowerCase().includes(search)
-    );
-  }
-
-  if (filters.value.category) {
-    filtered = filtered.filter((p) => p.category === filters.value.category);
-  }
-
-  if (filters.value.status) {
-    filtered = filtered.filter((p) => p.status === filters.value.status);
-  }
-
-  return filtered;
-});
-
-const totalProducts = computed(() => filteredProducts.value.length);
+const totalProducts = computed(() => products.value.length);
 const totalPages = computed(() =>
   Math.ceil(totalProducts.value / itemsPerPage.value)
 );
+
+// Funções do Supabase
+const fetchProducts = async () => {
+  loading.value = true;
+  try {
+    let query = supabase
+      .from('products')
+      .select(`
+        *,
+        categories(name)
+      `)
+      .order('created_at', { ascending: false });
+
+    // Aplicar filtros
+    if (filters.value.search) {
+      query = query.or(`name.ilike.%${filters.value.search}%,sku.ilike.%${filters.value.search}%,description.ilike.%${filters.value.search}%`);
+    }
+
+    if (filters.value.category) {
+      query = query.eq('category_id', filters.value.category);
+    }
+
+    if (filters.value.status) {
+      if (filters.value.status === 'out-of-stock') {
+        query = query.eq('stock', 0);
+      } else {
+        query = query.eq('is_active', filters.value.status === 'active');
+      }
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    products.value = data || [];
+  } catch (error) {
+    console.error('Erro ao buscar produtos:', error);
+    alert('Erro ao carregar produtos');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const fetchCategories = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('id, name')
+      .order('name');
+
+    if (error) throw error;
+
+    categories.value = data || [];
+  } catch (error) {
+    console.error('Erro ao buscar categorias:', error);
+  }
+};
 
 // Métodos
 const formatCurrency = (value: number) => {
@@ -470,16 +486,8 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-const getCategoryName = (category: string) => {
-  const categories = {
-    "armas-fogo": "Armas de Fogo",
-    "armas-pressao": "Armas de Pressão",
-    pesca: "Pesca",
-    airsoft: "Airsoft",
-    caca: "Caça",
-    vestuario: "Vestuário",
-  };
-  return categories[category] || category;
+const getCategoryName = (product: any) => {
+  return product.categories?.name || 'Sem categoria';
 };
 
 const getStockClass = (stock: number) => {
@@ -488,22 +496,16 @@ const getStockClass = (stock: number) => {
   return "bg-green-100 text-green-800";
 };
 
-const getStatusClass = (status: string) => {
-  const classes = {
-    active: "bg-green-100 text-green-800",
-    inactive: "bg-gray-100 text-gray-800",
-    "out-of-stock": "bg-red-100 text-red-800",
-  };
-  return classes[status] || "bg-gray-100 text-gray-800";
+const getStatusClass = (product: any) => {
+  if (product.stock === 0) return "bg-red-100 text-red-800";
+  if (!product.is_active) return "bg-gray-100 text-gray-800";
+  return "bg-green-100 text-green-800";
 };
 
-const getStatusLabel = (status: string) => {
-  const labels = {
-    active: "Ativo",
-    inactive: "Inativo",
-    "out-of-stock": "Sem Estoque",
-  };
-  return labels[status] || status;
+const getStatusLabel = (product: any) => {
+  if (product.stock === 0) return "Sem Estoque";
+  if (!product.is_active) return "Inativo";
+  return "Ativo";
 };
 
 const clearFilters = () => {
@@ -512,11 +514,12 @@ const clearFilters = () => {
     category: "",
     status: "",
   };
+  fetchProducts();
 };
 
 const toggleSelectAll = () => {
   if (selectAll.value) {
-    selectedProducts.value = filteredProducts.value.map((p) => p.id);
+    selectedProducts.value = products.value.map((p) => p.id);
   } else {
     selectedProducts.value = [];
   }
@@ -532,55 +535,82 @@ const closeModal = () => {
   editingProduct.value = null;
 };
 
-const saveProduct = (productData: any) => {
-  if (editingProduct.value) {
-    // Atualizar produto existente
-    const index = products.value.findIndex(
-      (p) => p.id === editingProduct.value.id
-    );
-    if (index !== -1) {
-      products.value[index] = { ...productData, id: editingProduct.value.id };
-    }
-  } else {
-    // Adicionar novo produto
-    const newProduct = {
-      ...productData,
-      id: Date.now(), // ID temporário
-    };
-    products.value.push(newProduct);
-  }
-
+const saveProduct = async (productData: any) => {
+  await fetchProducts(); // Recarregar lista após salvar
   closeModal();
 };
 
-const toggleProductStatus = (product: any) => {
-  const newStatus = product.status === "active" ? "inactive" : "active";
-  product.status = newStatus;
+const toggleProductStatus = async (product: any) => {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .update({ is_active: !product.is_active })
+      .eq('id', product.id);
+
+    if (error) throw error;
+
+    await fetchProducts(); // Recarregar lista
+  } catch (error) {
+    console.error('Erro ao alterar status:', error);
+    alert('Erro ao alterar status do produto');
+  }
 };
 
-const deleteProduct = (product: any) => {
+const deleteProduct = async (product: any) => {
   if (confirm(`Tem certeza que deseja excluir o produto "${product.name}"?`)) {
-    const index = products.value.findIndex((p) => p.id === product.id);
-    if (index !== -1) {
-      products.value.splice(index, 1);
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', product.id);
+
+      if (error) throw error;
+
+      await fetchProducts(); // Recarregar lista
+    } catch (error) {
+      console.error('Erro ao excluir produto:', error);
+      alert('Erro ao excluir produto');
     }
   }
 };
 
-const bulkUpdateStatus = (status: string) => {
-  selectedProducts.value = [];
+const bulkUpdateStatus = async (isActive: boolean) => {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .update({ is_active: isActive })
+      .in('id', selectedProducts.value);
+
+    if (error) throw error;
+
+    await fetchProducts();
+    selectedProducts.value = [];
+  } catch (error) {
+    console.error('Erro ao atualizar produtos:', error);
+    alert('Erro ao atualizar produtos');
+  }
 };
 
-const bulkDelete = () => {
+const bulkDelete = async () => {
   if (
     confirm(
       `Tem certeza que deseja excluir ${selectedProducts.value.length} produto(s)?`
     )
   ) {
-    products.value = products.value.filter(
-      (p) => !selectedProducts.value.includes(p.id)
-    );
-    selectedProducts.value = [];
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .in('id', selectedProducts.value);
+
+      if (error) throw error;
+
+      await fetchProducts();
+      selectedProducts.value = [];
+    } catch (error) {
+      console.error('Erro ao excluir produtos:', error);
+      alert('Erro ao excluir produtos');
+    }
   }
 };
 
@@ -602,13 +632,21 @@ const exportProducts = () => {
   window.URL.revokeObjectURL(url);
 };
 
-// Watch para atualizar selectAll
+// Watchers
 watch(
   selectedProducts,
   (newVal) => {
     selectAll.value =
-      newVal.length === filteredProducts.value.length && newVal.length > 0;
+      newVal.length === products.value.length && newVal.length > 0;
   },
   { deep: true }
 );
+
+// Lifecycle
+onMounted(async () => {
+  await Promise.all([
+    fetchProducts(),
+    fetchCategories()
+  ]);
+});
 </script>

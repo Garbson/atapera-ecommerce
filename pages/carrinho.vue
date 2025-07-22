@@ -131,17 +131,20 @@
                   <!-- Remover Item -->
                   <button
                     @click="removeItem(item.id)"
-                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
+                    title="Remover item"
                   >
                     <svg
-                      class="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
+                      class="w-5 h-5 transition-transform group-hover:scale-110"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
                       <path
-                        fill-rule="evenodd"
-                        d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z M4 5a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 102 0v3a1 1 0 11-2 0V9zm4 0a1 1 0 10-2 0v3a1 1 0 102 0V9z"
-                        clip-rule="evenodd"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"
                       />
                     </svg>
                   </button>
@@ -178,7 +181,7 @@
                 @click="goToCheckout"
                 class="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 transition-colors"
               >
-                Finalizar Compra
+                Ir para Pagamento
               </button>
               <NuxtLink
                 to="/produtos"

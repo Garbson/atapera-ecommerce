@@ -1,145 +1,6 @@
 <!-- components/AdminLayout.vue -->
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Header Admin -->
-    <header class="bg-white shadow-sm border-b sticky top-0 z-30">
-      <div class="px-6 py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-6">
-            <!-- Logo -->
-            <NuxtLink to="/admin" class="flex items-center gap-3">
-              <div
-                class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center"
-              >
-                <span class="text-white font-bold text-sm">A</span>
-              </div>
-              <div>
-                <h1 class="text-xl font-bold text-gray-800">Admin Atapera</h1>
-              </div>
-            </NuxtLink>
-
-            <!-- Breadcrumb -->
-            <nav
-              class="hidden md:flex items-center gap-2 text-sm text-gray-600"
-            >
-              <NuxtLink to="/admin" class="hover:text-red-600 transition-colors"
-                >Dashboard</NuxtLink
-              >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-              <span class="text-gray-800 font-medium">{{
-                currentPageName
-              }}</span>
-            </nav>
-          </div>
-
-          <div class="flex items-center gap-4">
-            <!-- Notifications -->
-            <button
-              class="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-              <span
-                class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"
-              ></span>
-            </button>
-
-            <!-- User Menu -->
-            <div class="relative">
-              <button
-                @click="showUserMenu = !showUserMenu"
-                class="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <div
-                  class="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center"
-                >
-                  <span class="text-white text-sm font-medium">{{
-                    userInitials
-                  }}</span>
-                </div>
-                <div class="hidden sm:block text-left">
-                  <p class="text-sm font-medium text-gray-800">
-                    {{ user?.email?.split("@")[0] }}
-                  </p>
-                  <p class="text-xs text-gray-600">Administrador</p>
-                </div>
-                <svg
-                  class="w-4 h-4 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-
-              <!-- User Dropdown -->
-              <div
-                v-if="showUserMenu"
-                v-click-outside="() => (showUserMenu = false)"
-                class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
-              >
-                <NuxtLink
-                  to="/admin/perfil"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                >
-                  Meu Perfil
-                </NuxtLink>
-                <NuxtLink
-                  to="/admin/configuracoes"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                >
-                  Configurações
-                </NuxtLink>
-                <NuxtLink
-                  to="/"
-                  target="_blank"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                >
-                  Ver Site
-                </NuxtLink>
-                <hr class="my-2" />
-                <button
-                  @click="logout"
-                  class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors"
-                >
-                  Sair
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
     <div class="flex">
       <!-- Sidebar -->
       <aside
@@ -233,56 +94,6 @@
             </li>
             <li>
               <NuxtLink
-                to="/admin/usuarios"
-                class="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
-                :class="{
-                  'bg-red-100 text-red-700':
-                    $route.path.includes('/admin/usuarios'),
-                }"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-                  />
-                </svg>
-                Usuários
-              </NuxtLink>
-            </li>
-            <li>
-              <NuxtLink
-                to="/admin/financeiro"
-                class="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
-                :class="{
-                  'bg-red-100 text-red-700':
-                    $route.path.includes('/admin/financeiro'),
-                }"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-                Financeiro
-              </NuxtLink>
-            </li>
-            <li>
-              <NuxtLink
                 to="/admin/configuracoes"
                 class="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
                 :class="{
@@ -371,8 +182,6 @@ const currentPageName = computed(() => {
     "/admin": "Dashboard",
     "/admin/produtos": "Produtos",
     "/admin/pedidos": "Pedidos",
-    "/admin/usuarios": "Usuários",
-    "/admin/financeiro": "Financeiro",
     "/admin/configuracoes": "Configurações",
   };
 
@@ -393,7 +202,6 @@ const formatCurrency = (value: number) => {
 };
 
 const logout = async () => {
-
   try {
     await authStore.signOut();
   } catch (error) {

@@ -124,12 +124,15 @@ export const useUserProfileStore = defineStore('userProfile', () => {
   };
 
   const updateProfile = async (profileData: Partial<UserProfile>) => {
+    const { success, error: notify } = useNotifications();
+    
     try {
       loading.value = true;
       error.value = null;
 
       const { data: userState } = useAuth();
       if (!userState.value?.id || !profile.value?.id) {
+        notify('Erro de autenticação', 'Perfil não encontrado');
         return { data: null, error: 'Perfil não encontrado' };
       }
 
@@ -151,10 +154,18 @@ export const useUserProfileStore = defineStore('userProfile', () => {
       if (updateError) throw updateError;
 
       profile.value = data;
+      
+      // Notificação de sucesso
+      success(
+        'Perfil atualizado!',
+        'Suas informações pessoais foram salvas com sucesso'
+      );
+      
       return { data, error: null };
     } catch (err: any) {
       error.value = err.message;
       console.error('Erro ao atualizar perfil:', err);
+      notify('Erro ao atualizar perfil', err.message || 'Não foi possível salvar as alterações');
       return { data: null, error: err.message };
     } finally {
       loading.value = false;

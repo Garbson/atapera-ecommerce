@@ -33,6 +33,7 @@ export const useProductsStore = defineStore("products", () => {
       width?: number;
       height?: number;
     };
+    images?: string[];
     requires_license: boolean;
     license_type?: string;
     caliber?: string;
@@ -273,26 +274,51 @@ export const useProductsStore = defineStore("products", () => {
       error.value = null;
 
       const supabase = getSupabaseClient();
-      const { data, error: updateError } = await supabase
-        .from("products")
-        .update(cleanData)
-        .eq("id", id)
-        .select()
-        .single();
+      
+      // Implementar timeout e retry para resolver problemas de concorrência
+      let attempt = 0;
+      const maxAttempts = 3;
+      
+      while (attempt < maxAttempts) {
+        try {
+          const { data, error: updateError } = await Promise.race([
+            supabase
+              .from("products")
+              .update(cleanData)
+              .eq("id", id)
+              .select()
+              .single(),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout: A operação demorou mais que 8 segundos')), 8000)
+            )
+          ]);
 
-      if (updateError) throw updateError;
+          if (updateError) throw updateError;
 
-      // Atualizar no estado local
-      const index = products.value.findIndex((p: Product) => p.id === id);
-      if (index !== -1) {
-        products.value[index] = data;
+          // Atualizar no estado local
+          const index = products.value.findIndex((p: Product) => p.id === id);
+          if (index !== -1) {
+            products.value[index] = data;
+          }
+
+          if (currentProduct.value?.id === id) {
+            currentProduct.value = data;
+          }
+
+          return { data, error: null };
+          
+        } catch (attemptError: any) {
+          attempt++;
+          
+          if (attempt >= maxAttempts) {
+            throw attemptError;
+          }
+          
+          // Aguardar antes de tentar novamente
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
       }
 
-      if (currentProduct.value?.id === id) {
-        currentProduct.value = data;
-      }
-
-      return { data, error: null };
     } catch (err: any) {
       error.value = err.message;
       console.error("Erro ao atualizar produto:", err);

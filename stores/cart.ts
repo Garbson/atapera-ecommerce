@@ -69,12 +69,17 @@ export const useCartStore = defineStore("cart", {
 
     // ✅ ADICIONAR ITEM AO CARRINHO
     async addItem(product: Omit<CartItem, "quantity">, quantity = 1) {
+      const { success, error } = useNotifications();
       const existingItem = this.items.find((item) => item.id === product.id);
 
       // Verificar estoque
       if (existingItem) {
         const newQuantity = existingItem.quantity + quantity;
         if (product.maxStock && newQuantity > product.maxStock) {
+          error(
+            "Limite de estoque atingido",
+            `Máximo de ${product.maxStock} unidades disponíveis`
+          );
           throw new Error(`Estoque máximo de ${product.maxStock} unidades`);
         }
       }
@@ -82,7 +87,24 @@ export const useCartStore = defineStore("cart", {
       try {
         this.loading = true;
         await this.addItemToSupabase(product, quantity);
-      } catch (error) {
+        
+        // Mostrar notificação de sucesso
+        success(
+          "Produto adicionado!",
+          `${product.name} foi adicionado ao seu carrinho`
+        );
+        
+        // Abrir carrinho por 3 segundos para mostrar o item
+        this.openCart();
+        setTimeout(() => {
+          this.closeCart();
+        }, 3000);
+        
+      } catch (error: any) {
+        error(
+          "Erro ao adicionar produto",
+          error.message || "Não foi possível adicionar o produto ao carrinho"
+        );
         throw error;
       } finally {
         this.loading = false;
@@ -157,8 +179,12 @@ export const useCartStore = defineStore("cart", {
 
     // ✅ REMOVER ITEM DO CARRINHO
     async removeItem(productId: string) {
-
+      const { success, error } = useNotifications();
       const auth = useAuth();
+
+      // Pegar nome do produto antes de remover
+      const item = this.items.find((item) => item.id === productId);
+      const productName = item?.name || "Produto";
 
       try {
         this.loading = true;
@@ -170,16 +196,27 @@ export const useCartStore = defineStore("cart", {
           .delete()
           .eq("product_id", productId);
         query = query.eq("user_id", auth.user.value?.id);
-        const { error } = await query;
-        if (error) throw error;
+        const { error: deleteError } = await query;
+        if (deleteError) throw deleteError;
 
         // ✅ REMOVER DO ESTADO LOCAL
         const index = this.items.findIndex((item) => item.id === productId);
         if (index > -1) {
           this.items.splice(index, 1);
         }
-      } catch (error) {
+
+        // Mostrar notificação de sucesso
+        success(
+          "Produto removido",
+          `${productName} foi removido do seu carrinho`
+        );
+
+      } catch (error: any) {
         console.error("❌ [Cart] Erro ao remover item:", error);
+        error(
+          "Erro ao remover produto",
+          "Não foi possível remover o produto do carrinho"
+        );
         throw error;
       } finally {
         this.loading = false;

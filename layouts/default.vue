@@ -13,6 +13,7 @@
 
     <!-- Componentes globais -->
     <CartSidebar />
+    <NotificationToast />
   </div>
 </template>
 

@@ -581,23 +581,41 @@ const fetchUserData = async () => {
   if (!user.value) return;
 
   try {
-    // Buscar dados do perfil
-    const { data: profile } = await $fetch("/api/user/profile");
-    if (profile) {
-      Object.assign(profileData, profile);
-      Object.assign(editProfileData, {
-        name: profile.name || "",
-        cpf: profile.cpf || "",
-        phone: profile.phone || "",
-      });
-    }
+    // Usar dados do usuário global do auth (Supabase)
+    const userData = user.value;
+    
+    // Preencher dados do perfil com informações do Supabase
+    Object.assign(profileData, {
+      name: userData.user_metadata?.full_name || userData.email || "",
+      email: userData.email || "",
+      cpf: userData.user_metadata?.cpf || "",
+      phone: userData.user_metadata?.phone || "",
+      created_at: userData.created_at
+    });
+    
+    Object.assign(editProfileData, {
+      name: userData.user_metadata?.full_name || userData.email || "",
+      cpf: userData.user_metadata?.cpf || "",
+      phone: userData.user_metadata?.phone || "",
+    });
 
-    // Buscar estatísticas e pedidos recentes
-    const { data: dashboard } = await $fetch("/api/user/dashboard");
-    if (dashboard) {
-      Object.assign(stats, dashboard.stats);
-      recentOrders.value = dashboard.recentOrders || [];
+    // Buscar pedidos do usuário usando o store
+    const ordersStore = useOrdersStore();
+    const { data: userOrders } = await ordersStore.fetchUserOrders();
+    
+    if (userOrders && userOrders.length > 0) {
+      // Calcular estatísticas baseadas nos pedidos
+      stats.totalOrders = userOrders.length;
+      stats.totalSpent = userOrders
+        .filter(order => order.status !== 'cancelled')
+        .reduce((sum, order) => sum + order.total, 0);
+      stats.pendingOrders = userOrders.filter(order => order.status === 'pending').length;
+      stats.completedOrders = userOrders.filter(order => order.status === 'delivered').length;
+      
+      // Pegar os 3 pedidos mais recentes
+      recentOrders.value = userOrders.slice(0, 3);
     }
+    
   } catch (error) {
     console.error("Erro ao buscar dados do usuário:", error);
   } finally {

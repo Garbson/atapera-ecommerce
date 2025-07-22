@@ -33,11 +33,14 @@ export default defineNuxtConfig({
     cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
     cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
     cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
 
     public: {
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
       cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
     },
   },
 
@@ -72,6 +75,11 @@ export default defineNuxtConfig({
         {
           rel: "stylesheet",
           href: "https://fonts.googleapis.com/icon?family=Material+Icons+Outlined",
+        },
+        {
+          rel: "icon",
+          type: "image/png",
+          href: "/marca/ataperaIcon.png",
         },
       ],
     },

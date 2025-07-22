@@ -5,16 +5,12 @@
     <div class="container mx-auto px-4 py-4">
       <div class="flex items-center justify-between">
         <!-- Logo -->
-        <NuxtLink to="/" class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center"
-          >
-            <span class="text-white font-bold text-xl">A</span>
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold text-gray-800">Atapera</h1>
-            <p class="text-xs text-gray-500">Armas, Pesca & Aventura</p>
-          </div>
+        <NuxtLink to="/" class="flex items-center">
+          <img
+            src="/marca/ataperaSlogan.png"
+            alt="Atapera - Armas, Pesca & Aventura"
+            class="h-16 w-auto object-contain"
+          />
         </NuxtLink>
 
         <!-- Search Bar (Desktop) -->
@@ -124,6 +120,19 @@
                       >location_on</span
                     >
                     Endereços
+                  </button>
+                  
+                  <!-- Admin Panel Option -->
+                  <button
+                    v-if="isAdmin"
+                    @click="goToAdminPanel"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-150"
+                  >
+                    <span
+                      class="material-icons-outlined text-blue-400 mr-3 text-lg"
+                      >admin_panel_settings</span
+                    >
+                    Painel Admin
                   </button>
                 </div>
 
@@ -391,6 +400,13 @@
                 📦 Meus Pedidos
               </button>
               <button
+                v-if="isAdmin"
+                @click="goToAdminPanel"
+                class="block text-blue-600 hover:text-blue-700 transition-colors py-2 cursor-pointer"
+              >
+                🔐 Painel Admin
+              </button>
+              <button
                 @click="logout"
                 class="block text-red-600 hover:text-red-700 transition-colors py-2 cursor-pointer"
               >
@@ -470,6 +486,7 @@ const cartStore = useCartStore();
 // 🔧 VERSÃO REATIVA - não usar .value nos computed
 const isLoggedIn = computed(() => auth.isLoggedIn.value);
 const user = computed(() => auth.user.value);
+const isAdmin = computed(() => auth.isAdmin.value);
 const authStore = useAuth();
 
 // Estados
@@ -540,6 +557,16 @@ const goToAdmin = async (event?: Event) => {
   closeUserMenu();
   closeMobileMenu();
   await navigateTo("/admin/login");
+};
+
+const goToAdminPanel = async (event?: Event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  closeUserMenu();
+  closeMobileMenu();
+  await navigateTo("/admin");
 };
 
 // Outros métodos
