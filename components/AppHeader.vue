@@ -651,10 +651,7 @@ watch(
   }
 );
 
-// Debug no mount
-onMounted(() => {
-  // Garantir que authStore inicializa
-  authStore.initialize();
-});
+// Inicialização removida para evitar sobrecarga
+// A inicialização deve ser feita apenas uma vez no plugin ou layout principal
 
 </script>

@@ -54,8 +54,9 @@ export const useAuthStore = defineStore("auth", () => {
 
       if (signInError) throw signInError;
 
-      // Carregar perfil após login
+      // Atualizar user e carregar perfil após login
       if (data.user) {
+        user.value = data.user;
         await loadProfile();
         await checkAdminRole();
       }
@@ -111,6 +112,7 @@ export const useAuthStore = defineStore("auth", () => {
       if (signOutError) throw signOutError;
 
       // Limpar estado
+      user.value = null;
       profile.value = null;
       isAdmin.value = false;
 
@@ -353,7 +355,7 @@ export const useAuthStore = defineStore("auth", () => {
     error.value = null;
   };
 
-  // Inicializar store
+  // Inicializar store (sem listener para evitar sobrecarga)
   const initialize = async () => {
     try {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -363,19 +365,6 @@ export const useAuthStore = defineStore("auth", () => {
         await loadProfile();
         await checkAdminRole();
       }
-
-      // Listen para mudanças de autenticação
-      supabase.auth.onAuthStateChange(async (event, session) => {
-        user.value = session?.user || null;
-        
-        if (user.value) {
-          await loadProfile();
-          await checkAdminRole();
-        } else {
-          profile.value = null;
-          isAdmin.value = false;
-        }
-      });
     } catch (err) {
       console.error("Erro ao inicializar auth store:", err);
     }
