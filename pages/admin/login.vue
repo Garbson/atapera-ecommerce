@@ -262,7 +262,7 @@ useHead({
 });
 
 // ✅ USAR O SISTEMA SUPABASE QUE JÁ FUNCIONA
-const auth = useAuth();
+const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 
@@ -351,31 +351,28 @@ const handleLogin = async () => {
   loading.value = true;
 
   try {
-    // ✅ CORREÇÃO: Passar email e password como strings separadas
-    const result = await auth.signIn(form.email, form.password);
+    // ✅ CORREÇÃO: Usar o authStore e passar como objeto
+    const result = await authStore.signIn({
+      email: form.email,
+      password: form.password,
+    });
 
     if (result.error) {
       throw new Error(result.error);
     }
 
-    if (result.success && result.data?.user) {
-      // Lista de emails admin (mesma do middleware)
-      const adminEmails = [
-        "admin@atapera.shop",
-        "contato@atapera.shop",
-        "garbsonsouza2602@gmail.com",
-      ];
-
-      // Verificar se o usuário é admin
-      if (!adminEmails.includes(result.data.user.email)) {
-        await auth.signOut();
-        error.value =
-          "Acesso negado. Este usuário não tem permissões de administrador.";
+    if (result.data?.user) {
+      // Verificar se tem permissão de admin
+      const isAdmin = await authStore.checkAdminRole();
+      
+      if (!isAdmin) {
+        await authStore.signOut();
+        error.value = "Acesso negado. Este usuário não tem permissões de administrador.";
         return;
       }
 
       success.value = "Login realizado com sucesso!";
-      ("[Admin Login] Admin verificaconsole.logdo, redirecionando...");
+      console.log("[Admin Login] Admin verificado, redirecionando...");
 
       // Redirect após sucesso
       setTimeout(() => {
@@ -404,7 +401,7 @@ const handleLogin = async () => {
 // Lifecycle
 onMounted(() => {
   // Verificar se já está logado
-  if (auth.isLoggedIn.value) {
+  if (authStore.isAuthenticated) {
     router.push("/admin");
     return;
   }

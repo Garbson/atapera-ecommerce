@@ -1,7 +1,7 @@
 // stores/useAuthStore.ts
 export const useAuthStore = defineStore("auth", () => {
-  const user = useSupabase();
   const supabase = useSupabase();
+  const user = ref(null);
 
   // Estado
   const loading = ref(false);
@@ -255,7 +255,7 @@ export const useAuthStore = defineStore("auth", () => {
       }
 
       // role é um boolean, true = admin
-      isAdmin.value = !!data?.role;
+      isAdmin.value = data?.role === true;
 
       return isAdmin.value;
     } catch (err: any) {
@@ -355,26 +355,31 @@ export const useAuthStore = defineStore("auth", () => {
 
   // Inicializar store
   const initialize = async () => {
-    if (user.value) {
-      await loadProfile();
-      await checkAdminRole();
-    }
-  };
-
-  // Watch para mudanças no usuário
-  watch(
-    user,
-    async (newUser) => {
-      if (newUser) {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      user.value = currentUser;
+      
+      if (user.value) {
         await loadProfile();
         await checkAdminRole();
-      } else {
-        profile.value = null;
-        isAdmin.value = false;
       }
-    },
-    { immediate: true }
-  );
+
+      // Listen para mudanças de autenticação
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        user.value = session?.user || null;
+        
+        if (user.value) {
+          await loadProfile();
+          await checkAdminRole();
+        } else {
+          profile.value = null;
+          isAdmin.value = false;
+        }
+      });
+    } catch (err) {
+      console.error("Erro ao inicializar auth store:", err);
+    }
+  };
 
   return {
     // Estado

@@ -86,7 +86,7 @@
                     Conta
                   </div>
                   <div class="text-sm text-gray-900 font-medium break-all">
-                    {{ user?.email }}
+                    {{ authStore.userEmail }}
                   </div>
                 </div>
 
@@ -177,20 +177,6 @@
                   </button>
                 </div>
 
-                <hr class="my-1 border-gray-100" />
-
-                <div class="py-1">
-                  <button
-                    @click="goToAdmin"
-                    class="w-full text-left flex items-center px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-150"
-                  >
-                    <span
-                      class="material-icons-outlined text-blue-400 mr-3 text-lg"
-                      >admin_panel_settings</span
-                    >
-                    Admin
-                  </button>
-                </div>
               </template>
             </div>
           </div>
@@ -392,7 +378,7 @@
           <li v-else class="border-b pb-4">
             <div class="space-y-2">
               <div class="text-sm text-gray-500 py-2">
-                {{ user.value?.email }}
+                {{ authStore.userEmail }}
               </div>
               <button
                 @click="goToMinhaAccount"
@@ -494,15 +480,14 @@
 </template>
 
 <script setup lang="ts">
-// 🔧 SOLUÇÃO: Usar o auth diretamente e reagir às mudanças
-const auth = useAuth();
+// 🔧 SOLUÇÃO: Usar o authStore diretamente
+const authStore = useAuthStore();
 const cartStore = useCartStore();
 
-// 🔧 VERSÃO REATIVA - não usar .value nos computed
-const isLoggedIn = computed(() => auth.isLoggedIn.value);
-const user = computed(() => auth.user.value);
-const isAdmin = computed(() => auth.isAdmin.value);
-const authStore = useAuth();
+// 🔧 VERSÃO REATIVA - usar authStore
+const isLoggedIn = computed(() => authStore.isAuthenticated);
+const user = computed(() => authStore.profile);
+const isAdmin = computed(() => authStore.isAdmin);
 
 // Estados
 const searchQuery = ref("");
@@ -668,11 +653,8 @@ watch(
 
 // Debug no mount
 onMounted(() => {
-  // Garantir que auth inicializa
-  if (!auth.user.value) {
-
-    auth.initAuth();
-  }
+  // Garantir que authStore inicializa
+  authStore.initialize();
 });
 
 </script>
