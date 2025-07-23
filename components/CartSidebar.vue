@@ -87,10 +87,11 @@
                 class="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden"
               >
                 <img
-                  v-if="item.image"
-                  :src="item.image"
+                  v-if="getItemImage(item)"
+                  :src="getItemImage(item)"
                   :alt="item.name"
                   class="w-full h-full object-cover"
+                  @error="onImageError"
                 />
                 <div
                   v-else
@@ -136,11 +137,11 @@
                   <!-- Remove Button -->
                   <button
                     @click="cartStore.removeItem(item.id)"
-                    class="ml-auto text-red-500 hover:text-red-700 p-1"
+                    class="ml-auto text-red-500 hover:text-red-700 p-1 group"
                     title="Remover item"
                   >
                     <svg
-                      class="w-5 h-5"
+                      class="w-5 h-5 transition-transform group-hover:scale-110"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -149,7 +150,7 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"
                       />
                     </svg>
                   </button>
@@ -190,8 +191,9 @@
                     d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
                   />
                 </svg>
-                Finalizar Compra
+                Ir para Checkout
               </button>
+              
 
               <button
                 @click="cartStore.closeCart()"
@@ -210,6 +212,9 @@
 <script setup lang="ts">
 const cartStore = useCartStore();
 
+// Composables
+const { getProductImage } = useCloudinary();
+
 // Formatação de preço
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("pt-BR", {
@@ -218,7 +223,35 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
-// Ir para checkout
+// Obter imagem do item do carrinho
+const getItemImage = (item: any) => {
+  if (!item.image) return null;
+  
+  // Se já é uma URL completa, retornar diretamente
+  if (item.image.startsWith('http')) {
+    return item.image;
+  }
+  
+  // Se for um ID do Cloudinary, converter para URL
+  if (typeof item.image === 'string' && !item.image.startsWith('/')) {
+    return getProductImage(item.image, 'small');
+  }
+  
+  // Fallback para imagens locais
+  return item.image;
+};
+
+// Handler de erro de imagem
+const onImageError = (event: Event) => {
+  const target = event.target as HTMLImageElement;
+  console.error('Erro ao carregar imagem do carrinho:', target.src);
+  
+  // Substituir por placeholder SVG inline
+  const placeholder = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%23CBD5E0' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E";
+  target.src = placeholder;
+};
+
+// Ir para Pagamento
 const goToCheckout = () => {
   try {
     const checkoutData = cartStore.prepareCheckout();

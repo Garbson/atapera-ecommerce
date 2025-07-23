@@ -113,7 +113,7 @@
           <div class="p-4">
             <div class="mb-2">
               <span class="text-xs text-gray-500 uppercase tracking-wide">{{
-                product.category
+                getCategoryName(product.category_id)
               }}</span>
             </div>
 
@@ -192,155 +192,170 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+// Stores
+const productsStore = useProductsStore()
+const cartStore = useCartStore()
+const categoriesStore = useCategoriesStore()
 
-// Estados
-const loading = ref(false);
-const activeFilter = ref("all");
+// Composables
+const { getProductImage } = useCloudinary()
 
-// Filtros
-const filters = [
-  { id: "all", name: "Todos" },
-  { id: "armas", name: "Armas" },
-  { id: "pesca", name: "Pesca" },
-  { id: "outdoor", name: "Outdoor" },
-];
+// Estado reativo
+const { categories } = storeToRefs(categoriesStore)
 
-// Produtos mock (em produção viria da API/database)
-const products = ref([
-  {
-    id: 1,
-    name: "Carabina de Pressão CBC Nitro X 5.5mm",
-    category: "Armas de Pressão",
-    price: 899.9,
-    originalPrice: 1099.9,
-    image: "/images/carabina.webp",
-    rating: 5,
-    reviews: 124,
-    stock: 8,
-    isNew: true,
-    discount: 18,
-    requiresLicense: false,
-    filterCategory: "armas",
-  },
-  {
-    id: 2,
-    name: "Vara de Pesca Telescópica 3.60m",
-    category: "Equipamentos de Pesca",
-    price: 189.9,
-    image: "/images/vara.webp",
-    rating: 4,
-    reviews: 89,
-    stock: 15,
-    isNew: false,
-    filterCategory: "pesca",
-  },
-  {
-    id: 3,
-    name: "Pistola Glock Airsoft G17 GBB",
-    category: "Airsoft",
-    price: 2499.9,
-    originalPrice: 2799.9,
-    image: "/images/glock.webp",
-    rating: 5,
-    reviews: 67,
-    stock: 3,
-    discount: 11,
-    filterCategory: "armas",
-  },
-  {
-    id: 4,
-    name: "Molinete Shimano FX 2500",
-    category: "Equipamentos de Pesca",
-    price: 159.9,
-    image: "/images/molinete.webp",
-    rating: 4,
-    reviews: 156,
-    stock: 22,
-    filterCategory: "pesca",
-  },
-  {
-    id: 5,
-    name: "Arco Recurvo Tradicional 40lbs",
-    category: "Caça e Tiro",
-    price: 789.9,
-    image: "/images/arco.webp",
-    rating: 5,
-    reviews: 43,
-    stock: 7,
-    isNew: true,
-    filterCategory: "outdoor",
-  },
-  {
-    id: 6,
-    name: "Bota Tática Militar Cano Alto",
-    category: "Vestuário",
-    price: 329.9,
-    originalPrice: 399.9,
-    image: "/images/bota.webp",
-    rating: 4,
-    reviews: 203,
-    stock: 12,
-    discount: 18,
-    filterCategory: "outdoor",
-  },
-  {
-    id: 7,
-    name: "Kit Iscas Artificiais Completo",
-    category: "Equipamentos de Pesca",
-    price: 299.9,
-    image: "/images/isca.webp",
-    rating: 4,
-    reviews: 78,
-    stock: 25,
-    filterCategory: "pesca",
-  },
-  {
-    id: 8,
-    name: "Revólver de Pressão Crosman SR357",
-    category: "Armas de Pressão",
-    price: 1299.9,
-    image: "/images/revolverDePressao.webp",
-    rating: 5,
-    reviews: 91,
-    stock: 6,
-    isNew: true,
-    filterCategory: "armas",
-  },
-]);
+// Estados locais - usar estado local para featured products
+const featuredProducts = ref([])
+const loading = ref(false)
+const error = ref(null)
+const activeFilter = ref("all")
 
-// Computed
+// Produtos filtrados e processados
+const products = computed(() => {
+  if (!featuredProducts.value) return []
+  
+  return featuredProducts.value
+    .filter(product => product.is_featured && product.is_active)
+    .slice(0, 8) // Limitar a 8 produtos
+    .map(product => ({
+      ...product,
+      image: product.images?.[0] ? getProductImage(product.images[0], 'medium') : '/placeholder-product.jpg',
+      originalPrice: product.sale_price ? product.price : null,
+      price: product.sale_price || product.price,
+      discount: product.sale_price ? Math.round(((product.price - product.sale_price) / product.price) * 100) : null,
+      isNew: isNewProduct(product.created_at),
+      requiresLicense: product.requires_license,
+      filterCategory: getCategoryFilter(product.category_id),
+      rating: 4 + Math.random(), // Temporário até implementar avaliações
+      reviews: Math.floor(Math.random() * 200) + 10, // Temporário
+    }))
+})
+
+// Filtros baseados nas categorias reais
+const filters = computed(() => {
+  const baseFilters = [{ id: "all", name: "Todos" }]
+  
+  if (categories.value?.length > 0) {
+    const categoryFilters = categories.value
+      .filter(cat => ['armas-fogo', 'armas-pressao', 'airsoft', 'pesca', 'caca', 'vestuario', 'camping'].includes(cat.slug))
+      .map(cat => ({
+        id: cat.slug,
+        name: cat.title
+      }))
+    
+    return [...baseFilters, ...categoryFilters]
+  }
+  
+  return [
+    ...baseFilters,
+    { id: "armas-fogo", name: "Armas de Fogo" },
+    { id: "armas-pressao", name: "Armas de Pressão" },
+    { id: "airsoft", name: "Airsoft" },
+    { id: "pesca", name: "Pesca" },
+    { id: "caca", name: "Caça" },
+    { id: "vestuario", name: "Vestuário" },
+    { id: "camping", name: "Camping" },
+  ]
+})
+
+// Produtos filtrados por categoria
 const filteredProducts = computed(() => {
   if (activeFilter.value === "all") {
-    return products.value;
+    return products.value
   }
   return products.value.filter(
     (product) => product.filterCategory === activeFilter.value
-  );
-});
+  )
+})
+
+// Métodos auxiliares
+const isNewProduct = (createdAt) => {
+  if (!createdAt) return false
+  const created = new Date(createdAt)
+  const now = new Date()
+  const daysDiff = (now - created) / (1000 * 60 * 60 * 24)
+  return daysDiff <= 30 // Produto é "novo" se foi criado nos últimos 30 dias
+}
+
+const getCategoryFilter = (categoryId) => {
+  if (!categories.value || !categoryId) return "all"
+  
+  const category = categories.value.find(cat => cat.id === categoryId)
+  return category?.slug || "all"
+}
+
+const getCategoryName = (categoryId) => {
+  if (!categories.value || !categoryId) return "Produto"
+  
+  const category = categories.value.find(cat => cat.id === categoryId)
+  return category?.title || "Produto"
+}
 
 // Métodos
 const formatPrice = (price) => {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
-  }).format(price);
-};
+  }).format(price)
+}
 
-const addToCart = (product) => {
-  // Implementar lógica do carrinho
-  console.log("Adicionando ao carrinho:", product.name);
-  // const cartStore = useCartStore()
-  // cartStore.addItem(product)
-};
+const addToCart = async (product) => {
+  try {
+    await cartStore.addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      maxStock: product.stock,
+      product_id: product.id,
+      slug: product.slug,
+      sale_price: product.sale_price,
+    }, 1)
 
-// Simular loading inicial
-onMounted(() => {
-  loading.value = true;
-  setTimeout(() => {
-    loading.value = false;
-  }, 1000);
-});
+  } catch (error) {
+    console.error("❌ Erro ao adicionar produto ao carrinho:", error)
+    // TODO: Mostrar notificação de erro
+  }
+}
+
+// Função para buscar produtos em destaque separadamente
+const fetchFeaturedProducts = async () => {
+
+  
+  try {
+    loading.value = true
+    error.value = null
+    
+    // Carregar categorias se não estiverem carregadas
+    if (categories.value.length === 0) {
+      await categoriesStore.fetchCategories()
+    }
+    
+    // ✅ BUSCAR PRODUTOS DIRETAMENTE - SEM USAR A STORE GLOBAL
+    const supabase = useSupabase()
+    const { data, error: fetchError } = await supabase
+      .from("products")
+      .select("*")
+      .eq("is_featured", true)
+      .eq("is_active", true)
+      .limit(20)
+      .order("created_at", { ascending: false })
+    
+    if (fetchError) throw fetchError
+    
+    featuredProducts.value = data || []
+    
+  } catch (err) {
+    console.error("❌ Erro ao carregar produtos em destaque:", err)
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
+}
+
+// Carregar dados ao montar
+onMounted(async () => {
+  await fetchFeaturedProducts()
+})
 </script>
 
 <style scoped>

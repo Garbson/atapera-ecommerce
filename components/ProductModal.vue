@@ -1,25 +1,29 @@
 <!-- components/ProductModal.vue -->
 <template>
   <div
-    class="fixed inset-0 backdrop-blur-md bg-amber-100 bg-opacity-10 flex items-center justify-center z-50 p-4"
+    class="fixed inset-0 flex items-center justify-center z-50 p-4"
+    style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(2px);"
   >
     <div
-      class="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+      class="bg-white rounded-2xl max-w-6xl w-full max-h-[95vh] flex flex-col shadow-2xl"
     >
       <!-- Header -->
       <div
-        class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl"
+        class="bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-6 rounded-t-2xl flex-shrink-0"
       >
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-bold text-gray-800">
-            {{ isEditing ? "Editar Produto" : "Adicionar Produto" }}
-          </h2>
+          <div>
+            <h2 class="text-2xl font-bold">
+              {{ isEditing ? "Editar Produto" : "Adicionar Produto" }}
+            </h2>
+            <p class="text-red-100 mt-1">{{ isEditing ? "Atualize as informações do produto" : "Preencha os dados para criar um novo produto" }}</p>
+          </div>
           <button
             @click="$emit('close')"
-            class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            class="p-3 hover:bg-white hover:bg-opacity-10 rounded-full transition-colors"
           >
             <svg
-              class="w-5 h-5"
+              class="w-6 h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -36,7 +40,8 @@
       </div>
 
       <!-- Form -->
-      <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
+      <form @submit.prevent="handleSubmit" class="flex-1 overflow-y-auto flex flex-col">
+        <div class="p-8 space-y-8 flex-1">
         
         <!-- SEÇÃO DE IMAGENS -->
         <div class="space-y-4">
@@ -153,7 +158,7 @@
           </div>
 
           <!-- Slug -->
-          <div>
+          <div class="lg:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">
               URL (Slug) *
             </label>
@@ -163,20 +168,6 @@
               required
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="pistola-glock-g17-gen5"
-            />
-          </div>
-
-          <!-- SKU -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              SKU *
-            </label>
-            <input
-              v-model="form.sku"
-              type="text"
-              required
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              placeholder="GLK-G17-001"
             />
           </div>
 
@@ -326,16 +317,16 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Estoque *
+              Estoque
             </label>
             <input
               v-model="form.stock"
               type="number"
               min="0"
-              required
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="0"
             />
+            <p class="text-xs text-gray-500 mt-1">Deixe vazio se não desejar controlar estoque</p>
           </div>
 
           <div>
@@ -504,10 +495,43 @@
           </div>
         </div>
 
-        <!-- Buttons -->
-        <div
-          class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200"
-        >
+        <!-- SKU - Movido para o final -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-gray-800">Informações Técnicas</h3>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              SKU (Código do Produto) *
+            </label>
+            <div class="flex gap-2">
+              <input
+                v-model="form.sku"
+                type="text"
+                required
+                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="GLK-G17-001"
+              />
+              <button
+                type="button"
+                @click="generateSKU"
+                class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                title="Gerar SKU automaticamente"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Gerar
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Clique em "Gerar" para criar um SKU automaticamente baseado nas informações do produto</p>
+          </div>
+        </div>
+
+        </div>
+        
+        <!-- Footer Buttons -->
+        <div class="flex-shrink-0 border-t border-gray-200 p-6">
+          <div class="flex items-center justify-end gap-4">
           <button
             type="button"
             @click="$emit('close')"
@@ -517,6 +541,7 @@
           </button>
           <button
             type="submit"
+            @click="handleSubmit"
             :disabled="loading || uploadingImages"
             class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
@@ -544,6 +569,7 @@
             {{ loading ? "Salvando..." : isEditing ? "Atualizar" : "Criar" }}
             Produto
           </button>
+          </div>
         </div>
       </form>
     </div>
@@ -553,6 +579,8 @@
 <script setup lang="ts">
 const supabase = useSupabase();
 const { uploadImages, getProductImage } = useCloudinary();
+
+const productsStore = useProductsStore();
 
 interface Product {
   id?: string;
@@ -566,7 +594,7 @@ interface Product {
   brand?: string;
   model?: string;
   sku: string;
-  stock: number;
+  stock: number | null;
   min_stock: number;
   weight?: number;
   dimensions?: {
@@ -617,7 +645,7 @@ const form = reactive<Product>({
   brand: "",
   model: "",
   sku: "",
-  stock: 0,
+  stock: null,
   min_stock: 5,
   weight: 0,
   images: [],
@@ -694,11 +722,67 @@ const generateSlug = () => {
   }
 };
 
+// Gerar SKU automaticamente
+const generateSKU = () => {
+  // Mapeamento de categorias para prefixos
+  const categoryPrefixes = {
+    "3eebaee1-c85d-4b67-9af1-5619764b7307": "AF", // Armas de Fogo
+    "d3f1376d-92ea-4a9b-a367-80456b9f0063": "AP", // Armas de Pressão
+    "3b6c5fb9-e0f3-474b-8cc2-e36dd327d2aa": "PSC", // Pesca
+    "b8ce0b20-63ad-44a2-b0a0-f383d5f8ec32": "AIR", // Airsoft
+    "e3afc893-b4c0-43a6-9900-c1208b1372ed": "CAC", // Caça
+    "2a6c0a33-0025-4cce-a306-db578a19a4f2": "VEST", // Vestuário
+  };
+
+  let skuParts = [];
+  
+  // 1. Prefixo da categoria
+  const categoryPrefix = categoryPrefixes[form.category_id] || "PROD";
+  skuParts.push(categoryPrefix);
+  
+  // 2. Prefixo da marca (se informada)
+  if (form.brand) {
+    const brandPrefix = form.brand
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .substring(0, 3);
+    skuParts.push(brandPrefix);
+  }
+  
+  // 3. Prefixo do modelo (se informado)
+  if (form.model) {
+    const modelPrefix = form.model
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .substring(0, 3);
+    skuParts.push(modelPrefix);
+  }
+  
+  // 4. Número sequencial único baseado em timestamp
+  const timestamp = Date.now().toString().slice(-6);
+  skuParts.push(timestamp);
+  
+  // Montar SKU final
+  form.sku = skuParts.join("-");
+};
+
 // Submit do formulário
-const handleSubmit = async () => {
+const handleSubmit = async (event?: Event) => {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
   loading.value = true;
 
   try {
+    // Validações básicas
+    if (!form.name || !form.slug || !form.sku || !form.category_id || !form.price) {
+      alert('Por favor, preencha todos os campos obrigatórios');
+      return;
+    }
+
+    
     // Gerar ID temporário para produto novo (usado na pasta do Cloudinary)
     const productId = props.product?.id || crypto.randomUUID();
     
@@ -710,7 +794,7 @@ const handleSubmit = async () => {
       try {
         newImageUrls = await uploadImages(selectedFiles.value, productId);
       } catch (error) {
-        console.error('Erro no upload:', error);
+        console.error('❌ Erro no upload:', error);
         alert('Erro no upload das imagens. Tente novamente.');
         return;
       } finally {
@@ -721,29 +805,27 @@ const handleSubmit = async () => {
     // 2. Combinar imagens existentes com as novas
     const allImages = [...(form.images || []), ...newImageUrls];
 
-    // 3. Preparar dados para o Supabase
+    // 3. Preparar dados para a store
     const productData = {
       name: form.name,
       slug: form.slug,
       description: form.description,
       short_description: form.short_description,
-      price: parseFloat(form.price.toString()),
-      sale_price: form.sale_price
-        ? parseFloat(form.sale_price.toString())
-        : null,
+      price: form.price,
+      sale_price: form.sale_price || null,
       category_id: form.category_id,
       brand: form.brand || null,
       model: form.model || null,
       sku: form.sku,
-      stock: parseInt(form.stock.toString()),
-      min_stock: parseInt(form.min_stock.toString()),
-      weight: form.weight ? parseFloat(form.weight.toString()) : null,
+      stock: form.stock || 0,
+      min_stock: form.min_stock || 5,
+      weight: form.weight || null,
       dimensions: {
         length: dimensions.length || null,
         width: dimensions.width || null,
         height: dimensions.height || null,
       },
-      images: allImages, // Array com URLs do Cloudinary
+      images: allImages,
       requires_license: form.requires_license,
       license_type: form.license_type || null,
       caliber: form.caliber || null,
@@ -753,36 +835,48 @@ const handleSubmit = async () => {
       meta_description: form.meta_description || null,
     };
 
+
     let result;
 
     if (isEditing.value) {
-      // Atualizar produto existente
-      result = await supabase
-        .from("products")
-        .update(productData)
-        .eq("id", props.product!.id)
-        .select();
+
+      
+      try {
+
+        
+
+        const updateFunction = productsStore.updateProduct;
+      
+        
+        result = await updateFunction(props.product!.id!, productData);
+ 
+      } catch (updateError) {
+        console.error('❌ Erro na chamada updateProduct:', updateError);
+        throw updateError;
+      }
     } else {
-      // Criar novo produto com o ID gerado
-      result = await supabase
-        .from("products")
-        .insert([{ ...productData, id: productId }])
-        .select();
+   
+      result = await productsStore.createProduct(productData);
     }
 
+
+
     if (result.error) {
-      throw result.error;
+      console.error('❌ Erro da store:', result.error);
+      throw new Error(result.error);
     }
+
+    
 
     // Limpar arquivos selecionados
     selectedFiles.value = [];
     
-    emit("save", result.data[0]);
+    emit("save", result.data);
     emit("close");
     
   } catch (error: any) {
-    console.error("Erro ao salvar produto:", error);
-    alert(`Erro ao salvar produto: ${error.message}`);
+    console.error("❌ Erro ao salvar produto:", error);
+    alert(`Erro ao salvar produto: ${error.message || 'Erro desconhecido'}`);
   } finally {
     loading.value = false;
     uploadingImages.value = false;

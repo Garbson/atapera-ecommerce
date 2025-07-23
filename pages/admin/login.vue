@@ -339,25 +339,18 @@ const validateForm = () => {
 
 // ✅ FUNÇÃO DE LOGIN CORRIGIDA - Parâmetros corretos
 const handleLogin = async () => {
-  console.log("[Admin Login] Iniciando processo de login...");
-
   // Reset messages
   error.value = "";
   success.value = "";
 
   // Validate form
   if (!validateForm()) {
-    console.log("[Admin Login] Validação falhou");
     return;
   }
 
   loading.value = true;
 
   try {
-    console.log("[Admin Login] Tentando login com Supabase...", {
-      email: form.email,
-    });
-
     // ✅ CORREÇÃO: Passar email e password como strings separadas
     const result = await auth.signIn(form.email, form.password);
 
@@ -366,8 +359,6 @@ const handleLogin = async () => {
     }
 
     if (result.success && result.data?.user) {
-      console.log("[Admin Login] Login bem-sucedido!", result.data.user.email);
-
       // Lista de emails admin (mesma do middleware)
       const adminEmails = [
         "admin@atapera.shop",
@@ -377,7 +368,6 @@ const handleLogin = async () => {
 
       // Verificar se o usuário é admin
       if (!adminEmails.includes(result.data.user.email)) {
-        console.log("[Admin Login] Usuário não é admin, fazendo logout...");
         await auth.signOut();
         error.value =
           "Acesso negado. Este usuário não tem permissões de administrador.";
@@ -385,7 +375,7 @@ const handleLogin = async () => {
       }
 
       success.value = "Login realizado com sucesso!";
-      console.log("[Admin Login] Admin verificado, redirecionando...");
+      ("[Admin Login] Admin verificaconsole.logdo, redirecionando...");
 
       // Redirect após sucesso
       setTimeout(() => {
@@ -413,11 +403,8 @@ const handleLogin = async () => {
 
 // Lifecycle
 onMounted(() => {
-  console.log("[Admin Login] Página montada");
-
   // Verificar se já está logado
   if (auth.isLoggedIn.value) {
-    console.log("[Admin Login] Usuário já está logado, redirecionando...");
     router.push("/admin");
     return;
   }

@@ -37,42 +37,41 @@ export interface Database {
           sku: string | null;
           price: number;
           sale_price: number | null;
-          cost_price: number | null;
           category_id: string | null;
-          subcategory_id: string | null;
           brand: string | null;
+          model: string | null;
 
-          // ESTOQUE - SEM track_stock
+          // ESTOQUE
           stock: number;
           min_stock: number;
-          manage_stock: boolean; // Esta é a coluna correta
-          stock_status: string;
-
-          // STATUS
-          is_active: boolean;
-          is_featured: boolean;
-          status: string;
 
           // DADOS FÍSICOS
           weight: number | null;
-          length: number | null;
-          width: number | null;
-          height: number | null;
+          dimensions: any | null;
+
+          // ARRAYS E JSON
+          images: string[];
+          specifications: any | null;
+          target_species: string[] | null;
 
           // CAMPOS ESPECÍFICOS
           requires_license: boolean;
           license_type: string | null;
-          age_restriction: number | null;
+          caliber: string | null;
+          fishing_type: string | null;
 
-          // JSON
-          specifications: any | null;
-          images: any[];
-          gallery: any[];
+          // STATUS E MÉTRICAS
+          is_active: boolean;
+          is_featured: boolean;
+          views_count: number;
+          sales_count: number;
 
           // SEO
           meta_title: string | null;
           meta_description: string | null;
-          meta_keywords: string | null;
+
+          // BUSCA
+          search_vector: any | null;
 
           // TIMESTAMPS
           created_at: string;
@@ -87,30 +86,26 @@ export interface Database {
           sku?: string | null;
           price: number;
           sale_price?: number | null;
-          cost_price?: number | null;
           category_id?: string | null;
-          subcategory_id?: string | null;
           brand?: string | null;
+          model?: string | null;
           stock?: number;
           min_stock?: number;
-          manage_stock?: boolean;
-          stock_status?: string;
-          is_active?: boolean;
-          is_featured?: boolean;
-          status?: string;
           weight?: number | null;
-          length?: number | null;
-          width?: number | null;
-          height?: number | null;
+          dimensions?: any | null;
+          images?: string[];
+          specifications?: any | null;
+          target_species?: string[] | null;
           requires_license?: boolean;
           license_type?: string | null;
-          age_restriction?: number | null;
-          specifications?: any | null;
-          images?: any[];
-          gallery?: any[];
+          caliber?: string | null;
+          fishing_type?: string | null;
+          is_active?: boolean;
+          is_featured?: boolean;
+          views_count?: number;
+          sales_count?: number;
           meta_title?: string | null;
           meta_description?: string | null;
-          meta_keywords?: string | null;
         };
         Update: {
           name?: string;
@@ -120,30 +115,26 @@ export interface Database {
           sku?: string | null;
           price?: number;
           sale_price?: number | null;
-          cost_price?: number | null;
           category_id?: string | null;
-          subcategory_id?: string | null;
           brand?: string | null;
+          model?: string | null;
           stock?: number;
           min_stock?: number;
-          manage_stock?: boolean;
-          stock_status?: string;
-          is_active?: boolean;
-          is_featured?: boolean;
-          status?: string;
           weight?: number | null;
-          length?: number | null;
-          width?: number | null;
-          height?: number | null;
+          dimensions?: any | null;
+          images?: string[];
+          specifications?: any | null;
+          target_species?: string[] | null;
           requires_license?: boolean;
           license_type?: string | null;
-          age_restriction?: number | null;
-          specifications?: any | null;
-          images?: any[];
-          gallery?: any[];
+          caliber?: string | null;
+          fishing_type?: string | null;
+          is_active?: boolean;
+          is_featured?: boolean;
+          views_count?: number;
+          sales_count?: number;
           meta_title?: string | null;
           meta_description?: string | null;
-          meta_keywords?: string | null;
         };
       };
       categories: {

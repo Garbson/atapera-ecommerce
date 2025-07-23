@@ -13,23 +13,18 @@
 
     <!-- Componentes globais -->
     <CartSidebar />
+    <NotificationToast />
   </div>
 </template>
 
 <script setup lang="ts">
-// Inicializar stores
 const { initAuth } = useAuth();
 const cartStore = useCartStore();
 
 onMounted(async () => {
   try {
-    // Inicializar autenticação
     await initAuth();
-
-    // Carregar carrinho do localStorage
-    cartStore.loadFromLocalStorage();
-
-    console.log("✅ Layout inicializado com sucesso");
+    await cartStore.initCart();
   } catch (error) {
     console.error("❌ Erro ao inicializar layout:", error);
   }

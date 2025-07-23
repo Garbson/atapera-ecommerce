@@ -1,5 +1,6 @@
 // stores/cart.ts
 import { defineStore } from "pinia";
+import { useAuth } from "~/composables/useAuth";
 
 export interface CartItem {
   id: string;
@@ -9,17 +10,24 @@ export interface CartItem {
   image?: string;
   category?: string;
   maxStock?: number;
+  product_id?: string; // ID do produto na tabela products
+  slug?: string;
+  sale_price?: number;
 }
 
 export interface CartState {
   items: CartItem[];
   isOpen: boolean;
+  loading: boolean;
+  sessionId: string;
 }
 
 export const useCartStore = defineStore("cart", {
   state: (): CartState => ({
     items: [],
     isOpen: false,
+    loading: false,
+    sessionId: "",
   }),
 
   getters: {
@@ -54,80 +62,401 @@ export const useCartStore = defineStore("cart", {
   },
 
   actions: {
-    // Adicionar item ao carrinho
-    addItem(product: Omit<CartItem, "quantity">, quantity = 1) {
+    // ✅ INICIALIZAR CARRINHO
+    async initCart() {
+      await this.loadFromSupabase();
+    },
+
+    // ✅ ADICIONAR ITEM AO CARRINHO
+    async addItem(product: Omit<CartItem, "quantity">, quantity = 1) {
+      const { success, error } = useNotifications();
       const existingItem = this.items.find((item) => item.id === product.id);
 
+      // Verificar estoque
       if (existingItem) {
-        // Se item já existe, aumenta a quantidade
         const newQuantity = existingItem.quantity + quantity;
-
-        // Verifica se não excede o estoque
         if (product.maxStock && newQuantity > product.maxStock) {
+          error(
+            "Limite de estoque atingido",
+            `Máximo de ${product.maxStock} unidades disponíveis`
+          );
           throw new Error(`Estoque máximo de ${product.maxStock} unidades`);
         }
+      }
 
-        existingItem.quantity = newQuantity;
+      try {
+        this.loading = true;
+        await this.addItemToSupabase(product, quantity);
+        
+        // Mostrar notificação de sucesso
+        success(
+          "Produto adicionado!",
+          `${product.name} foi adicionado ao seu carrinho`
+        );
+        
+        // Abrir carrinho por 3 segundos para mostrar o item
+        this.openCart();
+        setTimeout(() => {
+          this.closeCart();
+        }, 3000);
+        
+      } catch (error: any) {
+        error(
+          "Erro ao adicionar produto",
+          error.message || "Não foi possível adicionar o produto ao carrinho"
+        );
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async addItemToSupabase(product: Omit<CartItem, "quantity">, quantity = 1) {
+      const supabase = useSupabase();
+      const auth = useAuth();
+
+      // Usar diretamente o ID do usuário do perfil
+      const userId = auth.user.value?.id;
+
+
+      // Verificar se item já existe no carrinho
+      let query = supabase
+        .from("cart_items")
+        .select("*")
+        .eq("product_id", product.id);
+      query = query.eq("user_id", auth.user.value?.id);
+
+      const { data: existingItems, error: fetchError } = await query;
+
+      if (fetchError) throw fetchError;
+
+      if (existingItems && existingItems.length > 0) {
+        const existingItem = existingItems[0];
+        const newQuantity = existingItem.quantity + quantity;
+
+        const { error: updateError } = await supabase
+          .from("cart_items")
+          .update({
+            quantity: newQuantity,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", auth.user.value?.id);
+
+        if (updateError) throw updateError;
+
+        const localItem = this.items.find((item) => item.id === product.id);
+        if (localItem) {
+          localItem.quantity = newQuantity;
+        } else {
+          this.items.push({
+            ...product,
+            quantity: newQuantity,
+            product_id: product.id,
+          });
+        }
       } else {
-        // Adiciona novo item
+        const insertData = {
+          user_id: userId,
+          product_id: product.id,
+          quantity,
+        };
+
+        const { error: insertError } = await supabase
+          .from("cart_items")
+          .insert(insertData);
+
+        if (insertError) {
+          throw insertError;
+        }
+
         this.items.push({
           ...product,
           quantity,
+          product_id: product.id,
         });
       }
-
-      this.saveToLocalStorage();
     },
 
-    // Remover item do carrinho
-    removeItem(productId: string) {
-      const index = this.items.findIndex((item) => item.id === productId);
-      if (index > -1) {
-        this.items.splice(index, 1);
-        this.saveToLocalStorage();
+    // ✅ REMOVER ITEM DO CARRINHO
+    async removeItem(productId: string) {
+      const { success, error } = useNotifications();
+      const auth = useAuth();
+
+      // Pegar nome do produto antes de remover
+      const item = this.items.find((item) => item.id === productId);
+      const productName = item?.name || "Produto";
+
+      try {
+        this.loading = true;
+
+        // ✅ REMOVER DO SUPABASE
+        const supabase = useSupabase();
+        let query = supabase
+          .from("cart_items")
+          .delete()
+          .eq("product_id", productId);
+        query = query.eq("user_id", auth.user.value?.id);
+        const { error: deleteError } = await query;
+        if (deleteError) throw deleteError;
+
+        // ✅ REMOVER DO ESTADO LOCAL
+        const index = this.items.findIndex((item) => item.id === productId);
+        if (index > -1) {
+          this.items.splice(index, 1);
+        }
+
+        // Mostrar notificação de sucesso
+        success(
+          "Produto removido",
+          `${productName} foi removido do seu carrinho`
+        );
+
+      } catch (error: any) {
+        console.error("❌ [Cart] Erro ao remover item:", error);
+        error(
+          "Erro ao remover produto",
+          "Não foi possível remover o produto do carrinho"
+        );
+        throw error;
+      } finally {
+        this.loading = false;
       }
     },
 
-    // Atualizar quantidade de um item
-    updateQuantity(productId: string, quantity: number) {
-      const item = this.items.find((item) => item.id === productId);
-
-      if (!item) return;
-
+    async updateQuantity(productId: string, quantity: number) {
       if (quantity <= 0) {
-        this.removeItem(productId);
+        await this.removeItem(productId);
         return;
       }
 
-      // Verifica estoque máximo
+      const item = this.items.find((item) => item.id === productId);
+      if (!item) return;
+
+      // Verificar estoque máximo
       if (item.maxStock && quantity > item.maxStock) {
         throw new Error(`Estoque máximo de ${item.maxStock} unidades`);
       }
 
-      item.quantity = quantity;
-      this.saveToLocalStorage();
-    },
+      const auth = useAuth();
 
-    // Aumentar quantidade de um item
-    increaseQuantity(productId: string) {
-      const item = this.items.find((item) => item.id === productId);
-      if (item) {
-        this.updateQuantity(productId, item.quantity + 1);
+      try {
+        this.loading = true;
+
+        // ✅ ATUALIZAR NO SUPABASE
+        const supabase = useSupabase();
+        let query = supabase
+          .from("cart_items")
+          .update({
+            quantity,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("product_id", productId);
+        query = query.eq("user_id", auth.user.value?.id);
+
+        const { error } = await query;
+        if (error) throw error;
+
+        // ✅ ATUALIZAR NO ESTADO LOCAL
+        item.quantity = quantity;
+
+      } catch (error) {
+        console.error("❌ [Cart] Erro ao atualizar quantidade:", error);
+        throw error;
+      } finally {
+        this.loading = false;
       }
     },
 
-    // Diminuir quantidade de um item
-    decreaseQuantity(productId: string) {
+    // ✅ AUMENTAR QUANTIDADE
+    async increaseQuantity(productId: string) {
       const item = this.items.find((item) => item.id === productId);
       if (item) {
-        this.updateQuantity(productId, item.quantity - 1);
+        await this.updateQuantity(productId, item.quantity + 1);
       }
     },
 
-    // Limpar carrinho
-    clearCart() {
-      this.items = [];
-      this.saveToLocalStorage();
+    // ✅ DIMINUIR QUANTIDADE
+    async decreaseQuantity(productId: string) {
+      const item = this.items.find((item) => item.id === productId);
+      if (item) {
+        await this.updateQuantity(productId, item.quantity - 1);
+      }
+    },
+
+    // ✅ LIMPAR CARRINHO
+    async clearCart() {
+      const auth = useAuth();
+      try {
+        this.loading = true;
+        const supabase = useSupabase();
+        let query = supabase.from("cart_items").delete();
+        query = query.eq("user_id", auth.user.value?.id);
+        const { error } = await query;
+        if (error) throw error;
+        this.items = [];
+      } catch (error) {
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // ✅ CARREGAR DO SUPABASE (logado ou sessão)
+    async loadFromSupabase() {
+      const supabase = useSupabase();
+      const auth = useAuth();
+
+      try {
+        const userId = auth.user.value?.id;
+        let query = supabase
+          .from("cart_items")
+          .select(
+            `
+       *,
+       products (
+         id,
+         name,
+         price,
+         sale_price,
+         images,
+         stock,
+         slug
+       )
+     `
+          )
+          .eq("user_id", userId);
+
+        const { data: cartItems, error } = await query;
+
+        if (error) {
+          console.error("❌ [loadFromSupabase] Erro na query:", error);
+          throw error;
+        }
+
+        const { getProductImage } = useCloudinary();
+
+        if (!cartItems || cartItems.length === 0) {
+          this.items = [];
+          return;
+        }
+
+        this.items = cartItems
+          .map((item: any) => {
+            if (!item.products) {
+              return null;
+            }
+
+            const cartItem = {
+              id: item.products.id,
+              name: item.products.name,
+              price: item.products.sale_price || item.products.price,
+              quantity: item.quantity,
+              image: item.products.images?.[0]
+                ? getProductImage(item.products.images[0], "small")
+                : "/placeholder-product.jpg",
+              maxStock: item.products.stock,
+              product_id: item.products.id,
+              slug: item.products.slug,
+              sale_price: item.products.sale_price,
+            };
+
+            return cartItem;
+          })
+          .filter((item) => item !== null);
+      } catch (error) {
+        console.error("❌ [Cart] Erro ao carregar do Supabase:", error);
+        this.items = [];
+      }
+    },
+
+    async syncCartOnLogin() {
+      const supabase = useSupabase();
+      const auth = useAuth();
+
+      if (!auth.user.value) return;
+
+      try {
+        const { data: sessionItems, error: sessionError } = await supabase
+          .from("cart_items")
+          .select(
+            `
+            *,
+            products (
+              id,
+              name,
+              price,
+              sale_price,
+              images,
+              stock,
+              slug
+            )
+          `
+          )
+          .eq("user_id", auth.user.value?.id);
+
+        if (sessionError) throw sessionError;
+
+        await this.loadFromSupabase();
+        if (sessionItems && sessionItems.length > 0) {
+          for (const sessionItem of sessionItems) {
+            const existsInUserCart = this.items.find(
+              (item) => item.id === sessionItem.products.id
+            );
+
+            if (!existsInUserCart) {
+              const product = {
+                id: sessionItem.products.id,
+                name: sessionItem.products.name,
+                price:
+                  sessionItem.products.sale_price || sessionItem.products.price,
+                image:
+                  sessionItem.products.images?.[0] ||
+                  "/placeholder-product.jpg",
+                maxStock: sessionItem.products.stock,
+                product_id: sessionItem.products.id,
+              };
+
+              await this.addItemToSupabase(product, sessionItem.quantity);
+            }
+          }
+
+          // 4. Limpar itens da sessão anônima
+          await supabase
+            .from("cart_items")
+            .delete()
+            .eq("session_id", auth.user.value?.id);
+        }
+      } catch (error) {
+        console.error("❌ [Cart] Erro ao sincronizar carrinho:", error);
+      }
+    },
+
+    async migrateToSession() {
+      const supabase = useSupabase();
+      const auth = useAuth();
+
+      try {
+        // 1. Se há itens no carrinho do usuário logado, migrar para sessão
+        if (this.items.length > 0 && auth.user.value) {
+          for (const item of this.items) {
+            await supabase.from("cart_items").insert({
+              user_id: null,
+              session_id: this.sessionId,
+              product_id: item.product_id || item.id,
+              quantity: item.quantity,
+            });
+          }
+
+          // 2. Limpar itens do usuário
+          await supabase
+            .from("cart_items")
+            .delete()
+            .eq("user_id", auth.user.value?.id);
+        }
+
+      } catch (error) {
+        console.error("❌ [Cart] Erro ao migrar carrinho:", error);
+      }
     },
 
     // Abrir/fechar sidebar do carrinho
@@ -143,33 +472,13 @@ export const useCartStore = defineStore("cart", {
       this.isOpen = false;
     },
 
-    // Salvar no localStorage
-    saveToLocalStorage() {
-      if (process.client) {
-        try {
-          localStorage.setItem("atapera_cart", JSON.stringify(this.items));
-        } catch (error) {
-          console.error("Erro ao salvar carrinho:", error);
-        }
-      }
+    resetCart() {
+      this.items = [];
+      this.isOpen = false;
+      this.loading = false;
     },
 
-    // Carregar do localStorage
-    loadFromLocalStorage() {
-      if (process.client) {
-        try {
-          const saved = localStorage.getItem("atapera_cart");
-          if (saved) {
-            this.items = JSON.parse(saved);
-          }
-        } catch (error) {
-          console.error("Erro ao carregar carrinho:", error);
-          this.items = [];
-        }
-      }
-    },
-
-    // Finalizar compra (preparar dados)
+    // ✅ FINALIZAR COMPRA
     prepareCheckout() {
       if (this.isEmpty) {
         throw new Error("Carrinho está vazio");

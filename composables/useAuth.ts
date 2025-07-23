@@ -1,23 +1,24 @@
 // composables/useAuth.ts - VERSÃO FINAL DEFINITIVA - CORRIGIDA PGRST116
 import type { Session, User } from "@supabase/supabase-js";
 
+// ✅ SINGLETON - Estados globais compartilhados
+const globalUser = ref<User | null>(null);
+const globalSession = ref<Session | null>(null);
+const globalLoading = ref(true);
+const globalProfile = ref<any>(null);
+
 export const useAuth = () => {
   const supabase = useSupabase();
 
-  // Estados reativos
-  const user = ref<User | null>(null);
-  const session = ref<Session | null>(null);
-  const loading = ref(true);
-  const profile = ref<any>(null);
+  // Estados reativos (usando refs globais)
+  const user = globalUser;
+  const session = globalSession;
+  const loading = globalLoading;
+  const profile = globalProfile;
 
   // ✅ COMPUTED CORRETO - retorna booleano diretamente
   const isLoggedIn = computed(() => {
     const result = !!user.value;
-    console.log("🔍 isLoggedIn computed:", {
-      user_exists: !!user.value,
-      user_id: user.value?.id || null,
-      result,
-    });
     return result;
   });
 
@@ -36,7 +37,6 @@ export const useAuth = () => {
 
   // ✅ Inicialização
   const initAuth = async () => {
-    console.log("🔄 initAuth: começando...");
     loading.value = true;
 
     try {
@@ -51,37 +51,28 @@ export const useAuth = () => {
         throw error;
       }
 
-      console.log("📊 Sessão do Supabase:", {
-        has_session: !!currentSession,
-        has_user: !!currentSession?.user,
-        user_email: currentSession?.user?.email || null,
-      });
 
       // ✅ Atualizar estados
       session.value = currentSession;
       user.value = currentSession?.user || null;
+      
 
-      console.log("✅ Estados atualizados:", {
-        user_set: !!user.value,
-        session_set: !!session.value,
-        isLoggedIn_value: isLoggedIn.value,
-      });
 
-      // ✅ Buscar perfil se logado
-      if (user.value) {
-        await getUserProfile();
-      }
+
+      // 🚧 TEMPORARIAMENTE DESABILITADO para debug
+      // if (user.value) {
+      //   await getUserProfile();
+      // }
 
       // ✅ Listener para mudanças
       supabase.auth.onAuthStateChange(async (event, newSession) => {
-        console.log("🔄 Auth mudou:", event, !!newSession);
-
         session.value = newSession;
         user.value = newSession?.user || null;
+        
 
         if (event === "SIGNED_IN" && newSession?.user) {
-          // ✅ Apenas criar/carregar perfil uma vez
-          await createOrUpdateProfile(newSession.user);
+          // 🚧 TEMPORARIAMENTE DESABILITADO para debug
+          // await createOrUpdateProfile(newSession.user);
         }
 
         if (event === "SIGNED_OUT") {
@@ -95,7 +86,6 @@ export const useAuth = () => {
       profile.value = null;
     } finally {
       loading.value = false;
-      console.log("🏁 initAuth: finalizado, isLoggedIn =", isLoggedIn.value);
     }
   };
 
@@ -104,7 +94,6 @@ export const useAuth = () => {
     if (!user.value) return;
 
     try {
-      console.log("👤 Buscando perfil para:", user.value.email);
 
       // ✅ USAR .maybeSingle() em vez de .single()
       const { data, error } = await supabase
@@ -118,8 +107,7 @@ export const useAuth = () => {
         throw error;
       }
 
-      profile.value = data; // data será null se não encontrar
-      console.log("✅ Perfil carregado:", !!data);
+      profile.value = data;
     } catch (error) {
       console.error("❌ Erro ao buscar perfil:", error);
       profile.value = null;
@@ -129,8 +117,6 @@ export const useAuth = () => {
   // ✅ CORRIGIDO - Usar UPSERT para evitar duplicatas
   const createOrUpdateProfile = async (authUser: User) => {
     try {
-      console.log("👤 Criando/atualizando perfil para:", authUser.email);
-
       // ✅ USAR UPSERT - Insert ou Update se já existir
       const { data: profileData, error: upsertError } = await supabase
         .from("user_profiles")
@@ -158,7 +144,6 @@ export const useAuth = () => {
 
       // ✅ Atualizar o profile local
       profile.value = profileData;
-      console.log("✅ Perfil criado/atualizado:", !!profileData);
     } catch (error) {
       console.error("❌ Erro ao criar/atualizar perfil:", error);
     }
@@ -166,22 +151,31 @@ export const useAuth = () => {
 
   // ✅ Login
   const signIn = async (email: string, password: string) => {
-    console.log("🔑 signIn: tentando login...");
+    const { success: notify, error } = useNotifications();
     loading.value = true;
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (signInError) throw signInError;
 
-      console.log("✅ signIn: sucesso");
+      notify(
+        'Login realizado!',
+        `Bem-vindo de volta, ${user.value?.email}!`
+      );
+
       return { success: true, data };
-    } catch (error: any) {
-      console.error("❌ Erro signIn:", error);
-      return { success: false, error: error.message };
+    } catch (signInError: any) {
+      console.error("❌ Erro signIn:", signInError);
+      error(
+        'Erro no login',
+        signInError.message === 'Invalid login credentials' ? 
+          'Email ou senha incorretos' : signInError.message
+      );
+      return { success: false, error: signInError.message };
     } finally {
       loading.value = false;
     }
@@ -197,11 +191,11 @@ export const useAuth = () => {
       phone?: string;
     }
   ) => {
-    console.log("📝 signUp: tentando cadastro...");
+    const { success: notify, error } = useNotifications();
     loading.value = true;
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -209,13 +203,21 @@ export const useAuth = () => {
         },
       });
 
-      if (error) throw error;
+      if (signUpError) throw signUpError;
 
-      console.log("✅ signUp: sucesso");
+      notify(
+        'Conta criada!',
+        'Verifique seu email para ativar sua conta'
+      );
+
       return { success: true, data };
-    } catch (error: any) {
-      console.error("❌ Erro signUp:", error);
-      return { success: false, error: error.message };
+    } catch (signUpError: any) {
+      console.error("❌ Erro signUp:", signUpError);
+      error(
+        'Erro no cadastro',
+        signUpError.message
+      );
+      return { success: false, error: signUpError.message };
     } finally {
       loading.value = false;
     }
@@ -224,7 +226,6 @@ export const useAuth = () => {
   // ✅ Login com Google
   const signInWithGoogle = async () => {
     try {
-      console.log("🔑 signInWithGoogle: iniciando...");
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -235,7 +236,6 @@ export const useAuth = () => {
 
       if (error) throw error;
 
-      console.log("✅ signInWithGoogle: redirecionando");
       return { success: true };
     } catch (error: any) {
       console.error("❌ Erro signInWithGoogle:", error);
@@ -245,7 +245,7 @@ export const useAuth = () => {
 
   // ✅ Logout
   const signOut = async () => {
-    console.log("🚪 signOut: começando...");
+    const { success: notify } = useNotifications();
 
     try {
       const { error } = await supabase.auth.signOut();
@@ -256,7 +256,10 @@ export const useAuth = () => {
       session.value = null;
       profile.value = null;
 
-      console.log("✅ signOut: concluído, isLoggedIn =", isLoggedIn.value);
+      notify(
+        'Logout realizado!',
+        'Você foi desconectado com sucesso'
+      );
 
       await navigateTo("/");
       return { success: true };
@@ -273,7 +276,6 @@ export const useAuth = () => {
   // ✅ Reset senha
   const resetPassword = async (email: string) => {
     try {
-      console.log("📧 resetPassword: enviando email...");
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
@@ -281,7 +283,6 @@ export const useAuth = () => {
 
       if (error) throw error;
 
-      console.log("✅ resetPassword: email enviado");
       return { success: true };
     } catch (error: any) {
       console.error("❌ Erro resetPassword:", error);
@@ -300,7 +301,6 @@ export const useAuth = () => {
     }
 
     try {
-      console.log("📝 updateProfile: atualizando...");
 
       const { error } = await supabase
         .from("user_profiles")
@@ -317,7 +317,6 @@ export const useAuth = () => {
         profile.value = { ...profile.value, ...updates };
       }
 
-      console.log("✅ updateProfile: concluído");
       return { success: true };
     } catch (error: any) {
       console.error("❌ Erro updateProfile:", error);

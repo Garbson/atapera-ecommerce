@@ -1,7 +1,11 @@
 // stores/useProductsStore.ts
 export const useProductsStore = defineStore("products", () => {
-  const supabase = useSupabaseClient();
+  // Função para obter cliente Supabase
+  const getSupabaseClient = () => {
+    return useSupabase();
+  };
 
+  
   // Estado
   const products = ref([]);
   const loading = ref(false);
@@ -29,6 +33,7 @@ export const useProductsStore = defineStore("products", () => {
       width?: number;
       height?: number;
     };
+    images?: string[];
     requires_license: boolean;
     license_type?: string;
     caliber?: string;
@@ -47,6 +52,8 @@ export const useProductsStore = defineStore("products", () => {
     featured?: boolean;
     page?: number;
     limit?: number;
+    sort?: string;
+    order?: 'asc' | 'desc';
   }
 
   // Getters
@@ -78,12 +85,15 @@ export const useProductsStore = defineStore("products", () => {
   });
 
   // Actions
-  const fetchProducts = async (filters: ProductFilters = {}) => {
+  const fetchProducts = async (filters: ProductFilters = {}) => { 
     try {
       loading.value = true;
       error.value = null;
 
-      let query = supabase.from("products").select("*");
+      const supabase = getSupabaseClient();
+      const config = useRuntimeConfig();
+      // ✅ FORÇAR CHAMADA SEMPRE - SEM CACHE
+      let query = supabase.from("products").select("*", { count: "exact", head: false });
 
       // Aplicar filtros
       if (filters.search) {
@@ -112,14 +122,33 @@ export const useProductsStore = defineStore("products", () => {
       }
 
       // Ordenação
-      query = query.order("created_at", { ascending: false });
+      if (filters.sort && filters.order) {
+        query = query.order(filters.sort, { ascending: filters.order === 'asc' });
+      } else {
+        query = query.order("created_at", { ascending: false });
+      }
 
-      const { data, error: fetchError } = await query;
+      
+      const { data, error: fetchError, count } = await query;
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error("❌ [ProductsStore] ERRO na query do Supabase:", fetchError);
+        throw fetchError;
+      }
+
 
       products.value = data || [];
-      return { data, error: null };
+      
+      return { 
+        data: {
+          data: data || [],
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / (filters.limit || 20)),
+          page: filters.page || 1,
+          limit: filters.limit || 20
+        }, 
+        error: null 
+      };
     } catch (err: any) {
       error.value = err.message;
       console.error("Erro ao buscar produtos:", err);
@@ -134,6 +163,7 @@ export const useProductsStore = defineStore("products", () => {
       loading.value = true;
       error.value = null;
 
+      const supabase = getSupabaseClient();
       const { data, error: fetchError } = await supabase
         .from("products")
         .select("*")
@@ -158,6 +188,7 @@ export const useProductsStore = defineStore("products", () => {
       loading.value = true;
       error.value = null;
 
+      const supabase = getSupabaseClient();
       const { data, error: fetchError } = await supabase
         .from("products")
         .select("*")
@@ -180,27 +211,28 @@ export const useProductsStore = defineStore("products", () => {
   const createProduct = async (
     productData: Omit<Product, "id" | "created_at" | "updated_at">
   ) => {
+    // Limpar e formatar dados
+    const cleanData = {
+      ...productData,
+      sale_price: productData.sale_price || null,
+      weight: productData.weight || null,
+      brand: productData.brand || null,
+      model: productData.model || null,
+      caliber: productData.caliber || null,
+      license_type: productData.license_type || null,
+      meta_title: productData.meta_title || null,
+      meta_description: productData.meta_description || null,
+      dimensions: productData.dimensions || null,
+      price: parseFloat(productData.price.toString()),
+      stock: parseInt(productData.stock.toString()),
+      min_stock: parseInt(productData.min_stock.toString()),
+    };
+
     try {
       loading.value = true;
       error.value = null;
 
-      // Limpar dados vazios
-      const cleanData = {
-        ...productData,
-        sale_price: productData.sale_price || null,
-        weight: productData.weight || null,
-        brand: productData.brand || null,
-        model: productData.model || null,
-        caliber: productData.caliber || null,
-        license_type: productData.license_type || null,
-        meta_title: productData.meta_title || null,
-        meta_description: productData.meta_description || null,
-        dimensions: productData.dimensions || null,
-        price: parseFloat(productData.price.toString()),
-        stock: parseInt(productData.stock.toString()),
-        min_stock: parseInt(productData.min_stock.toString()),
-      };
-
+      const supabase = getSupabaseClient();
       const { data, error: createError } = await supabase
         .from("products")
         .insert([cleanData])
@@ -223,47 +255,70 @@ export const useProductsStore = defineStore("products", () => {
   };
 
   const updateProduct = async (id: string, productData: Partial<Product>) => {
+    // Limpar e formatar dados
+    const cleanData = { ...productData };
+    
+    // Converter números se necessário
+    if (cleanData.price) {
+      cleanData.price = parseFloat(cleanData.price.toString());
+    }
+    if (cleanData.stock !== undefined) {
+      cleanData.stock = parseInt(cleanData.stock.toString());
+    }
+    if (cleanData.min_stock !== undefined) {
+      cleanData.min_stock = parseInt(cleanData.min_stock.toString());
+    }
+
     try {
       loading.value = true;
       error.value = null;
 
-      // Limpar dados vazios
-      const cleanData = {
-        ...productData,
-        updated_at: new Date().toISOString(),
-      };
+      const supabase = getSupabaseClient();
+      
+      // Implementar timeout e retry para resolver problemas de concorrência
+      let attempt = 0;
+      const maxAttempts = 3;
+      
+      while (attempt < maxAttempts) {
+        try {
+          const { data, error: updateError } = await Promise.race([
+            supabase
+              .from("products")
+              .update(cleanData)
+              .eq("id", id)
+              .select()
+              .single(),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout: A operação demorou mais que 8 segundos')), 8000)
+            )
+          ]);
 
-      // Converter números se necessário
-      if (cleanData.price) {
-        cleanData.price = parseFloat(cleanData.price.toString());
+          if (updateError) throw updateError;
+
+          // Atualizar no estado local
+          const index = products.value.findIndex((p: Product) => p.id === id);
+          if (index !== -1) {
+            products.value[index] = data;
+          }
+
+          if (currentProduct.value?.id === id) {
+            currentProduct.value = data;
+          }
+
+          return { data, error: null };
+          
+        } catch (attemptError: any) {
+          attempt++;
+          
+          if (attempt >= maxAttempts) {
+            throw attemptError;
+          }
+          
+          // Aguardar antes de tentar novamente
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
       }
-      if (cleanData.stock !== undefined) {
-        cleanData.stock = parseInt(cleanData.stock.toString());
-      }
-      if (cleanData.min_stock !== undefined) {
-        cleanData.min_stock = parseInt(cleanData.min_stock.toString());
-      }
 
-      const { data, error: updateError } = await supabase
-        .from("products")
-        .update(cleanData)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (updateError) throw updateError;
-
-      // Atualizar no estado local
-      const index = products.value.findIndex((p: Product) => p.id === id);
-      if (index !== -1) {
-        products.value[index] = data;
-      }
-
-      if (currentProduct.value?.id === id) {
-        currentProduct.value = data;
-      }
-
-      return { data, error: null };
     } catch (err: any) {
       error.value = err.message;
       console.error("Erro ao atualizar produto:", err);
@@ -278,6 +333,7 @@ export const useProductsStore = defineStore("products", () => {
       loading.value = true;
       error.value = null;
 
+      const supabase = getSupabaseClient();
       const { error: deleteError } = await supabase
         .from("products")
         .delete()
@@ -323,6 +379,7 @@ export const useProductsStore = defineStore("products", () => {
       loading.value = true;
       error.value = null;
 
+      const supabase = getSupabaseClient();
       const { error: updateError } = await supabase
         .from("products")
         .update({ is_active: isActive, updated_at: new Date().toISOString() })
@@ -347,11 +404,12 @@ export const useProductsStore = defineStore("products", () => {
     }
   };
 
-  const bulkDelete = async (ids: string[]) => {
+  const bulkDeleteProducts = async (ids: string[]) => {
     try {
       loading.value = true;
       error.value = null;
 
+      const supabase = getSupabaseClient();
       const { error: deleteError } = await supabase
         .from("products")
         .delete()
@@ -428,11 +486,9 @@ export const useProductsStore = defineStore("products", () => {
       .replace(/-+/g, "-"); // Remove hífens duplicados
   };
 
-  const validateSKU = async (
-    sku: string,
-    excludeId?: string
-  ): Promise<boolean> => {
+  const validateSKU = async (sku: string, excludeId?: string): Promise<boolean> => {
     try {
+      const supabase = getSupabaseClient();
       let query = supabase.from("products").select("id").eq("sku", sku);
 
       if (excludeId) {
@@ -448,11 +504,9 @@ export const useProductsStore = defineStore("products", () => {
     }
   };
 
-  const validateSlug = async (
-    slug: string,
-    excludeId?: string
-  ): Promise<boolean> => {
+  const validateSlug = async (slug: string, excludeId?: string): Promise<boolean> => {
     try {
+      const supabase = getSupabaseClient();
       let query = supabase.from("products").select("id").eq("slug", slug);
 
       if (excludeId) {
@@ -474,6 +528,11 @@ export const useProductsStore = defineStore("products", () => {
 
   const clearCurrentProduct = () => {
     currentProduct.value = null;
+  };
+
+  // ✅ FUNÇÃO PARA LIMPAR CACHE DE PRODUTOS
+  const clearProductsCache = () => {
+    products.value = [];
   };
 
   return {
@@ -499,7 +558,7 @@ export const useProductsStore = defineStore("products", () => {
     deleteProduct,
     toggleProductStatus,
     bulkUpdateStatus,
-    bulkDelete,
+    bulkDeleteProducts,
     updateStock,
     getProductStats,
 
@@ -509,5 +568,6 @@ export const useProductsStore = defineStore("products", () => {
     validateSlug,
     clearError,
     clearCurrentProduct,
+    clearProductsCache,
   };
 });

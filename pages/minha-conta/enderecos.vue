@@ -123,50 +123,62 @@
     <!-- Modal de Endereço -->
     <div
       v-if="showModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-gray-900 bg-opacity-75 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       @click.self="closeModal"
     >
       <div
-        class="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
+        class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto transition-all duration-300 transform scale-100"
       >
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-medium">
-            {{ editingAddress ? "Editar Endereço" : "Adicionar Endereço" }}
-          </h3>
-          <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              ></path>
+        <div class="flex justify-between items-center mb-6">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-red-100 rounded-lg">
+              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold text-gray-900">
+                {{ editingAddress ? "Editar Endereço" : "Novo Endereço" }}
+              </h3>
+              <p class="text-sm text-gray-500">
+                {{ editingAddress ? "Modifique as informações do endereço" : "Adicione um novo endereço de entrega" }}
+              </p>
+            </div>
+          </div>
+          <button 
+            @click="closeModal" 
+            class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
         </div>
 
-        <form @submit.prevent="saveAddress" class="space-y-4">
+        <form @submit.prevent="saveAddress" class="space-y-5">
           <!-- Label do Endereço -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+              </svg>
               Nome do Endereço
             </label>
             <input
               v-model="addressForm.label"
               type="text"
               placeholder="Ex: Casa, Trabalho, etc."
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
             />
           </div>
 
           <!-- CEP -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+              </svg>
               CEP *
             </label>
             <input
@@ -174,20 +186,24 @@
               type="text"
               placeholder="00000-000"
               @blur="fetchAddressByCEP"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
               required
             />
           </div>
 
           <!-- Rua -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Rua *
+            <label class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              Endereço *
             </label>
             <input
               v-model="addressForm.street"
               type="text"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="Nome da rua"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
               required
             />
           </div>
@@ -195,39 +211,41 @@
           <!-- Número e Complemento -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
                 Número *
               </label>
               <input
                 v-model="addressForm.number"
                 type="text"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="123"
+                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                 required
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
                 Complemento
               </label>
               <input
                 v-model="addressForm.complement"
                 type="text"
                 placeholder="Apto, Bloco, etc."
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
+                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
               />
             </div>
           </div>
 
           <!-- Bairro -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
               Bairro *
             </label>
             <input
               v-model="addressForm.neighborhood"
               type="text"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="Nome do bairro"
+              class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
               required
             />
           </div>
@@ -235,24 +253,25 @@
           <!-- Cidade e Estado -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
                 Cidade *
               </label>
               <input
                 v-model="addressForm.city"
                 type="text"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="Nome da cidade"
+                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                 required
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
                 Estado *
               </label>
               <select
                 v-model="addressForm.state"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
+                class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors bg-white"
                 required
               >
                 <option value="">Selecione</option>
@@ -288,36 +307,42 @@
           </div>
 
           <!-- Checkbox Endereço Principal -->
-          <div>
-            <label class="flex items-center">
+          <div class="bg-gray-50 rounded-lg p-4">
+            <label class="flex items-start gap-3 cursor-pointer">
               <input
                 v-model="addressForm.is_default"
                 type="checkbox"
-                class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                class="mt-1 rounded border-gray-300 text-red-600 focus:ring-red-500 focus:ring-2"
               />
-              <span class="ml-2 text-sm text-gray-700">
-                Tornar este endereço como principal
-              </span>
+              <div>
+                <span class="text-sm font-medium text-gray-900">
+                  Definir como endereço principal
+                </span>
+                <p class="text-xs text-gray-500 mt-1">
+                  Este endereço será usado como padrão em suas compras futuras
+                </p>
+              </div>
             </label>
           </div>
 
           <!-- Botões -->
-          <div class="flex justify-end gap-4 pt-4">
+          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
             <button
               type="button"
               @click="closeModal"
-              class="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+              class="px-6 py-2.5 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               :disabled="saving"
-              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400"
+              class="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
             >
-              {{
-                saving ? "Salvando..." : editingAddress ? "Atualizar" : "Salvar"
-              }}
+              <svg v-if="saving" class="animate-spin w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              {{ saving ? "Salvando..." : editingAddress ? "Atualizar Endereço" : "Salvar Endereço" }}
             </button>
           </div>
         </form>
@@ -402,16 +427,15 @@ const saveAddress = async () => {
   saving.value = true;
 
   try {
-    const endpoint = editingAddress.value
-      ? `/api/addresses/${editingAddress.value.id}`
-      : "/api/addresses";
-
-    const method = editingAddress.value ? "PUT" : "POST";
-
-    await $fetch(endpoint, {
-      method,
-      body: addressForm,
-    });
+    const addressStore = useAddressStore();
+    
+    if (editingAddress.value) {
+      // Atualizar endereço existente
+      await addressStore.updateAddress(editingAddress.value.id, addressForm);
+    } else {
+      // Criar novo endereço
+      await addressStore.createAddress(addressForm);
+    }
 
     await fetchAddresses();
     closeModal();
@@ -428,9 +452,8 @@ const saveAddress = async () => {
 
 const setAsDefault = async (addressId: string) => {
   try {
-    await $fetch(`/api/addresses/${addressId}/set-default`, {
-      method: "POST",
-    });
+    const addressStore = useAddressStore();
+    await addressStore.setAsDefault(addressId);
 
     await fetchAddresses();
     alert("Endereço principal atualizado!");
@@ -443,9 +466,8 @@ const deleteAddress = async (addressId: string) => {
   if (!confirm("Tem certeza que deseja excluir este endereço?")) return;
 
   try {
-    await $fetch(`/api/addresses/${addressId}`, {
-      method: "DELETE",
-    });
+    const addressStore = useAddressStore();
+    await addressStore.deleteAddress(addressId);
 
     await fetchAddresses();
     alert("Endereço excluído!");
@@ -458,8 +480,15 @@ const fetchAddresses = async () => {
   loading.value = true;
 
   try {
-    const { data } = await $fetch("/api/addresses");
-    addresses.value = data || [];
+    // Usar o store de endereços em vez de API direta
+    const addressStore = useAddressStore();
+    const { data, error } = await addressStore.fetchAddresses();
+    
+    if (error) {
+      console.error("Erro ao buscar endereços:", error);
+    } else {
+      addresses.value = data || [];
+    }
   } catch (error) {
     console.error("Erro ao buscar endereços:", error);
   } finally {

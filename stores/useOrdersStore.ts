@@ -1,6 +1,7 @@
 // stores/useOrdersStore.ts
 export const useOrdersStore = defineStore('orders', () => {
-  const supabase = useSupabaseClient()
+  // Obter cliente Supabase
+  const supabase = useSupabase()
 
   // Estado
   const orders = ref([])
@@ -22,17 +23,18 @@ export const useOrdersStore = defineStore('orders', () => {
 
   interface Order {
     id?: string
-    number: string
-    customer_id?: string
+    order_number: string
+    user_id?: string
     customer_name: string
     customer_email: string
     customer_phone?: string
+    customer_cpf?: string
     status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
     subtotal: number
     tax_amount: number
-    shipping_amount: number
+    shipping_cost: number
     discount_amount: number
-    total_amount: number
+    total: number
     payment_method?: string
     payment_status: 'pending' | 'paid' | 'failed' | 'refunded'
     shipping_address: {
@@ -102,14 +104,129 @@ export const useOrdersStore = defineStore('orders', () => {
   const getTotalRevenue = computed(() => {
     return orders.value
       .filter((order: Order) => order.status !== 'cancelled')
-      .reduce((sum, order: Order) => sum + order.total_amount, 0)
+      .reduce((sum, order: Order) => sum + order.total, 0)
   })
 
-  // Actions
+  // Actions específicas para pedidos
+  const cancelOrderById = async (orderId: string) => {
+    try {
+      loading.value = true;
+      error.value = null;
+
+      const { data, error: updateError } = await supabase
+        .from('orders')
+        .update({ 
+          status: 'cancelled',
+          payment_status: 'refunded',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', orderId)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      // Atualizar estado local
+      const index = orders.value.findIndex((order: Order) => order.id === orderId);
+      if (index !== -1) {
+        orders.value[index] = { ...orders.value[index], ...data };
+      }
+
+      return { data, error: null };
+    } catch (err: any) {
+      error.value = err.message;
+      console.error('Erro ao cancelar pedido:', err);
+      return { data: null, error: err.message };
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const reorderItems = async (orderId: string) => {
+    try {
+      loading.value = true;
+      error.value = null;
+
+      // Buscar itens do pedido original
+      const { data: orderItems, error: fetchError } = await supabase
+        .from('order_items')
+        .select('product_id, quantity')
+        .eq('order_id', orderId);
+
+      if (fetchError) throw fetchError;
+      if (!orderItems) {
+        throw new Error('Pedido não encontrado');
+      }
+
+      // Adicionar itens ao carrinho (assumindo que existe uma store de carrinho)
+      const cartStore = useCartStore();
+      for (const item of orderItems) {
+        await cartStore.addItem({
+          id: item.product_id,
+          name: item.product_name,
+          price: item.price,
+          product_id: item.product_id,
+        }, item.quantity);
+      }
+
+      return { data: { success: true }, error: null };
+    } catch (err: any) {
+      error.value = err.message;
+      console.error('Erro ao reordenar itens:', err);
+      return { data: null, error: err.message };
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const fetchUserOrders = async () => {
+    try {
+      loading.value = true;
+      error.value = null;
+
+      const { user } = useAuth();
+      if (!user.value?.id) {
+        return { data: [], error: 'Usuário não autenticado' };
+      }
+
+      const { data, error: fetchError } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            id,
+            product_id,
+            product_name,
+            product_sku,
+            quantity,
+            unit_price,
+            total_price
+          )
+        `)
+        .eq('user_id', user.value.id)
+        .order('created_at', { ascending: false });
+
+      if (fetchError) throw fetchError;
+
+      orders.value = data.map((order: any) => ({
+        ...order,
+        items: order.order_items || []
+      }));
+
+      return { data: orders.value, error: null };
+    } catch (err: any) {
+      error.value = err.message;
+      console.error('Erro ao buscar pedidos do usuário:', err);
+      return { data: [], error: err.message };
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const fetchOrders = async (filters: OrderFilters = {}) => {
     try {
-      loading.value = true
-      error.value = null
+      loading.value = true;
+      error.value = null;
 
       let query = supabase
         .from('orders')
@@ -124,61 +241,60 @@ export const useOrdersStore = defineStore('orders', () => {
             unit_price,
             total_price
           )
-        `)
+        `);
 
       // Aplicar filtros
       if (filters.search) {
-        query = query.or(`number.ilike.%${filters.search}%,customer_name.ilike.%${filters.search}%,customer_email.ilike.%${filters.search}%`)
+        query = query.or(`number.ilike.%${filters.search}%,customer_name.ilike.%${filters.search}%,customer_email.ilike.%${filters.search}%`);
       }
 
       if (filters.status) {
-        query = query.eq('status', filters.status)
+        query = query.eq('status', filters.status);
       }
 
       if (filters.payment_status) {
-        query = query.eq('payment_status', filters.payment_status)
+        query = query.eq('payment_status', filters.payment_status);
       }
 
       if (filters.date_from) {
-        query = query.gte('created_at', filters.date_from)
+        query = query.gte('created_at', filters.date_from);
       }
 
       if (filters.date_to) {
-        query = query.lte('created_at', filters.date_to)
+        query = query.lte('created_at', filters.date_to);
       }
 
       if (filters.customer) {
-        query = query.or(`customer_name.ilike.%${filters.customer}%,customer_email.ilike.%${filters.customer}%`)
+        query = query.or(`customer_name.ilike.%${filters.customer}%,customer_email.ilike.%${filters.customer}%`);
       }
 
       // Paginação
       if (filters.page && filters.limit) {
-        const from = (filters.page - 1) * filters.limit
-        const to = from + filters.limit - 1
-        query = query.range(from, to)
+        const from = (filters.page - 1) * filters.limit;
+        const to = from + filters.limit - 1;
+        query = query.range(from, to);
       }
 
       // Ordenação
-      query = query.order('created_at', { ascending: false })
+      query = query.order('created_at', { ascending: false });
 
-      const { data, error: fetchError } = await query
-
-      if (fetchError) throw fetchError
+      const { data, error: fetchError } = await query;
+      
+      if (fetchError) throw fetchError;
 
       // Processar dados dos pedidos
-      orders.value = (data || []).map((order: any) => ({
+      orders.value = data.map((order: any) => ({
         ...order,
         items: order.order_items || []
-      }))
+      }));
 
-      return { data: orders.value, error: null }
-
+      return { data: orders.value, error: null };
     } catch (err: any) {
-      error.value = err.message
-      console.error('Erro ao buscar pedidos:', err)
-      return { data: null, error: err.message }
+      error.value = err.message;
+      console.error('Erro ao buscar pedidos:', err);
+      return { data: [], error: err.message };
     } finally {
-      loading.value = false
+      loading.value = false;
     }
   }
 
@@ -241,7 +357,7 @@ export const useOrdersStore = defineStore('orders', () => {
             total_price
           )
         `)
-        .eq('number', number)
+        .eq('order_number', number)
         .single()
 
       if (fetchError) throw fetchError
@@ -262,55 +378,101 @@ export const useOrdersStore = defineStore('orders', () => {
     }
   }
 
-  const createOrder = async (orderData: Omit<Order, 'id' | 'number' | 'created_at' | 'updated_at'>) => {
+  const createOrder = async (orderData: any) => {
+    const { success, error: notify } = useNotifications()
+    
     try {
       loading.value = true
       error.value = null
 
+
+
+      // Obter usuário do composable global
+      const { user } = useAuth()
+
+      
       // Gerar número do pedido
+
       const orderNumber = await generateOrderNumber()
 
+
+      // Separar os itens dos dados do pedido
+      const { items, ...orderWithoutItems } = orderData
+      
       const newOrder = {
-        ...orderData,
-        number: orderNumber,
+        ...orderWithoutItems,
+        order_number: orderNumber,
+        user_id: user.value?.id,
       }
 
-      const { data, error: createError } = await supabase
-        .from('orders')
-        .insert([newOrder])
-        .select()
-        .single()
 
-      if (createError) throw createError
+      
+      try {
+        const { data, error: createError } = await supabase
+          .from('orders')
+          .insert([newOrder])
+          .select()
+          .single()
 
-      // Criar itens do pedido se fornecidos
-      if (orderData.items && orderData.items.length > 0) {
-        const orderItems = orderData.items.map(item => ({
-          ...item,
-          order_id: data.id
-        }))
 
-        const { error: itemsError } = await supabase
-          .from('order_items')
-          .insert(orderItems)
-
-        if (itemsError) throw itemsError
-
-        // Atualizar estoque dos produtos
-        for (const item of orderData.items) {
-          await updateProductStock(item.product_id, item.quantity, 'subtract')
+        if (createError) {
+          console.error('Erro detalhado do Supabase:', createError)
+          throw createError
         }
+
+        
+        // Criar itens do pedido se fornecidos
+        if (items && items.length > 0) {
+          const orderItems = items.map(item => ({
+            ...item,
+            order_id: data.id
+          }))
+
+
+          const { error: itemsError } = await supabase
+            .from('order_items')
+            .insert(orderItems)
+
+          if (itemsError) {
+            console.error('Erro ao inserir itens:', itemsError)
+            throw itemsError
+          }
+
+
+          // Atualizar estoque dos produtos
+          for (const item of items) {
+            await updateProductStock(item.product_id, item.quantity, 'subtract')
+          }
+        }
+
+        // Adicionar ao estado local
+        const completeOrder = { ...data, items: items || [] }
+        orders.value.unshift(completeOrder)
+
+        
+        // Notificação de sucesso
+        success(
+          'Pedido criado!',
+          `Pedido #${orderNumber} foi criado com sucesso`
+        )
+
+        return { data: completeOrder, error: null }
+        
+      } catch (insertError) {
+        console.error('Erro durante insert:', insertError)
+        throw insertError
       }
-
-      // Adicionar ao estado local
-      const completeOrder = { ...data, items: orderData.items || [] }
-      orders.value.unshift(completeOrder)
-
-      return { data: completeOrder, error: null }
 
     } catch (err: any) {
       error.value = err.message
       console.error('Erro ao criar pedido:', err)
+      
+      // Notificação de erro
+      notify(
+        'Erro ao criar pedido',
+        err.message || 'Não foi possível processar seu pedido'
+      )
+      
       return { data: null, error: err.message }
     } finally {
       loading.value = false
@@ -540,20 +702,22 @@ export const useOrdersStore = defineStore('orders', () => {
         if (order.status === 'cancelled') return false
         return new Date(order.created_at!) >= startDate
       })
-      .reduce((sum, order: Order) => sum + order.total_amount, 0)
+      .reduce((sum, order: Order) => sum + order.total, 0)
   }
 
   // Utilitários
   const generateOrderNumber = async (): Promise<string> => {
-    const year = new Date().getFullYear()
-    const { count } = await supabase
-      .from('orders')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', `${year}-01-01`)
-      .lt('created_at', `${year + 1}-01-01`)
-
-    const orderCount = (count || 0) + 1
-    return `${year}-${orderCount.toString().padStart(6, '0')}`
+    try {
+      const year = new Date().getFullYear()
+      const timestamp = Date.now().toString().slice(-6) // Últimos 6 dígitos do timestamp
+      const random = Math.floor(Math.random() * 100).toString().padStart(2, '0')
+      return `${year}-${timestamp}${random}`
+    } catch (error) {
+      console.error('Erro ao gerar número do pedido:', error)
+      // Fallback simples
+      const timestamp = Date.now()
+      return `${new Date().getFullYear()}-${timestamp}`
+    }
   }
 
   const updateProductStock = async (productId: string, quantity: number, operation: 'add' | 'subtract') => {
@@ -639,6 +803,7 @@ export const useOrdersStore = defineStore('orders', () => {
 
     // Actions
     fetchOrders,
+    fetchUserOrders,
     fetchOrderById,
     fetchOrderByNumber,
     createOrder,

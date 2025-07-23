@@ -71,7 +71,6 @@ export const useCloudinary = () => {
       formData.append("folder", `products/${productId}`);
 
       try {
-        console.log(`Fazendo upload da imagem ${i + 1}/${files.length}...`);
 
         const response = await fetch(
           `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -92,7 +91,6 @@ export const useCloudinary = () => {
         }
 
         const result = await response.json();
-        console.log("Upload bem-sucedido:", result.public_id);
 
         if (result.public_id) {
           uploadedUrls.push(result.public_id);
@@ -126,9 +124,7 @@ export const useCloudinary = () => {
           theme: "minimal",
         },
         (error: any, result: any) => {
-          if (!error && result && result.event === "success") {
-            console.log("Upload bem-sucedido:", result.info.public_id);
-          }
+
 
           if (result && result.event === "close") {
             // Widget fechado, pegar todas as imagens uploadadas

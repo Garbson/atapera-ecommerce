@@ -1,7 +1,23 @@
 <template>
   <div v-if="product" class="container mx-auto px-4 py-8">
     <!-- Breadcrumbs -->
-    <Breadcrumbs :items="breadcrumbs" />
+    <nav class="mb-6">
+      <ol class="flex items-center space-x-2 text-sm">
+        <li>
+          <NuxtLink to="/" class="text-gray-500 hover:text-gray-700"
+            >Início</NuxtLink
+          >
+        </li>
+        <li class="text-gray-400">/</li>
+        <li>
+          <NuxtLink to="/produtos" class="text-gray-500 hover:text-gray-700"
+            >Produtos</NuxtLink
+          >
+        </li>
+        <li class="text-gray-400">/</li>
+        <li class="text-gray-900 font-medium">{{ product.name }}</li>
+      </ol>
+    </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
       <!-- Galeria de Imagens -->
@@ -14,18 +30,23 @@
           />
         </div>
 
-        <div class="grid grid-cols-4 gap-2">
+        <div
+          class="grid grid-cols-4 gap-2"
+          v-if="product.images && product.images.length > 1"
+        >
           <button
             v-for="(image, index) in product.images"
             :key="index"
-            @click="selectedImage = image"
+            @click="selectedImage = getProductImage(image)"
             class="aspect-square bg-gray-100 rounded border-2"
             :class="
-              selectedImage === image ? 'border-red-500' : 'border-transparent'
+              selectedImage === getProductImage(image)
+                ? 'border-red-500'
+                : 'border-transparent'
             "
           >
             <img
-              :src="image"
+              :src="getProductImage(image, 'small')"
               :alt="`${product.name} ${index + 1}`"
               class="w-full h-full object-cover rounded"
             />
@@ -89,16 +110,23 @@
           class="bg-yellow-50 border border-yellow-200 rounded-lg p-4"
         >
           <div class="flex items-center gap-2 text-yellow-800">
-            <ExclamationTriangleIcon class="h-5 w-5" />
+            <span class="material-icons text-yellow-600">warning</span>
             <span class="font-medium">Requer Licença</span>
           </div>
           <p class="text-sm text-yellow-700 mt-1">
-            Este produto requer {{ product.license_type }} para compra.
+            Este produto requer
+            {{ product.license_type || "documentação" }} para compra.
           </p>
         </div>
 
         <!-- Especificações Técnicas -->
-        <div v-if="product.specifications" class="border rounded-lg p-4">
+        <div
+          v-if="
+            product.specifications &&
+            Object.keys(product.specifications).length > 0
+          "
+          class="border rounded-lg p-4"
+        >
           <h3 class="font-semibold mb-3">Especificações Técnicas</h3>
           <dl class="space-y-2">
             <div
@@ -108,6 +136,32 @@
             >
               <dt class="text-gray-600">{{ formatSpecKey(key) }}:</dt>
               <dd class="font-medium">{{ value }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Informações do Produto -->
+        <div
+          v-if="product.brand || product.caliber"
+          class="border rounded-lg p-4"
+        >
+          <h3 class="font-semibold mb-3">Informações</h3>
+          <dl class="space-y-2">
+            <div v-if="product.brand" class="flex justify-between">
+              <dt class="text-gray-600">Marca:</dt>
+              <dd class="font-medium">{{ product.brand }}</dd>
+            </div>
+            <div v-if="product.model" class="flex justify-between">
+              <dt class="text-gray-600">Modelo:</dt>
+              <dd class="font-medium">{{ product.model }}</dd>
+            </div>
+            <div v-if="product.caliber" class="flex justify-between">
+              <dt class="text-gray-600">Calibre:</dt>
+              <dd class="font-medium">{{ product.caliber }}</dd>
+            </div>
+            <div v-if="product.weight" class="flex justify-between">
+              <dt class="text-gray-600">Peso:</dt>
+              <dd class="font-medium">{{ product.weight }}kg</dd>
             </div>
           </dl>
         </div>
@@ -152,80 +206,92 @@
               @click="toggleFavorite"
               class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              <HeartIcon
-                :class="
-                  isFavorite ? 'text-red-500 fill-current' : 'text-gray-400'
-                "
-                class="h-6 w-6"
-              />
+              <span
+                class="material-icons"
+                :class="isFavorite ? 'text-red-500' : 'text-gray-400'"
+              >
+                {{ isFavorite ? "favorite" : "favorite_border" }}
+              </span>
             </button>
           </div>
         </div>
 
-        <!-- Compartilhar -->
-        <div class="flex items-center gap-4 pt-4 border-t">
-          <span class="text-sm text-gray-600">Compartilhar:</span>
-          <div class="flex gap-2">
-            <button class="p-2 text-blue-600 hover:bg-blue-50 rounded">
-              <ShareIcon class="h-5 w-5" />
-            </button>
-          </div>
-        </div>
+        <!-- Simulador de Frete -->
+        <ShippingCalculator :product="product" :weight="1" />
       </div>
     </div>
 
     <!-- Descrição Detalhada -->
-    <div class="prose max-w-none mb-12">
+    <div v-if="product.description" class="prose max-w-none mb-12">
       <h2 class="text-2xl font-bold mb-4">Descrição</h2>
       <div v-html="product.description"></div>
     </div>
 
     <!-- Produtos Relacionados -->
-    <RelatedProducts
-      :category-id="product.category_id"
-      :current-product-id="product.id"
-    />
-
-    <!-- Avaliações -->
-    <ProductReviews :product-id="product.id" />
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold mb-6">Produtos Relacionados</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          v-for="relatedProduct in relatedProducts"
+          :key="relatedProduct.id"
+          class="bg-white rounded-lg shadow-sm border hover:shadow-lg transition-all duration-300"
+        >
+          <div class="aspect-square overflow-hidden bg-gray-50 rounded-t-lg">
+            <NuxtLink :to="`/produtos/${relatedProduct.slug}`">
+              <img
+                :src="getFirstProductImage(relatedProduct.images)"
+                :alt="relatedProduct.name"
+                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              />
+            </NuxtLink>
+          </div>
+          <div class="p-4">
+            <NuxtLink :to="`/produtos/${relatedProduct.slug}`">
+              <h3
+                class="font-medium text-gray-900 mb-2 hover:text-red-600 transition-colors"
+              >
+                {{ relatedProduct.name }}
+              </h3>
+            </NuxtLink>
+            <p class="text-lg font-bold text-red-600">
+              {{
+                formatPrice(relatedProduct.sale_price || relatedProduct.price)
+              }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div v-else class="container mx-auto px-4 py-8">
-    <ProductSkeleton />
+    <div class="animate-pulse">
+      <div class="h-8 bg-gray-200 rounded w-3/4 mb-6"></div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="aspect-square bg-gray-200 rounded-lg"></div>
+        <div class="space-y-4">
+          <div class="h-8 bg-gray-200 rounded w-full"></div>
+          <div class="h-6 bg-gray-200 rounded w-1/2"></div>
+          <div class="h-12 bg-gray-200 rounded w-full"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  ExclamationTriangleIcon,
-  HeartIcon,
-  ShareIcon,
-} from "@heroicons/vue/24/outline";
-
+// ✅ IMPORTAR SUPABASE E CLOUDINARY
+const supabase = useSupabase();
+const { getProductImage } = useCloudinary();
 const route = useRoute();
-const { addItem } = useCartStore();
 
 // Estados
 const product = ref(null);
+const relatedProducts = ref([]);
 const selectedImage = ref("");
 const quantity = ref(1);
 const loading = ref(false);
 const isFavorite = ref(false);
-
-// Computed
-const breadcrumbs = computed(() => {
-  if (!product.value) return [];
-
-  return [
-    { name: "Início", href: "/" },
-    { name: "Produtos", href: "/produtos" },
-    {
-      name: product.value.category_name,
-      href: `/categoria/${product.value.category_slug}`,
-    },
-    { name: product.value.name, href: route.path },
-  ];
-});
 
 // Métodos
 const formatPrice = (price: number) => {
@@ -243,15 +309,31 @@ const addToCart = async () => {
   loading.value = true;
 
   try {
-    addItem({
+    const cartStore = useCartStore();
+
+    // Preparar dados do produto para o carrinho
+    const cartItem = {
       id: product.value.id,
       name: product.value.name,
       price: product.value.sale_price || product.value.price,
-      image: product.value.images[0],
-      category: product.value.category_name,
+      image: product.value.images?.[0] || "/placeholder-product.jpg",
+      category: "Produto", // Você pode buscar o nome da categoria se necessário
       maxStock: product.value.stock,
-      quantity: quantity.value,
-    });
+      product_id: product.value.id,
+    };
+
+    // Adicionar ao carrinho usando a store
+    await cartStore.addItem(cartItem, quantity.value);
+
+    // Feedback visual
+    const originalText = "Produto adicionado ao carrinho!";
+    alert(originalText);
+
+    // Opcional: abrir carrinho automaticamente
+    // cartStore.openCart();
+  } catch (error: any) {
+    console.error("Erro ao adicionar ao carrinho:", error);
+    alert(error.message || "Erro ao adicionar produto ao carrinho");
   } finally {
     loading.value = false;
   }
@@ -259,16 +341,58 @@ const addToCart = async () => {
 
 const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value;
-  // Implementar lógica de favoritos
 };
 
-// Fetch produto
+// ✅ FUNÇÃO PARA EXIBIR PRIMEIRA IMAGEM DO CLOUDINARY
+const getFirstProductImage = (images: string[]) => {
+  if (!images || images.length === 0) {
+    return "/placeholder-product.jpg";
+  }
+
+  if (typeof images[0] === "string" && !images[0].startsWith("http")) {
+    return getProductImage(images[0], "medium");
+  }
+
+  return images[0];
+};
+
+// ✅ FUNÇÃO CORRIGIDA - Buscar produto usando Supabase
 const fetchProduct = async () => {
   try {
-    const { data } = await $fetch(`/api/products/${route.params.slug}`);
+
+    // ✅ USAR SUPABASE DIRETAMENTE
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("slug", route.params.slug)
+      .eq("is_active", true)
+      .single();
+
+    if (error) {
+      console.error("❌ Erro do Supabase:", error);
+      throw error;
+    }
+
+    if (!data) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "Produto não encontrado",
+      });
+    }
+
     product.value = data;
-    selectedImage.value = data.images[0];
+
+    // Definir imagem selecionada
+    if (data.images && data.images.length > 0) {
+      selectedImage.value = getProductImage(data.images[0], "large");
+    } else {
+      selectedImage.value = "/placeholder-product.jpg";
+    }
+
+    // Buscar produtos relacionados
+    await fetchRelatedProducts(data.category_id, data.id);
   } catch (error) {
+    console.error("❌ Erro ao buscar produto:", error);
     throw createError({
       statusCode: 404,
       statusMessage: "Produto não encontrado",
@@ -276,32 +400,43 @@ const fetchProduct = async () => {
   }
 };
 
-// Lifecycle
+// ✅ BUSCAR PRODUTOS RELACIONADOS
+const fetchRelatedProducts = async (
+  categoryId: string,
+  currentProductId: string
+) => {
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select("id, name, slug, price, sale_price, images")
+      .eq("category_id", categoryId)
+      .eq("is_active", true)
+      .neq("id", currentProductId)
+      .limit(4);
+
+    if (error) {
+      console.error("❌ Erro ao buscar produtos relacionados:", error);
+      return;
+    }
+
+    relatedProducts.value = data || [];
+  } catch (error) {
+    console.error("❌ Erro ao buscar produtos relacionados:", error);
+  }
+};
+
+// Lifecycle - buscar produto
 await fetchProduct();
 
 // SEO
-useSeoMeta({
-  title: `${product.value.name} - Atapera`,
-  description: product.value.short_description || product.value.description,
-  ogTitle: product.value.name,
-  ogDescription: product.value.short_description,
-  ogImage: product.value.images[0],
-  ogType: "product",
-});
-
-// Schema.org
-useSchemaOrg([
-  defineProduct({
-    name: product.value.name,
-    description: product.value.description,
-    image: product.value.images,
-    sku: product.value.sku,
-    brand: product.value.brand,
-    offers: {
-      price: product.value.sale_price || product.value.price,
-      priceCurrency: "BRL",
-      availability: product.value.stock > 0 ? "InStock" : "OutOfStock",
-    },
-  }),
-]);
+if (product.value) {
+  useSeoMeta({
+    title: `${product.value.name} - Atapera`,
+    description: product.value.short_description || product.value.description,
+    ogTitle: product.value.name,
+    ogDescription: product.value.short_description,
+    ogImage: selectedImage.value,
+    ogType: "product",
+  });
+}
 </script>

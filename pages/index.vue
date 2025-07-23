@@ -13,8 +13,6 @@
     <!-- Sobre a Atapera -->
     <AboutSection />
 
-    <!-- Newsletter -->
-    <NewsletterSection />
   </div>
 </template>
 

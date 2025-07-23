@@ -1,26 +1,21 @@
 // middleware/admin-auth.ts
-export default defineNuxtRouteMiddleware((to, from) => {
-  const { user, isLoggedIn, loading } = useAuth();
+export default defineNuxtRouteMiddleware(async (to, from) => {
+  const authStore = useAuthStore();
 
   // Aguardar carregamento da autenticação
-  if (loading.value) {
+  if (authStore.loading) {
     return;
   }
 
   // Verificar se está logado
-  if (!isLoggedIn.value) {
+  if (!authStore.isAuthenticated) {
     return navigateTo("/admin/login");
   }
 
-  // Lista de emails autorizados como admin
-  const adminEmails = [
-    "admin@atapera.shop",
-    "contato@atapera.shop",
-    "garbsonsouza2602@gmail.com", // Adicione seu email aqui
-  ];
-
-  // Verificar se o usuário é admin
-  if (!user.value?.email || !adminEmails.includes(user.value.email)) {
+  // Verificar role de admin
+  const isAdmin = await authStore.checkAdminRole();
+  
+  if (!isAdmin) {
     throw createError({
       statusCode: 403,
       statusMessage:
