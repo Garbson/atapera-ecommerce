@@ -97,12 +97,6 @@
           <h3 class="text-lg font-semibold">Filtros</h3>
           <div class="flex gap-2">
             <button
-              @click="forceRefresh"
-              class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-            >
-              🔄 Recarregar
-            </button>
-            <button
               v-if="hasActiveFilters"
               @click="clearAllFilters"
               class="text-sm text-gray-600 hover:text-gray-800"
@@ -446,11 +440,6 @@ const clearAllFilters = () => {
   currentPage.value = 1;
 };
 
-// Força reload dos produtos (útil para debug)
-const forceRefresh = async () => {
-  currentPage.value = 1;
-  await fetchProducts();
-};
 
 const fetchProducts = async () => {
   if (!productsStore || !categoriesStore) {
@@ -570,11 +559,11 @@ watch(
 watch(
   () => route.path,
   async () => {
-    console.log("🔄 Mudança de rota detectada:", route.path);
+
 
     // Extrair slug da rota diretamente
     const routeSlug = route.params.slug || route.path.split("/").pop();
-    console.log("🔍 Slug extraído da rota:", routeSlug);
+
 
     if (!productsStore || !categoriesStore || !routeSlug) {
       console.error("❌ Dados insuficientes para fetch");
@@ -586,7 +575,6 @@ watch(
 
     // Buscar categoria pelo slug da rota
     const category = categoriesStore.getCategoryBySlug(routeSlug);
-    console.log("🔍 Categoria encontrada pela rota:", category);
 
     if (category) {
       currentPage.value = 1;
@@ -599,13 +587,12 @@ watch(
 watch(
   () => route.path,
   async () => {
-    console.log("🔄 Mudança de rota detectada:", route.path);
+
     productsStore.clearProductsCache();
     await categoriesStore.fetchCategories();
-    console.log("🔄 Resetando filtros e página...");
     currentPage.value = 1;
     await fetchProducts();
-    console.log("🔄 Produtos recarregados após mudança de rota");
+
   }
 );
 

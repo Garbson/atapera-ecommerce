@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
       config.stripeWebhookSecret
     )
 
-    console.log('Webhook recebido:', stripeEvent.type)
+
 
     switch (stripeEvent.type) {
       case 'payment_intent.succeeded':
@@ -43,8 +43,6 @@ export default defineEventHandler(async (event) => {
         await handlePaymentFailure(stripeEvent.data.object as Stripe.PaymentIntent)
         break
       
-      default:
-        console.log(`Evento não tratado: ${stripeEvent.type}`)
     }
 
     return { received: true }
@@ -86,9 +84,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 
     if (error) {
       console.error('Erro ao atualizar pedido:', error)
-    } else {
-      console.log(`Pagamento confirmado para pedido ${orderId}`)
-    }
+    } 
   } catch (error) {
     console.error('Erro ao processar pagamento bem-sucedido:', error)
   }
@@ -122,8 +118,6 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
 
     if (error) {
       console.error('Erro ao atualizar pedido:', error)
-    } else {
-      console.log(`Pagamento falhou para pedido ${orderId}`)
     }
   } catch (error) {
     console.error('Erro ao processar falha de pagamento:', error)

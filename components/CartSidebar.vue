@@ -193,6 +193,7 @@
                 </svg>
                 Ir para Checkout
               </button>
+              
 
               <button
                 @click="cartStore.closeCart()"

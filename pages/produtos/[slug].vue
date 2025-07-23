@@ -215,6 +215,9 @@
             </button>
           </div>
         </div>
+
+        <!-- Simulador de Frete -->
+        <ShippingCalculator :product="product" :weight="1" />
       </div>
     </div>
 

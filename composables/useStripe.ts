@@ -17,7 +17,6 @@ export const useStripe = () => {
   // Criar Payment Intent
   const createPaymentIntent = async (amount: number, currency = 'brl', metadata = {}) => {
     try {
-      console.log('Chamando API stripe/create-payment-intent com:', { amount: Math.round(amount * 100), currency, metadata })
       
       const data = await $fetch('/api/stripe/create-payment-intent', {
         method: 'POST',
@@ -28,7 +27,6 @@ export const useStripe = () => {
         }
       })
       
-      console.log('Resposta da API:', data)
       return { data, error: null }
     } catch (error: any) {
       console.error('Erro ao criar Payment Intent:', error)
@@ -57,7 +55,6 @@ export const useStripe = () => {
   // Criar Payment Method PIX
   const createPixPayment = async (amount: number, metadata = {}) => {
     try {
-      console.log('Chamando API stripe/create-pix-payment com:', { amount: Math.round(amount * 100), currency: 'brl', metadata })
       
       const data = await $fetch('/api/stripe/create-pix-payment', {
         method: 'POST',
@@ -68,7 +65,6 @@ export const useStripe = () => {
         }
       })
       
-      console.log('Resposta da API PIX:', data)
       return { data, error: null }
     } catch (error: any) {
       console.error('Erro ao criar pagamento PIX:', error)

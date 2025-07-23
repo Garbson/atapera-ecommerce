@@ -385,16 +385,16 @@ export const useOrdersStore = defineStore('orders', () => {
       loading.value = true
       error.value = null
 
-      console.log('Criando pedido com dados:', orderData)
+
 
       // Obter usuário do composable global
       const { user } = useAuth()
-      console.log('Usuário global:', user.value)
+
       
       // Gerar número do pedido
-      console.log('Gerando número do pedido...')
+
       const orderNumber = await generateOrderNumber()
-      console.log('Número gerado:', orderNumber)
+
 
       // Separar os itens dos dados do pedido
       const { items, ...orderWithoutItems } = orderData
@@ -405,38 +405,29 @@ export const useOrdersStore = defineStore('orders', () => {
         user_id: user.value?.id,
       }
 
-      console.log('Dados finais do pedido:', newOrder)
 
-      console.log('Inserindo pedido no banco...')
-      console.log('Método de pagamento do pedido:', newOrder.payment_method)
       
       try {
-        console.log('Chamando supabase.from(orders).insert...')
         const { data, error: createError } = await supabase
           .from('orders')
           .insert([newOrder])
           .select()
           .single()
 
-        console.log('Resultado do insert:', { data, createError })
-        console.log('Insert completado, continuando...')
 
         if (createError) {
           console.error('Erro detalhado do Supabase:', createError)
           throw createError
         }
 
-        console.log('Pedido inserido com sucesso:', data)
         
         // Criar itens do pedido se fornecidos
         if (items && items.length > 0) {
-          console.log('Criando itens do pedido...')
           const orderItems = items.map(item => ({
             ...item,
             order_id: data.id
           }))
 
-          console.log('Itens a serem inseridos:', orderItems)
 
           const { error: itemsError } = await supabase
             .from('order_items')
@@ -447,7 +438,6 @@ export const useOrdersStore = defineStore('orders', () => {
             throw itemsError
           }
 
-          console.log('Itens inseridos com sucesso')
 
           // Atualizar estoque dos produtos
           for (const item of items) {
@@ -459,7 +449,6 @@ export const useOrdersStore = defineStore('orders', () => {
         const completeOrder = { ...data, items: items || [] }
         orders.value.unshift(completeOrder)
 
-        console.log('Pedido completo criado:', completeOrder)
         
         // Notificação de sucesso
         success(

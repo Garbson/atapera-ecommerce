@@ -181,7 +181,6 @@ onMounted(async () => {
       throw new Error('Elemento #card-element não encontrado após múltiplas tentativas')
     }
     
-    console.log('Elemento encontrado, montando Stripe...')
     // Montar elemento do cartão
     cardElement.value.mount('#card-element')
 

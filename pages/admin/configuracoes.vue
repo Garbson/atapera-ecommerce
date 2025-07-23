@@ -489,9 +489,5 @@ const saveAllSettings = async () => {
   }
 };
 
-// Lifecycle
-onMounted(() => {
-  // Aqui você carregaria as configurações salvas do Supabase
-  console.log('Configurações carregadas');
-});
+
 </script>

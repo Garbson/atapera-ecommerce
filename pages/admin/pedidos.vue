@@ -546,7 +546,6 @@ const fixPaidOrders = async () => {
       return;
     }
 
-    console.log(`Encontrados ${paidOrders.length} pedidos pagos para corrigir status`);
 
     // Atualizar todos os pedidos pagos para status 'confirmed'
     const { error: updateError } = await supabase

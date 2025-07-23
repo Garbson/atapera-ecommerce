@@ -402,6 +402,73 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
     ],
   },
 
+  camping: {
+    slug: "camping",
+    title: "Camping",
+    description:
+      "Equipamentos completos para camping e aventuras outdoor. Barracas, mochilas, lanternas e tudo para sua experiência na natureza.",
+    color: "orange",
+    backgroundImage: "/images/campingBg.jpg",
+    filters: [
+      {
+        key: "subcategory",
+        label: "Categoria",
+        placeholder: "Todas as Categorias",
+        options: [
+          { value: "barracas", label: "Barracas" },
+          { value: "mochilas", label: "Mochilas" },
+          { value: "sacos-dormir", label: "Sacos de Dormir" },
+          { value: "lanternas", label: "Lanternas" },
+          { value: "ferramentas", label: "Ferramentas" },
+          { value: "cozinha", label: "Cozinha Camping" },
+          { value: "acessorios", label: "Acessórios" },
+        ],
+      },
+      {
+        key: "season",
+        label: "Temporada",
+        placeholder: "Todas as Temporadas",
+        options: [
+          { value: "3-estacoes", label: "3 Estações" },
+          { value: "4-estacoes", label: "4 Estações" },
+          { value: "verao", label: "Verão" },
+          { value: "inverno", label: "Inverno" },
+        ],
+      },
+      {
+        key: "brand",
+        label: "Marca",
+        placeholder: "Todas as Marcas",
+        options: [
+          { value: "nautika", label: "Nautika" },
+          { value: "coleman", label: "Coleman" },
+          { value: "trilhas", label: "Trilhas & Rumos" },
+          { value: "azteq", label: "Azteq" },
+          { value: "campingaz", label: "Campingaz" },
+        ],
+      },
+      {
+        key: "capacity",
+        label: "Capacidade",
+        placeholder: "Todas as Capacidades",
+        options: [
+          { value: "1-pessoa", label: "1 Pessoa" },
+          { value: "2-pessoas", label: "2 Pessoas" },
+          { value: "3-4-pessoas", label: "3-4 Pessoas" },
+          { value: "5-pessoas", label: "5+ Pessoas" },
+        ],
+      },
+    ],
+    quickCategories: [
+      { id: 1, name: "Barracas", icon: "⛺", value: "barracas" },
+      { id: 2, name: "Mochilas", icon: "🎒", value: "mochilas" },
+      { id: 3, name: "Sacos de Dormir", icon: "🛏️", value: "sacos-dormir" },
+      { id: 4, name: "Lanternas", icon: "🔦", value: "lanternas" },
+      { id: 5, name: "Ferramentas", icon: "🔧", value: "ferramentas" },
+      { id: 6, name: "Cozinha", icon: "🍳", value: "cozinha" },
+    ],
+  },
+
   ofertas: {
     slug: "ofertas",
     title: "Ofertas Especiais",
@@ -420,6 +487,7 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
           { value: "pesca", label: "Pesca" },
           { value: "caca", label: "Caça" },
           { value: "vestuario", label: "Vestuário" },
+          { value: "camping", label: "Camping" },
         ],
       },
       {

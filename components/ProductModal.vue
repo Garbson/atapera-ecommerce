@@ -773,8 +773,6 @@ const handleSubmit = async (event?: Event) => {
     event.stopPropagation();
   }
   
-  console.log('🔧 handleSubmit chamado - usando store');
-  console.log('🔍 isEditing:', isEditing.value, 'props.product:', props.product);
   loading.value = true;
 
   try {
@@ -784,21 +782,17 @@ const handleSubmit = async (event?: Event) => {
       return;
     }
 
-    console.log('✅ Validações básicas OK');
     
     // Gerar ID temporário para produto novo (usado na pasta do Cloudinary)
     const productId = props.product?.id || crypto.randomUUID();
-    console.log('🆔 Product ID:', productId);
     
     // 1. Fazer upload das novas imagens se houver
     let newImageUrls: string[] = [];
     if (selectedFiles.value.length > 0) {
       uploadingImages.value = true;
-      console.log('📸 Fazendo upload de', selectedFiles.value.length, 'imagens');
       
       try {
         newImageUrls = await uploadImages(selectedFiles.value, productId);
-        console.log('✅ Upload concluído:', newImageUrls);
       } catch (error) {
         console.error('❌ Erro no upload:', error);
         alert('Erro no upload das imagens. Tente novamente.');
@@ -810,7 +804,6 @@ const handleSubmit = async (event?: Event) => {
     
     // 2. Combinar imagens existentes com as novas
     const allImages = [...(form.images || []), ...newImageUrls];
-    console.log('🖼️ Total de imagens:', allImages.length);
 
     // 3. Preparar dados para a store
     const productData = {
@@ -842,44 +835,38 @@ const handleSubmit = async (event?: Event) => {
       meta_description: form.meta_description || null,
     };
 
-    console.log('📋 Dados do produto preparados:', productData);
 
     let result;
 
     if (isEditing.value) {
-      console.log('✏️ Atualizando produto existente via store');
-      console.log('🆔 ID do produto para atualização:', props.product!.id);
-      console.log('📝 Dados para atualização:', productData);
+
       
       try {
-        console.log('🚀 Chamando updateProduct...');
-        console.log('🔍 Verificando se updateProduct existe:', typeof productsStore.updateProduct);
-        console.log('🔍 ID:', props.product!.id!, 'Tipo:', typeof props.product!.id!);
+
         
-        // Tentar chamar diretamente
-        console.log('🔥 Tentativa direta de chamada...');
+
         const updateFunction = productsStore.updateProduct;
-        console.log('🔍 Função extraída:', typeof updateFunction);
+      
         
         result = await updateFunction(props.product!.id!, productData);
-        console.log('✅ updateProduct retornou:', result);
+ 
       } catch (updateError) {
         console.error('❌ Erro na chamada updateProduct:', updateError);
         throw updateError;
       }
     } else {
-      console.log('➕ Criando novo produto via store');
+   
       result = await productsStore.createProduct(productData);
     }
 
-    console.log('🔍 Resultado da store:', result);
+
 
     if (result.error) {
       console.error('❌ Erro da store:', result.error);
       throw new Error(result.error);
     }
 
-    console.log('✅ Produto salvo com sucesso via store:', result.data);
+    
 
     // Limpar arquivos selecionados
     selectedFiles.value = [];

@@ -236,7 +236,7 @@ const filters = computed(() => {
   
   if (categories.value?.length > 0) {
     const categoryFilters = categories.value
-      .filter(cat => ['armas-fogo', 'armas-pressao', 'airsoft', 'pesca', 'caca', 'vestuario'].includes(cat.slug))
+      .filter(cat => ['armas-fogo', 'armas-pressao', 'airsoft', 'pesca', 'caca', 'vestuario', 'camping'].includes(cat.slug))
       .map(cat => ({
         id: cat.slug,
         name: cat.title
@@ -253,6 +253,7 @@ const filters = computed(() => {
     { id: "pesca", name: "Pesca" },
     { id: "caca", name: "Caça" },
     { id: "vestuario", name: "Vestuário" },
+    { id: "camping", name: "Camping" },
   ]
 })
 

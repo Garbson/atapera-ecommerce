@@ -295,6 +295,13 @@
           </li>
           <li>
             <NuxtLink
+              to="/categoria/camping"
+              class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              >Camping</NuxtLink
+            >
+          </li>
+          <li>
+            <NuxtLink
               to="/categoria/ofertas"
               class="text-red-600 hover:text-red-700 font-medium transition-colors"
               >🔥 Ofertas</NuxtLink
@@ -462,6 +469,14 @@
               class="block text-gray-700 hover:text-red-600 transition-colors"
               @click="closeMobileMenu"
               >Vestuário</NuxtLink
+            >
+          </li>
+          <li>
+            <NuxtLink
+              to="/categoria/camping"
+              class="block text-gray-700 hover:text-red-600 transition-colors"
+              @click="closeMobileMenu"
+              >Camping</NuxtLink
             >
           </li>
           <li>
