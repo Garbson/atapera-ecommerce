@@ -331,149 +331,146 @@
     <!-- Mobile Menu -->
     <div
       v-if="showMobileMenu"
-      class="md:hidden bg-white border-t border-gray-200"
+      class="md:hidden bg-white border-t border-gray-200 shadow-lg"
     >
-      <nav class="container mx-auto px-4 py-4">
-        <ul class="space-y-4">
-          <li>
-            <button
-              @click="showMobileSearch = !showMobileSearch"
-              class="flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors cursor-pointer"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              Buscar
-            </button>
-          </li>
+      <nav class="container mx-auto px-4 py-6">
+        <!-- Header do Menu -->
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-1">Categorias</h3>
+          <p class="text-sm text-gray-500">Navegue por nossos produtos</p>
+        </div>
 
-          <!-- Mobile Auth Section -->
-          <li v-if="!isLoggedIn" class="border-b pb-4">
-            <div class="space-y-2">
-              <button
-                @click="goToLogin"
-                class="block text-gray-700 hover:text-red-600 transition-colors py-2 cursor-pointer"
-              >
-                👤 Entrar
-              </button>
-              <button
-                @click="goToCadastro"
-                class="block text-gray-700 hover:text-red-600 transition-colors py-2 cursor-pointer"
-              >
-                📝 Criar Conta
-              </button>
+        <!-- Buscar -->
+        <div class="mb-6">
+          <button
+            @click="showMobileSearch = !showMobileSearch"
+            class="w-full flex items-center gap-3 p-3 bg-gray-50 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            <svg
+              class="w-5 h-5 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <span class="font-medium">Buscar produtos</span>
+          </button>
+        </div>
+
+        <!-- Categorias Grid -->
+        <div class="grid grid-cols-2 gap-3">
+          <NuxtLink
+            to="/categoria/armas-fogo"
+            @click="closeMobileMenu"
+            class="group p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 hover:from-red-100 hover:to-red-200 transition-all duration-200"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-2 h-2 bg-red-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <span class="font-semibold text-gray-800 text-sm">Armas de Fogo</span>
             </div>
-          </li>
+            <span class="text-xs text-gray-600">Pistolas, Rifles</span>
+          </NuxtLink>
 
-          <li v-else class="border-b pb-4">
-            <div class="space-y-2">
-              <div class="text-sm text-gray-500 py-2">
-                {{ authStore.userEmail }}
-              </div>
-              <button
-                @click="goToMinhaAccount"
-                class="block text-gray-700 hover:text-red-600 transition-colors py-2 cursor-pointer"
-              >
-                👤 Minha Conta
-              </button>
-              <button
-                @click="goToPedidos"
-                class="block text-gray-700 hover:text-red-600 transition-colors py-2 cursor-pointer"
-              >
-                📦 Meus Pedidos
-              </button>
-              <button
-                v-if="isAdmin"
-                @click="goToAdminPanel"
-                class="block text-blue-600 hover:text-blue-700 transition-colors py-2 cursor-pointer"
-              >
-                🔐 Painel Admin
-              </button>
-              <button
-                @click="logout"
-                class="block text-red-600 hover:text-red-700 transition-colors py-2 cursor-pointer"
-              >
-                🚪 Sair
-              </button>
+          <NuxtLink
+            to="/categoria/armas-pressao"
+            @click="closeMobileMenu"
+            class="group p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:from-blue-100 hover:to-blue-200 transition-all duration-200"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-2 h-2 bg-blue-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <span class="font-semibold text-gray-800 text-sm">Armas Pressão</span>
             </div>
-          </li>
+            <span class="text-xs text-gray-600">Chumbinho, CO2</span>
+          </NuxtLink>
 
-          <!-- Navigation Links -->
-          <li>
-            <NuxtLink
-              to="/categoria/armas-fogo"
-              class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="closeMobileMenu"
-              >Armas de Fogo</NuxtLink
-            >
-          </li>
-          <li>
-            <NuxtLink
-              to="/categoria/armas-pressao"
-              class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="closeMobileMenu"
-              >Armas de Pressão</NuxtLink
-            >
-          </li>
-          <li>
-            <NuxtLink
-              to="/categoria/pesca"
-              class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="closeMobileMenu"
-              >Pesca</NuxtLink
-            >
-          </li>
-          <li>
-            <NuxtLink
-              to="/categoria/airsoft"
-              class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="closeMobileMenu"
-              >Airsoft</NuxtLink
-            >
-          </li>
-          <li>
-            <NuxtLink
-              to="/categoria/caca"
-              class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="closeMobileMenu"
-              >Caça</NuxtLink
-            >
-          </li>
-          <li>
-            <NuxtLink
-              to="/categoria/vestuario"
-              class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="closeMobileMenu"
-              >Vestuário</NuxtLink
-            >
-          </li>
-          <li>
-            <NuxtLink
-              to="/categoria/camping"
-              class="block text-gray-700 hover:text-red-600 transition-colors"
-              @click="closeMobileMenu"
-              >Camping</NuxtLink
-            >
-          </li>
-          <li>
-            <NuxtLink
-              to="/categoria/ofertas"
-              class="block text-red-600 hover:text-red-700 transition-colors"
-              @click="closeMobileMenu"
-              >🔥 Ofertas</NuxtLink
-            >
-          </li>
-        </ul>
+          <NuxtLink
+            to="/categoria/pesca"
+            @click="closeMobileMenu"
+            class="group p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200 hover:from-cyan-100 hover:to-cyan-200 transition-all duration-200"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-2 h-2 bg-cyan-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <span class="font-semibold text-gray-800 text-sm">Pesca</span>
+            </div>
+            <span class="text-xs text-gray-600">Varas, Iscas</span>
+          </NuxtLink>
+
+          <NuxtLink
+            to="/categoria/airsoft"
+            @click="closeMobileMenu"
+            class="group p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-200"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-2 h-2 bg-green-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <span class="font-semibold text-gray-800 text-sm">Airsoft</span>
+            </div>
+            <span class="text-xs text-gray-600">Réplicas, BBs</span>
+          </NuxtLink>
+
+          <NuxtLink
+            to="/categoria/caca"
+            @click="closeMobileMenu"
+            class="group p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 hover:from-amber-100 hover:to-amber-200 transition-all duration-200"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-2 h-2 bg-amber-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <span class="font-semibold text-gray-800 text-sm">Caça</span>
+            </div>
+            <span class="text-xs text-gray-600">Equipamentos</span>
+          </NuxtLink>
+
+          <NuxtLink
+            to="/categoria/vestuario"
+            @click="closeMobileMenu"
+            class="group p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-200"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-2 h-2 bg-purple-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <span class="font-semibold text-gray-800 text-sm">Vestuário</span>
+            </div>
+            <span class="text-xs text-gray-600">Roupas, Botas</span>
+          </NuxtLink>
+
+          <NuxtLink
+            to="/categoria/camping"
+            @click="closeMobileMenu"
+            class="group p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200 hover:from-emerald-100 hover:to-emerald-200 transition-all duration-200"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-2 h-2 bg-emerald-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <span class="font-semibold text-gray-800 text-sm">Camping</span>
+            </div>
+            <span class="text-xs text-gray-600">Barracas, Mochilas</span>
+          </NuxtLink>
+
+          <NuxtLink
+            to="/categoria/ofertas"
+            @click="closeMobileMenu"
+            class="group p-4 bg-gradient-to-br from-red-100 to-red-200 rounded-xl border-2 border-red-300 hover:from-red-200 hover:to-red-300 transition-all duration-200 relative overflow-hidden"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-2 h-2 bg-red-600 rounded-full group-hover:scale-125 transition-transform animate-pulse"></div>
+              <span class="font-bold text-red-800 text-sm">🔥 Ofertas</span>
+            </div>
+            <span class="text-xs text-red-700 font-medium">Promoções especiais</span>
+            <div class="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+              <span class="text-white text-xs font-bold">%</span>
+            </div>
+          </NuxtLink>
+        </div>
+
+        <!-- Footer do Menu -->
+        <div class="mt-6 pt-4 border-t border-gray-100">
+          <p class="text-xs text-gray-500 text-center">
+            Use o ícone de usuário para acessar sua conta
+          </p>
+        </div>
       </nav>
     </div>
   </header>

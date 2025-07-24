@@ -12,19 +12,19 @@
         <div v-else>
           <!-- Stats Cards -->
           <div
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8"
           >
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-gray-600">Vendas Hoje</p>
-                  <p class="text-2xl font-bold text-gray-800">
+                  <p class="text-xs sm:text-sm text-gray-600">Vendas Hoje</p>
+                  <p class="text-lg sm:text-2xl font-bold text-gray-800">
                     {{ formatCurrency(stats.vendasHoje) }}
                   </p>
-                  <p class="text-sm text-green-600 mt-1">+12% vs ontem</p>
+                  <p class="text-xs sm:text-sm text-green-600 mt-1">+12% vs ontem</p>
                 </div>
                 <div
-                  class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
+                  class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0"
                 >
                   <svg
                     class="w-6 h-6 text-green-600"
@@ -43,17 +43,17 @@
               </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-gray-600">Pedidos Pendentes</p>
-                  <p class="text-2xl font-bold text-gray-800">
+                  <p class="text-xs sm:text-sm text-gray-600">Pedidos Pendentes</p>
+                  <p class="text-lg sm:text-2xl font-bold text-gray-800">
                     {{ stats.pedidosPendentes }}
                   </p>
-                  <p class="text-sm text-orange-600 mt-1">Requer atenção</p>
+                  <p class="text-xs sm:text-sm text-orange-600 mt-1">Requer atenção</p>
                 </div>
                 <div
-                  class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"
+                  class="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0"
                 >
                   <svg
                     class="w-6 h-6 text-orange-600"
@@ -72,19 +72,19 @@
               </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-gray-600">Produtos Ativos</p>
-                  <p class="text-2xl font-bold text-gray-800">
+                  <p class="text-xs sm:text-sm text-gray-600">Produtos Ativos</p>
+                  <p class="text-lg sm:text-2xl font-bold text-gray-800">
                     {{ stats.produtosAtivos }}
                   </p>
-                  <p class="text-sm text-blue-600 mt-1">
+                  <p class="text-xs sm:text-sm text-blue-600 mt-1">
                     {{ stats.produtosBaixoEstoque }} baixo estoque
                   </p>
                 </div>
                 <div
-                  class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"
+                  class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0"
                 >
                   <svg
                     class="w-6 h-6 text-blue-600"
@@ -103,17 +103,17 @@
               </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm text-gray-600">Novos Usuários</p>
-                  <p class="text-2xl font-bold text-gray-800">
+                  <p class="text-xs sm:text-sm text-gray-600">Novos Usuários</p>
+                  <p class="text-lg sm:text-2xl font-bold text-gray-800">
                     {{ stats.novosUsuarios }}
                   </p>
-                  <p class="text-sm text-purple-600 mt-1">Esta semana</p>
+                  <p class="text-xs sm:text-sm text-purple-600 mt-1">Esta semana</p>
                 </div>
                 <div
-                  class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"
+                  class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0"
                 >
                   <svg
                     class="w-6 h-6 text-purple-600"
@@ -134,18 +134,18 @@
           </div>
 
           <!-- Quick Actions -->
-          <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">
+          <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
+            <h2 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">
               Ações Rápidas
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
               <NuxtLink
                 to="/admin/produtos"
-                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <div class="p-2 bg-red-100 rounded-lg mr-3">
+                <div class="p-2 bg-red-100 rounded-lg mr-3 flex-shrink-0">
                   <svg
-                    class="w-5 h-5 text-red-600"
+                    class="w-4 h-4 sm:w-5 sm:h-5 text-red-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -159,19 +159,19 @@
                   </svg>
                 </div>
                 <div>
-                  <p class="font-medium text-gray-800">Gerenciar Produtos</p>
-                  <p class="text-sm text-gray-600">
+                  <p class="text-sm sm:text-base font-medium text-gray-800">Gerenciar Produtos</p>
+                  <p class="text-xs sm:text-sm text-gray-600">
                     Adicionar, editar e organizar produtos
                   </p>
                 </div>
               </NuxtLink>
 
               <button
-                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <div class="p-2 bg-blue-100 rounded-lg mr-3">
+                <div class="p-2 bg-blue-100 rounded-lg mr-3 flex-shrink-0">
                   <svg
-                    class="w-5 h-5 text-blue-600"
+                    class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -185,19 +185,19 @@
                   </svg>
                 </div>
                 <div>
-                  <p class="font-medium text-gray-800">Categorias</p>
-                  <p class="text-sm text-gray-600">
+                  <p class="text-sm sm:text-base font-medium text-gray-800">Categorias</p>
+                  <p class="text-xs sm:text-sm text-gray-600">
                     Organizar categorias de produtos
                   </p>
                 </div>
               </button>
 
               <button
-                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                class="flex items-center p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <div class="p-2 bg-green-100 rounded-lg mr-3">
+                <div class="p-2 bg-green-100 rounded-lg mr-3 flex-shrink-0">
                   <svg
-                    class="w-5 h-5 text-green-600"
+                    class="w-4 h-4 sm:w-5 sm:h-5 text-green-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -211,8 +211,8 @@
                   </svg>
                 </div>
                 <div>
-                  <p class="font-medium text-gray-800">Relatórios</p>
-                  <p class="text-sm text-gray-600">
+                  <p class="text-sm sm:text-base font-medium text-gray-800">Relatórios</p>
+                  <p class="text-xs sm:text-sm text-gray-600">
                     Visualizar estatísticas e relatórios
                   </p>
                 </div>
@@ -221,27 +221,27 @@
           </div>
 
           <!-- Top Products -->
-          <div class="bg-white rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+          <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">
               Produtos Mais Recentes
             </h3>
-            <div class="overflow-x-auto">
-              <table class="w-full">
+            <div class="overflow-x-auto -mx-4 sm:mx-0">
+              <table class="w-full min-w-full">
                 <thead>
                   <tr class="border-b border-gray-200">
-                    <th class="text-left py-3 px-4 font-medium text-gray-600">
+                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-medium text-gray-600 text-xs sm:text-sm">
                       Produto
                     </th>
-                    <th class="text-left py-3 px-4 font-medium text-gray-600">
+                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-medium text-gray-600 text-xs sm:text-sm hidden sm:table-cell">
                       Categoria
                     </th>
-                    <th class="text-left py-3 px-4 font-medium text-gray-600">
+                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-medium text-gray-600 text-xs sm:text-sm">
                       Preço
                     </th>
-                    <th class="text-left py-3 px-4 font-medium text-gray-600">
+                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-medium text-gray-600 text-xs sm:text-sm">
                       Estoque
                     </th>
-                    <th class="text-left py-3 px-4 font-medium text-gray-600">
+                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-medium text-gray-600 text-xs sm:text-sm hidden md:table-cell">
                       Status
                     </th>
                   </tr>
@@ -252,13 +252,13 @@
                     :key="product.id"
                     class="border-b border-gray-100 hover:bg-gray-50"
                   >
-                    <td class="py-3 px-4">
-                      <div class="flex items-center gap-3">
+                    <td class="py-2 sm:py-3 px-2 sm:px-4">
+                      <div class="flex items-center gap-2 sm:gap-3">
                         <div
-                          class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"
+                          class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0"
                         >
                           <svg
-                            class="w-6 h-6 text-gray-400"
+                            class="w-4 h-4 sm:w-6 sm:h-6 text-gray-400"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -271,31 +271,34 @@
                             />
                           </svg>
                         </div>
-                        <div>
-                          <p class="font-medium text-gray-800">
+                        <div class="min-w-0">
+                          <p class="text-xs sm:text-sm font-medium text-gray-800 truncate">
                             {{ product.name }}
                           </p>
-                          <p class="text-sm text-gray-600">
+                          <p class="text-xs text-gray-600 sm:hidden">
+                            {{ getCategoryName(product.category_id) }}
+                          </p>
+                          <p class="text-xs text-gray-600 hidden sm:block">
                             SKU: {{ product.sku }}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td class="py-3 px-4 text-gray-600">
+                    <td class="py-2 sm:py-3 px-2 sm:px-4 text-gray-600 text-xs sm:text-sm hidden sm:table-cell">
                       {{ getCategoryName(product.category_id) }}
                     </td>
-                    <td class="py-3 px-4 font-medium text-green-600">
+                    <td class="py-2 sm:py-3 px-2 sm:px-4 font-medium text-green-600 text-xs sm:text-sm">
                       {{ formatCurrency(product.price) }}
                     </td>
-                    <td class="py-3 px-4">
+                    <td class="py-2 sm:py-3 px-2 sm:px-4">
                       <span
-                        class="inline-block px-2 py-1 text-xs rounded-full"
+                        class="inline-block px-1 sm:px-2 py-1 text-xs rounded-full"
                         :class="getStockClass(product.stock)"
                       >
-                        {{ product.stock }} un.
+                        {{ product.stock }}
                       </span>
                     </td>
-                    <td class="py-3 px-4">
+                    <td class="py-2 sm:py-3 px-2 sm:px-4 hidden md:table-cell">
                       <span
                         class="inline-block px-2 py-1 text-xs rounded-full"
                         :class="

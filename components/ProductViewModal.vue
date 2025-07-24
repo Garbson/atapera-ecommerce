@@ -93,21 +93,6 @@
               </div>
             </div>
 
-            <!-- Stock and Availability -->
-            <div class="space-y-2">
-              <div v-if="product.stock > 0" class="flex items-center text-green-600">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                <span class="font-medium">Em estoque ({{ product.stock }} unidades)</span>
-              </div>
-              <div v-else class="flex items-center text-red-600">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-                <span class="font-medium">Produto esgotado</span>
-              </div>
-            </div>
 
             <!-- License Warning -->
             <div v-if="product.requires_license" class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -186,13 +171,11 @@
                     v-model.number="quantity"
                     type="number"
                     min="1"
-                    :max="product.stock"
                     class="w-16 py-2 text-center border-0 focus:ring-0"
                   >
                   <button
                     @click="increaseQuantity"
-                    :disabled="quantity >= product.stock"
-                    class="p-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
+                    class="p-2 text-gray-600 hover:text-gray-800"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -205,26 +188,18 @@
               <div class="flex gap-3">
                 <button 
                   @click="handleAddToCart"
-                  :disabled="product.stock === 0 || addingToCart"
-                  :class="[
-                    'flex-1 py-3 px-6 rounded-lg font-medium transition-colors',
-                    product.stock > 0 
-                      ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50' 
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  ]"
+                  :disabled="addingToCart"
+                  class="flex-1 py-3 px-6 rounded-lg font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   <span v-if="addingToCart" class="flex items-center justify-center">
                     <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Adicionando...
                   </span>
-                  <span v-else-if="product.stock > 0">
-                    Adicionar ao Carrinho
-                  </span>
                   <span v-else>
-                    Produto Esgotado
+                    Adicionar ao Carrinho
                   </span>
                 </button>
 
@@ -320,9 +295,7 @@ const closeModal = () => {
 };
 
 const increaseQuantity = () => {
-  if (quantity.value < props.product.stock) {
-    quantity.value++;
-  }
+  quantity.value++;
 };
 
 const decreaseQuantity = () => {
@@ -332,7 +305,7 @@ const decreaseQuantity = () => {
 };
 
 const handleAddToCart = async () => {
-  if (props.product.stock === 0 || addingToCart.value) return;
+  if (addingToCart.value) return;
   
   addingToCart.value = true;
   

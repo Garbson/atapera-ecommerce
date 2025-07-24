@@ -320,7 +320,10 @@ export const useCartStore = defineStore("cart", {
          sale_price,
          images,
          stock,
-         slug
+         slug,
+         category_id,
+         requires_license,
+         categories!inner(slug, name)
        )
      `
           )

@@ -227,6 +227,29 @@
             </select>
           </div>
 
+          <!-- Subcategoria -->
+          <div v-if="availableSubcategories.length > 0">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Subcategoria
+            </label>
+            <select
+              v-model="form.subcategory"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            >
+              <option value="">Selecione uma subcategoria</option>
+              <option 
+                v-for="subcategory in availableSubcategories" 
+                :key="subcategory.value" 
+                :value="subcategory.value"
+              >
+                {{ subcategory.label }}
+              </option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">
+              A subcategoria ajuda os clientes a encontrar o produto mais facilmente
+            </p>
+          </div>
+
           <!-- Calibre (se aplicável) -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -326,7 +349,7 @@
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="0"
             />
-            <p class="text-xs text-gray-500 mt-1">Deixe vazio se não desejar controlar estoque</p>
+            <p class="text-xs text-gray-500 mt-1">Opcional - Usado apenas para controle interno</p>
           </div>
 
           <div>
@@ -577,6 +600,8 @@
 </template>
 
 <script setup lang="ts">
+import { categoriesConfig, getCategoryConfig } from '~/config/categories';
+
 const supabase = useSupabase();
 const { uploadImages, getProductImage } = useCloudinary();
 
@@ -591,6 +616,7 @@ interface Product {
   price: number;
   sale_price?: number;
   category_id: string;
+  subcategory?: string;
   brand?: string;
   model?: string;
   sku: string;
@@ -626,6 +652,30 @@ const uploadingImages = ref(false);
 const selectedFiles = ref<File[]>([]);
 const isEditing = computed(() => !!props.product);
 
+// Mapeamento de IDs de categoria para slugs
+const categoryIdToSlug = {
+  "3eebaee1-c85d-4b67-9af1-5619764b7307": "armas-fogo",
+  "d3f1376d-92ea-4a9b-a367-80456b9f0063": "armas-pressao", 
+  "3b6c5fb9-e0f3-474b-8cc2-e36dd327d2aa": "pesca",
+  "b8ce0b20-63ad-44a2-b0a0-f383d5f8ec32": "airsoft",
+  "e3afc893-b4c0-43a6-9900-c1208b1372ed": "caca",
+  "2a6c0a33-0025-4cce-a306-db578a19a4f2": "vestuario"
+};
+
+// Subcategorias disponíveis baseadas na categoria selecionada
+const availableSubcategories = computed(() => {
+  if (!form.category_id) return [];
+  
+  const categorySlug = categoryIdToSlug[form.category_id];
+  if (!categorySlug) return [];
+  
+  const categoryConfig = getCategoryConfig(categorySlug);
+  if (!categoryConfig) return [];
+  
+  const subcategoryFilter = categoryConfig.filters.find(filter => filter.key === 'subcategory');
+  return subcategoryFilter?.options || [];
+});
+
 // Dimensões separadas para facilitar o binding
 const dimensions = reactive({
   length: 0,
@@ -642,6 +692,7 @@ const form = reactive<Product>({
   price: 0,
   sale_price: 0,
   category_id: "",
+  subcategory: "",
   brand: "",
   model: "",
   sku: "",
@@ -665,6 +716,11 @@ if (props.product) {
     Object.assign(dimensions, props.product.dimensions);
   }
 }
+
+// Limpar subcategoria quando categoria mudar
+watch(() => form.category_id, () => {
+  form.subcategory = "";
+});
 
 // Funções para manipulação de arquivos
 const handleFileSelect = (event: Event) => {
@@ -814,6 +870,7 @@ const handleSubmit = async (event?: Event) => {
       price: form.price,
       sale_price: form.sale_price || null,
       category_id: form.category_id,
+      subcategory: form.subcategory || null,
       brand: form.brand || null,
       model: form.model || null,
       sku: form.sku,

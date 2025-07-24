@@ -83,7 +83,7 @@
                   v-model="customerInfo.phone"
                   type="tel"
                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
-                  placeholder="(11) 99999-9999"
+                  placeholder="(68) 9282-7730"
                 />
               </div>
               <div>
@@ -662,15 +662,15 @@ const hasFirearms = computed(() => {
     const category = item.category?.toLowerCase() || "";
     const name = item.name?.toLowerCase() || "";
 
-    // Verificar na categoria e no nome do produto
+    // Verificar prioritariamente pela categoria e campo requires_license
+    const productCategory = item.products?.categories?.slug || item.category;
+    const requiresLicense = item.products?.requires_license;
+    
     const isFirearm =
-      category.includes("armas-fogo") ||
-      category.includes("fogo") ||
-      category.includes("armas de fogo") ||
-      name.includes("pistola") ||
-      name.includes("revolver") ||
-      name.includes("rifle") ||
-      name.includes("carabina");
+      productCategory === "armas-fogo" ||
+      requiresLicense === true ||
+      (productCategory?.includes("armas-fogo") && !productCategory?.includes("pressao")) ||
+      (category.includes("armas-fogo") && !category.includes("pressao"));
 
     return isFirearm;
   });
@@ -963,7 +963,7 @@ const processCardPayment = async (orderId: string) => {
   }
 
   // Redirecionar para página de pagamento com Stripe Elements
-  await navigateTo(`/pagamento?intent=${data.clientSecret}&order=${orderId}`);
+  await navigateTo(`/pagamento?intent=${data.clientSecret}&order=${orderId}&total=${finalTotal.value}`);
 };
 
 const processPixPayment = async (orderId: string) => {
@@ -975,7 +975,7 @@ const processPixPayment = async (orderId: string) => {
   }
 
   await navigateTo(
-    `/pagamento-pix?intent=${data.clientSecret}&order=${orderId}`
+    `/pagamento-pix?intent=${data.clientSecret}&order=${orderId}&total=${finalTotal.value}`
   );
 };
 

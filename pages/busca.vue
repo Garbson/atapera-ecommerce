@@ -303,6 +303,7 @@ const addToCart = async (product: any) => {
         product_id: product.id,
         slug: product.slug,
         sale_price: product.sale_price,
+        category: product.categories?.slug || "produto",
       },
       1
     );

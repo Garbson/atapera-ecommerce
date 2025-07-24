@@ -54,6 +54,15 @@ export const useProductsStore = defineStore("products", () => {
     limit?: number;
     sort?: string;
     order?: 'asc' | 'desc';
+    minPrice?: number | string;
+    maxPrice?: number | string;
+    subcategory?: string;
+    brand?: string;
+    caliber?: string;
+    model?: string;
+    requires_license?: boolean;
+    has_sale?: boolean; // Para produtos em promoção
+    [key: string]: any; // Para filtros dinâmicos
   }
 
   // Getters
@@ -90,6 +99,7 @@ export const useProductsStore = defineStore("products", () => {
       loading.value = true;
       error.value = null;
 
+
       const supabase = getSupabaseClient();
       const config = useRuntimeConfig();
       // ✅ FORÇAR CHAMADA SEMPRE - SEM CACHE
@@ -114,11 +124,67 @@ export const useProductsStore = defineStore("products", () => {
         query = query.eq("is_featured", true);
       }
 
+      // Filtro para produtos em promoção (com sale_price)
+      if (filters.has_sale) {
+        query = query.not("sale_price", "is", null);
+      }
+
+      // Filtros de preço
+      if (filters.minPrice) {
+        const minPrice = parseFloat(filters.minPrice.toString());
+        if (!isNaN(minPrice)) {
+          query = query.gte("price", minPrice);
+        }
+      }
+
+      if (filters.maxPrice) {
+        const maxPrice = parseFloat(filters.maxPrice.toString());
+        if (!isNaN(maxPrice)) {
+          query = query.lte("price", maxPrice);
+        }
+      }
+
+      // Filtros dinâmicos de categoria
+      if (filters.subcategory) {
+        query = query.eq("subcategory", filters.subcategory);
+      }
+
+      if (filters.brand) {
+        query = query.eq("brand", filters.brand);
+      }
+
+      if (filters.caliber) {
+        query = query.eq("caliber", filters.caliber);
+      }
+
+      if (filters.model) {
+        query = query.eq("model", filters.model);
+      }
+
+      if (typeof filters.requires_license === "boolean") {
+        query = query.eq("requires_license", filters.requires_license);
+      }
+
+      // Filtros dinâmicos gerais (para filtros customizados de categoria)
+      Object.keys(filters).forEach(key => {
+        if (!['search', 'category', 'status', 'featured', 'has_sale', 'page', 'limit', 'sort', 'order', 'minPrice', 'maxPrice', 'subcategory', 'brand', 'caliber', 'model', 'requires_license', '_timestamp'].includes(key)) {
+          const value = filters[key];
+          if (value !== null && value !== undefined && value !== '') {
+            query = query.eq(key, value);
+          }
+        }
+      });
+
       // Paginação
       if (filters.page && filters.limit) {
         const from = (filters.page - 1) * filters.limit;
         const to = from + filters.limit - 1;
         query = query.range(from, to);
+      }
+
+      // Apenas produtos ativos por padrão (a menos que status seja especificamente definido)
+      if (filters.status === undefined) {
+        query = query.eq("is_active", true);
       }
 
       // Ordenação

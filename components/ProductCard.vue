@@ -32,18 +32,6 @@
         >
           -{{ discountPercentage }}%
         </span>
-        <span
-          v-if="product.stock <= product.min_stock"
-          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
-        >
-          Últimas unidades
-        </span>
-        <span
-          v-if="product.stock === 0"
-          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
-        >
-          Esgotado
-        </span>
       </div>
 
       <!-- Quick Actions -->
@@ -159,13 +147,8 @@
       <!-- Add to Cart Button -->
       <button
         @click="handleAddToCart"
-        :disabled="product.stock === 0 || addingToCart"
-        :class="[
-          'w-full py-2 px-4 rounded-md font-medium text-sm transition-colors',
-          product.stock > 0
-            ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed',
-        ]"
+        :disabled="addingToCart"
+        class="w-full py-2 px-4 rounded-md font-medium text-sm transition-colors bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
       >
         <span v-if="addingToCart" class="flex items-center justify-center">
           <svg
@@ -189,8 +172,7 @@
           </svg>
           Adicionando...
         </span>
-        <span v-else-if="product.stock > 0"> Adicionar ao Carrinho </span>
-        <span v-else> Produto Esgotado </span>
+        <span v-else>Adicionar ao Carrinho</span>
       </button>
     </div>
   </div>
@@ -258,7 +240,7 @@ const discountPercentage = computed(() => {
 
 // Methods
 const handleAddToCart = async () => {
-  if (props.product.stock === 0 || addingToCart.value) return;
+  if (addingToCart.value) return;
 
   addingToCart.value = true;
 

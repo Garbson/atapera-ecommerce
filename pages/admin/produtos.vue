@@ -1,22 +1,22 @@
 <!-- pages/admin/produtos/index.vue -->
 <template>
   <AdminLayout>
-    <div class="space-y-6">
+    <div class="space-y-4 sm:space-y-6">
       <!-- Header -->
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-gray-800">Gerenciar Produtos</h1>
-          <p class="text-gray-600">
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Gerenciar Produtos</h1>
+          <p class="text-sm sm:text-base text-gray-600">
             Adicione, edite e gerencie produtos da loja
           </p>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 sm:gap-4">
           <button
             @click="exportProducts"
-            class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
+            class="bg-gray-100 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm sm:text-base"
           >
             <svg
-              class="w-5 h-5"
+              class="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -28,14 +28,14 @@
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            Exportar
+            <span class="hidden sm:inline">Exportar</span>
           </button>
           <button
             @click="showAddModal = true"
-            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+            class="bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 text-sm sm:text-base"
           >
             <svg
-              class="w-5 h-5"
+              class="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -47,34 +47,35 @@
                 d="M12 6v6m0 0v6m0-6h6m-6 0H6"
               />
             </svg>
-            Adicionar Produto
+            <span class="hidden sm:inline">Adicionar Produto</span>
+            <span class="sm:hidden">Adicionar</span>
           </button>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="bg-white rounded-xl shadow-sm p-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2"
               >Buscar</label
             >
             <input
               v-model="filters.search"
               type="text"
-              placeholder="Nome, SKU ou descrição..."
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="Nome, SKU..."
+              class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2"
               >Categoria</label
             >
             <select
               v-model="filters.category"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
             >
-              <option value="">Todas as categorias</option>
+              <option value="">Todas</option>
               <option 
                 v-for="category in categories" 
                 :key="category.id" 
@@ -85,26 +86,26 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2"
               >Status</label
             >
             <select
               v-model="filters.status"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
             >
-              <option value="">Todos os status</option>
+              <option value="">Todos</option>
               <option value="active">Ativo</option>
               <option value="inactive">Inativo</option>
               <option value="out-of-stock">Sem estoque</option>
             </select>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
+          <div class="sm:col-span-2 lg:col-span-1">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2"
               >Ações</label
             >
             <button
               @click="clearFilters"
-              class="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+              class="w-full bg-gray-100 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm"
             >
               Limpar Filtros
             </button>
@@ -114,11 +115,11 @@
 
       <!-- Products Table -->
       <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full">
+        <div class="overflow-x-auto -mx-4 sm:mx-0">
+          <table class="w-full min-w-full">
             <thead class="bg-gray-50">
               <tr>
-                <th class="text-left py-4 px-6 font-medium text-gray-600">
+                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm">
                   <input
                     type="checkbox"
                     v-model="selectAll"
@@ -126,25 +127,25 @@
                     class="rounded"
                   />
                 </th>
-                <th class="text-left py-4 px-6 font-medium text-gray-600">
+                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm">
                   Produto
                 </th>
-                <th class="text-left py-4 px-6 font-medium text-gray-600">
+                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm hidden sm:table-cell">
                   SKU
                 </th>
-                <th class="text-left py-4 px-6 font-medium text-gray-600">
+                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm hidden md:table-cell">
                   Categoria
                 </th>
-                <th class="text-left py-4 px-6 font-medium text-gray-600">
+                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm">
                   Preço
                 </th>
-                <th class="text-left py-4 px-6 font-medium text-gray-600">
+                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm">
                   Estoque
                 </th>
-                <th class="text-left py-4 px-6 font-medium text-gray-600">
+                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm hidden lg:table-cell">
                   Status
                 </th>
-                <th class="text-left py-4 px-6 font-medium text-gray-600">
+                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm">
                   Ações
                 </th>
               </tr>
@@ -166,7 +167,7 @@
                 :key="product.id"
                 class="border-b border-gray-100 hover:bg-gray-50"
               >
-                <td class="py-4 px-6">
+                <td class="py-2 sm:py-4 px-2 sm:px-6">
                   <input
                     type="checkbox"
                     v-model="selectedProducts"
@@ -174,45 +175,51 @@
                     class="rounded"
                   />
                 </td>
-                <td class="py-4 px-6">
-                  <div class="flex items-center gap-4">
+                <td class="py-2 sm:py-4 px-2 sm:px-6">
+                  <div class="flex items-center gap-2 sm:gap-4">
                     <img
                       :src="product.images?.[0] ? getProductImage(product.images[0], 'small') : '/placeholder-product.jpg'"
                       :alt="product.name"
-                      class="w-12 h-12 rounded-lg object-cover"
+                      class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
                     />
-                    <div>
-                      <p class="font-medium text-gray-800">
+                    <div class="min-w-0">
+                      <p class="text-xs sm:text-sm font-medium text-gray-800 truncate">
                         {{ product.name }}
                       </p>
-                      <p class="text-sm text-gray-600 line-clamp-1">
+                      <p class="text-xs text-gray-600 sm:hidden">
+                        SKU: {{ product.sku }}
+                      </p>
+                      <p class="text-xs text-gray-600 md:hidden">
+                        {{ getCategoryName(product) }}
+                      </p>
+                      <p class="text-xs text-gray-600 line-clamp-1 hidden sm:block">
                         {{ product.short_description || product.description }}
                       </p>
                     </div>
                   </div>
                 </td>
-                <td class="py-4 px-6 font-mono text-sm text-gray-600">
+                <td class="py-2 sm:py-4 px-2 sm:px-6 font-mono text-xs sm:text-sm text-gray-600 hidden sm:table-cell">
                   {{ product.sku }}
                 </td>
-                <td class="py-4 px-6">
+                <td class="py-2 sm:py-4 px-2 sm:px-6 hidden md:table-cell">
                   <span
                     class="inline-block px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"
                   >
                     {{ getCategoryName(product) }}
                   </span>
                 </td>
-                <td class="py-4 px-6 font-semibold text-gray-800">
+                <td class="py-2 sm:py-4 px-2 sm:px-6 font-semibold text-gray-800 text-xs sm:text-sm">
                   {{ formatCurrency(product.price) }}
                 </td>
-                <td class="py-4 px-6">
+                <td class="py-2 sm:py-4 px-2 sm:px-6">
                   <span
-                    class="inline-block px-2 py-1 text-xs rounded-full"
+                    class="inline-block px-1 sm:px-2 py-1 text-xs rounded-full"
                     :class="getStockClass(product.stock || 0)"
                   >
-                    {{ product.stock || 0 }} un.
+                    {{ product.stock || 0 }}
                   </span>
                 </td>
-                <td class="py-4 px-6">
+                <td class="py-2 sm:py-4 px-2 sm:px-6 hidden lg:table-cell">
                   <span
                     class="inline-block px-2 py-1 text-xs rounded-full"
                     :class="getStatusClass(product)"
@@ -220,15 +227,15 @@
                     {{ getStatusLabel(product) }}
                   </span>
                 </td>
-                <td class="py-4 px-6">
-                  <div class="flex items-center gap-2">
+                <td class="py-2 sm:py-4 px-2 sm:px-6">
+                  <div class="flex items-center gap-1 sm:gap-2">
                     <button
                       @click="editProduct(product)"
-                      class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                      class="p-1 sm:p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
                       title="Editar"
                     >
                       <svg
-                        class="w-4 h-4"
+                        class="w-3 h-3 sm:w-4 sm:h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -243,14 +250,14 @@
                     </button>
                     <button
                       @click="toggleProductStatus(product)"
-                      class="p-2 text-yellow-600 hover:bg-yellow-100 rounded-lg transition-colors"
+                      class="p-1 sm:p-2 text-yellow-600 hover:bg-yellow-100 rounded-lg transition-colors"
                       :title="
                         product.is_active ? 'Desativar' : 'Ativar'
                       "
                     >
                       <svg
                         v-if="product.is_active"
-                        class="w-4 h-4"
+                        class="w-3 h-3 sm:w-4 sm:h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -264,7 +271,7 @@
                       </svg>
                       <svg
                         v-else
-                        class="w-4 h-4"
+                        class="w-3 h-3 sm:w-4 sm:h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

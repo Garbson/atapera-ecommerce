@@ -113,7 +113,7 @@ const cardElement = ref<any>(null)
 // Parâmetros da URL
 const clientSecret = route.query.intent as string
 const orderId = route.query.order as string
-const amount = cartStore.totalValue
+const amount = route.query.total ? parseFloat(route.query.total as string) : cartStore.totalValue
 
 // Verificar se temos os parâmetros necessários
 if (!clientSecret || !orderId) {

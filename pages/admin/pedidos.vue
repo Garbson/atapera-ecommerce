@@ -1,56 +1,57 @@
 <!-- pages/admin/pedidos.vue -->
 <template>
   <AdminLayout>
-    <div class="space-y-6">
+    <div class="space-y-4 sm:space-y-6">
       <!-- Header -->
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-gray-800">Gerenciar Pedidos</h1>
-          <p class="text-gray-600">
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Gerenciar Pedidos</h1>
+          <p class="text-sm sm:text-base text-gray-600">
             Acompanhe e gerencie todos os pedidos da loja
           </p>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 sm:gap-4">
           <button
             @click="fixPaidOrders"
-            class="bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 transition-colors flex items-center gap-2"
+            class="bg-green-100 text-green-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-green-200 transition-colors flex items-center gap-2 text-sm sm:text-base"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Corrigir Status Pagos
+            <span class="hidden sm:inline">Corrigir Status Pagos</span>
+            <span class="sm:hidden">Corrigir</span>
           </button>
           <button
             @click="exportOrders"
-            class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
+            class="bg-gray-100 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm sm:text-base"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Exportar
+            <span class="hidden sm:inline">Exportar</span>
           </button>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="bg-white rounded-xl shadow-sm p-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Buscar</label>
             <input
               v-model="filters.search"
               type="text"
-              placeholder="Número do pedido, email..."
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              placeholder="Pedido, email..."
+              class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Status</label>
             <select
               v-model="filters.status"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
             >
-              <option value="">Todos os status</option>
+              <option value="">Todos</option>
               <option value="pending">Pendente</option>
               <option value="confirmed">Confirmado</option>
               <option value="processing">Processando</option>
@@ -60,23 +61,23 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Período</label>
             <select
               v-model="filters.period"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
             >
-              <option value="">Todos os períodos</option>
+              <option value="">Todos</option>
               <option value="today">Hoje</option>
               <option value="week">Esta semana</option>
               <option value="month">Este mês</option>
               <option value="quarter">Este trimestre</option>
             </select>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Ações</label>
+          <div class="sm:col-span-2 lg:col-span-1">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Ações</label>
             <button
               @click="clearFilters"
-              class="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+              class="w-full bg-gray-100 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm"
             >
               Limpar Filtros
             </button>
@@ -85,17 +86,17 @@
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white rounded-xl shadow-sm p-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
           <div class="flex items-center">
-            <div class="p-3 bg-blue-100 rounded-lg">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 sm:p-3 bg-blue-100 rounded-lg flex-shrink-0">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Total de Pedidos</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stats.total || 0 }}</p>
+            <div class="ml-3 sm:ml-4 min-w-0">
+              <p class="text-xs sm:text-sm font-medium text-gray-600">Total de Pedidos</p>
+              <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ stats.total || 0 }}</p>
             </div>
           </div>
         </div>

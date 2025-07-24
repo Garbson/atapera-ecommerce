@@ -86,23 +86,6 @@
           </div>
         </div>
 
-        <!-- Estoque -->
-        <div class="flex items-center gap-2">
-          <div
-            :class="product.stock > 0 ? 'text-green-600' : 'text-red-600'"
-            class="flex items-center gap-1"
-          >
-            <div
-              class="w-2 h-2 rounded-full"
-              :class="product.stock > 0 ? 'bg-green-600' : 'bg-red-600'"
-            ></div>
-            {{
-              product.stock > 0
-                ? `${product.stock} em estoque`
-                : "Fora de estoque"
-            }}
-          </div>
-        </div>
 
         <!-- Campos Específicos -->
         <div
@@ -181,11 +164,10 @@
                 v-model="quantity"
                 type="number"
                 min="1"
-                :max="product.stock"
                 class="w-16 text-center border-l border-r px-2 py-2"
               />
               <button
-                @click="quantity = Math.min(product.stock, quantity + 1)"
+                @click="quantity++"
                 class="px-3 py-2 hover:bg-gray-100"
               >
                 +
@@ -196,8 +178,8 @@
           <div class="flex gap-4">
             <button
               @click="addToCart"
-              :disabled="product.stock === 0 || loading"
-              class="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              :disabled="loading"
+              class="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 disabled:opacity-50"
             >
               {{ loading ? "Adicionando..." : "Adicionar ao Carrinho" }}
             </button>
@@ -317,8 +299,7 @@ const addToCart = async () => {
       name: product.value.name,
       price: product.value.sale_price || product.value.price,
       image: product.value.images?.[0] || "/placeholder-product.jpg",
-      category: "Produto", // Você pode buscar o nome da categoria se necessário
-      maxStock: product.value.stock,
+      category: product.value.categories?.slug || "produto", // Categoria real do produto
       product_id: product.value.id,
     };
 

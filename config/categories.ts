@@ -475,6 +475,7 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
     description:
       "Aproveite as melhores ofertas em armas, equipamentos de pesca, caça, airsoft e muito mais. Descontos de até 50% por tempo limitado!",
     color: "orange",
+    backgroundImage: "/images/ofertasBg.jpg",
     filters: [
       {
         key: "category",

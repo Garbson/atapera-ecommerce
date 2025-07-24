@@ -372,7 +372,6 @@ const handleLogin = async () => {
       }
 
       success.value = "Login realizado com sucesso!";
-      console.log("[Admin Login] Admin verificado, redirecionando...");
 
       // Redirect após sucesso
       setTimeout(() => {

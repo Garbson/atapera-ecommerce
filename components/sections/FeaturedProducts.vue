@@ -12,24 +12,6 @@
         </p>
       </div>
 
-      <!-- Filtros -->
-      <div class="flex justify-center mb-8">
-        <div class="flex bg-gray-100 rounded-lg p-1">
-          <button
-            v-for="filter in filters"
-            :key="filter.id"
-            @click="activeFilter = filter.id"
-            :class="[
-              'px-6 py-2 rounded-md font-medium transition-all duration-200',
-              activeFilter === filter.id
-                ? 'bg-red-600 text-white shadow-md'
-                : 'text-gray-600 hover:text-gray-800',
-            ]"
-          >
-            {{ filter.name }}
-          </button>
-        </div>
-      </div>
 
       <!-- Loading State -->
       <div
@@ -49,17 +31,19 @@
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
       >
         <div
-          v-for="product in filteredProducts"
+          v-for="product in products"
           :key="product.id"
           class="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
         >
           <!-- Product Image -->
           <div class="relative aspect-square overflow-hidden bg-gray-50">
-            <img
-              :src="product.image"
-              :alt="product.name"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
+            <NuxtLink :to="`/produtos/${product.slug}`">
+              <img
+                :src="product.image"
+                :alt="product.name"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </NuxtLink>
 
             <!-- Badges -->
             <div class="absolute top-3 left-3 flex flex-col gap-2">
@@ -99,14 +83,6 @@
               </button>
             </div>
 
-            <!-- Stock Status -->
-            <div v-if="product.stock <= 5" class="absolute bottom-3 left-3">
-              <span
-                class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full"
-              >
-                Últimas {{ product.stock }} unidades
-              </span>
-            </div>
           </div>
 
           <!-- Product Info -->
@@ -117,11 +93,13 @@
               }}</span>
             </div>
 
-            <h3
-              class="font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors"
-            >
-              {{ product.name }}
-            </h3>
+            <NuxtLink :to="`/produtos/${product.slug}`">
+              <h3
+                class="font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors"
+              >
+                {{ product.name }}
+              </h3>
+            </NuxtLink>
 
             <!-- Rating -->
             <div class="flex items-center gap-2 mb-3">
@@ -156,10 +134,9 @@
             <!-- Add to Cart -->
             <button
               @click="addToCart(product)"
-              :disabled="product.stock === 0"
-              class="w-full bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              class="w-full bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 transition-colors"
             >
-              {{ product.stock === 0 ? "Esgotado" : "Adicionar ao Carrinho" }}
+              Adicionar ao Carrinho
             </button>
           </div>
         </div>
@@ -207,7 +184,6 @@ const { categories } = storeToRefs(categoriesStore)
 const featuredProducts = ref([])
 const loading = ref(false)
 const error = ref(null)
-const activeFilter = ref("all")
 
 // Produtos filtrados e processados
 const products = computed(() => {
@@ -224,48 +200,11 @@ const products = computed(() => {
       discount: product.sale_price ? Math.round(((product.price - product.sale_price) / product.price) * 100) : null,
       isNew: isNewProduct(product.created_at),
       requiresLicense: product.requires_license,
-      filterCategory: getCategoryFilter(product.category_id),
       rating: 4 + Math.random(), // Temporário até implementar avaliações
       reviews: Math.floor(Math.random() * 200) + 10, // Temporário
     }))
 })
 
-// Filtros baseados nas categorias reais
-const filters = computed(() => {
-  const baseFilters = [{ id: "all", name: "Todos" }]
-  
-  if (categories.value?.length > 0) {
-    const categoryFilters = categories.value
-      .filter(cat => ['armas-fogo', 'armas-pressao', 'airsoft', 'pesca', 'caca', 'vestuario', 'camping'].includes(cat.slug))
-      .map(cat => ({
-        id: cat.slug,
-        name: cat.title
-      }))
-    
-    return [...baseFilters, ...categoryFilters]
-  }
-  
-  return [
-    ...baseFilters,
-    { id: "armas-fogo", name: "Armas de Fogo" },
-    { id: "armas-pressao", name: "Armas de Pressão" },
-    { id: "airsoft", name: "Airsoft" },
-    { id: "pesca", name: "Pesca" },
-    { id: "caca", name: "Caça" },
-    { id: "vestuario", name: "Vestuário" },
-    { id: "camping", name: "Camping" },
-  ]
-})
-
-// Produtos filtrados por categoria
-const filteredProducts = computed(() => {
-  if (activeFilter.value === "all") {
-    return products.value
-  }
-  return products.value.filter(
-    (product) => product.filterCategory === activeFilter.value
-  )
-})
 
 // Métodos auxiliares
 const isNewProduct = (createdAt) => {
@@ -276,12 +215,6 @@ const isNewProduct = (createdAt) => {
   return daysDiff <= 30 // Produto é "novo" se foi criado nos últimos 30 dias
 }
 
-const getCategoryFilter = (categoryId) => {
-  if (!categories.value || !categoryId) return "all"
-  
-  const category = categories.value.find(cat => cat.id === categoryId)
-  return category?.slug || "all"
-}
 
 const getCategoryName = (categoryId) => {
   if (!categories.value || !categoryId) return "Produto"
@@ -305,10 +238,10 @@ const addToCart = async (product) => {
       name: product.name,
       price: product.price,
       image: product.image,
-      maxStock: product.stock,
       product_id: product.id,
       slug: product.slug,
       sale_price: product.sale_price,
+      category: product.categories?.slug || "produto",
     }, 1)
 
   } catch (error) {

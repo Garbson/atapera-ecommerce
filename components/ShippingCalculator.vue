@@ -124,9 +124,17 @@ const isValidZip = computed(() => {
 })
 
 const hasFirearms = computed(() => {
-  if (!props.product?.category) return false
-  const categorySlug = props.product.category.toLowerCase()
-  return categorySlug.includes('armas-fogo') || categorySlug.includes('fogo')
+  if (!props.product) return false
+  
+  // Verificar campo requires_license primeiro
+  if (props.product.requires_license === true) return true
+  
+  // Verificar categoria específica
+  const categorySlug = props.product.categories?.slug || props.product.category
+  if (!categorySlug) return false
+  
+  const category = categorySlug.toLowerCase()
+  return category === 'armas-fogo' || (category.includes('armas-fogo') && !category.includes('pressao'))
 })
 
 // Methods

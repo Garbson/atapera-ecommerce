@@ -39,7 +39,6 @@
 
       <!-- Conteúdo -->
       <div class="md:col-span-2">
-        <!-- ✅ DEBUG: Conteúdo padrão se não houver NuxtPage -->
         <div v-if="!hasChildRoutes" class="space-y-6">
           <div class="bg-white p-6 rounded-lg shadow-sm border">
             <h2 class="text-xl font-semibold mb-4">Dados Pessoais</h2>

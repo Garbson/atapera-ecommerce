@@ -259,7 +259,7 @@ const features = [
     description:
       "Aceitamos diversas formas de pagamento incluindo PIX, cartões e parcelamento sem juros.",
     bgColor: "bg-indigo-100",
-    benefits: ["PIX com desconto", "Parcelamento 12x", "Pagamento seguro"],
+    benefits: ["Parcelamento 12x", "Pagamento seguro", "Transferência PIX"],
   },
   {
     id: 6,
