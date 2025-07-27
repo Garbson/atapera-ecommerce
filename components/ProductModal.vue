@@ -208,21 +208,12 @@
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
             >
               <option value="">Selecione uma categoria</option>
-              <option value="3eebaee1-c85d-4b67-9af1-5619764b7307">
-                Armas de Fogo
-              </option>
-              <option value="d3f1376d-92ea-4a9b-a367-80456b9f0063">
-                Armas de Pressão
-              </option>
-              <option value="3b6c5fb9-e0f3-474b-8cc2-e36dd327d2aa">
-                Pesca
-              </option>
-              <option value="b8ce0b20-63ad-44a2-b0a0-f383d5f8ec32">
-                Airsoft
-              </option>
-              <option value="e3afc893-b4c0-43a6-9900-c1208b1372ed">Caça</option>
-              <option value="2a6c0a33-0025-4cce-a306-db578a19a4f2">
-                Vestuário
+              <option 
+                v-for="category in availableCategories" 
+                :key="category.id" 
+                :value="category.id"
+              >
+                {{ category.name }}
               </option>
             </select>
           </div>
@@ -606,6 +597,7 @@ const supabase = useSupabase();
 const { uploadImages, getProductImage } = useCloudinary();
 
 const productsStore = useProductsStore();
+const categoriesStore = useCategoriesStore();
 
 interface Product {
   id?: string;
@@ -652,21 +644,25 @@ const uploadingImages = ref(false);
 const selectedFiles = ref<File[]>([]);
 const isEditing = computed(() => !!props.product);
 
-// Mapeamento de IDs de categoria para slugs
-const categoryIdToSlug = {
-  "3eebaee1-c85d-4b67-9af1-5619764b7307": "armas-fogo",
-  "d3f1376d-92ea-4a9b-a367-80456b9f0063": "armas-pressao", 
-  "3b6c5fb9-e0f3-474b-8cc2-e36dd327d2aa": "pesca",
-  "b8ce0b20-63ad-44a2-b0a0-f383d5f8ec32": "airsoft",
-  "e3afc893-b4c0-43a6-9900-c1208b1372ed": "caca",
-  "2a6c0a33-0025-4cce-a306-db578a19a4f2": "vestuario"
-};
+// Categorias disponíveis
+const availableCategories = computed(() => {
+  return categoriesStore.activeCategories || [];
+});
+
+// Mapeamento dinâmico de IDs de categoria para slugs
+const categoryIdToSlug = computed(() => {
+  const mapping = {};
+  availableCategories.value.forEach(category => {
+    mapping[category.id] = category.slug;
+  });
+  return mapping;
+});
 
 // Subcategorias disponíveis baseadas na categoria selecionada
 const availableSubcategories = computed(() => {
   if (!form.category_id) return [];
   
-  const categorySlug = categoryIdToSlug[form.category_id];
+  const categorySlug = categoryIdToSlug.value[form.category_id];
   if (!categorySlug) return [];
   
   const categoryConfig = getCategoryConfig(categorySlug);
@@ -720,6 +716,11 @@ if (props.product) {
 // Limpar subcategoria quando categoria mudar
 watch(() => form.category_id, () => {
   form.subcategory = "";
+});
+
+// Carregar categorias ao montar o componente
+onMounted(async () => {
+  await categoriesStore.fetchCategories();
 });
 
 // Funções para manipulação de arquivos
@@ -780,20 +781,22 @@ const generateSlug = () => {
 
 // Gerar SKU automaticamente
 const generateSKU = () => {
-  // Mapeamento de categorias para prefixos
-  const categoryPrefixes = {
-    "3eebaee1-c85d-4b67-9af1-5619764b7307": "AF", // Armas de Fogo
-    "d3f1376d-92ea-4a9b-a367-80456b9f0063": "AP", // Armas de Pressão
-    "3b6c5fb9-e0f3-474b-8cc2-e36dd327d2aa": "PSC", // Pesca
-    "b8ce0b20-63ad-44a2-b0a0-f383d5f8ec32": "AIR", // Airsoft
-    "e3afc893-b4c0-43a6-9900-c1208b1372ed": "CAC", // Caça
-    "2a6c0a33-0025-4cce-a306-db578a19a4f2": "VEST", // Vestuário
+  // Mapeamento de slugs para prefixos
+  const slugToPrefixes = {
+    "armas-fogo": "AF",
+    "armas-pressao": "AP",
+    "pesca": "PSC",
+    "airsoft": "AIR",
+    "caca": "CAC",
+    "vestuario": "VEST",
+    "camping": "CAMP",
   };
 
   let skuParts = [];
   
   // 1. Prefixo da categoria
-  const categoryPrefix = categoryPrefixes[form.category_id] || "PROD";
+  const categorySlug = categoryIdToSlug.value[form.category_id];
+  const categoryPrefix = categorySlug ? slugToPrefixes[categorySlug] || "PROD" : "PROD";
   skuParts.push(categoryPrefix);
   
   // 2. Prefixo da marca (se informada)

@@ -108,7 +108,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-6 gap-6">
               <!-- Dynamic Filters -->
               <div
-                v-for="filter in categoryData?.filters || []"
+                v-for="filter in enhancedFilters"
                 :key="filter.key"
                 class="space-y-2"
               >
@@ -529,6 +529,10 @@ const totalProducts = ref(0);
 const sortBy = ref("created_at");
 const showMobileFilters = ref(false);
 
+// Filtros dinâmicos
+const dynamicBrands = ref([]);
+const dynamicCalibers = ref([]);
+
 // Modal state
 const isProductModalOpen = ref(false);
 const selectedProduct = ref(null);
@@ -593,6 +597,43 @@ const hasActiveFilters = computed(() => {
   return Object.values(filters).some((value) => value !== "" && value !== null);
 });
 
+// Computed para filtros mesclados (estáticos + dinâmicos)
+const enhancedFilters = computed(() => {
+  if (!props.categoryData?.filters) return [];
+  
+  // Categorias que suportam filtros dinâmicos
+  const categoriesWithDynamicFilters = ['armas-fogo', 'armas-pressao', 'airsoft', 'pesca', 'caca', 'vestuario'];
+  const hasDynamicFilters = categoriesWithDynamicFilters.includes(props.categoryData.slug);
+  
+  return props.categoryData.filters.map(filter => {
+    // Aplicar marcas dinâmicas para todas as categorias suportadas
+    if (filter.key === 'brand' && hasDynamicFilters) {
+      return {
+        ...filter,
+        options: dynamicBrands.value.map(brand => ({
+          value: brand.value,
+          label: `${brand.label} (${brand.count})`
+        }))
+      };
+    }
+    
+    // Aplicar calibres dinâmicos apenas para categorias com calibre
+    const categoriesWithCaliber = ['armas-fogo', 'armas-pressao'];
+    if (filter.key === 'caliber' && categoriesWithCaliber.includes(props.categoryData.slug)) {
+      return {
+        ...filter,
+        options: dynamicCalibers.value.map(caliber => ({
+          value: caliber.value,
+          label: `${caliber.label} (${caliber.count})`
+        }))
+      };
+    }
+    
+    // Retornar filtro original para outros casos
+    return filter;
+  });
+});
+
 // Methods
 const updateFilter = (key, value) => {
   if (key && key in filters) {
@@ -606,6 +647,45 @@ const clearAllFilters = () => {
     filters[key] = ["minPrice", "maxPrice"].includes(key) ? null : "";
   });
   currentPage.value = 1;
+};
+
+// Buscar filtros dinâmicos
+const fetchDynamicFilters = async () => {
+  if (!productsStore) {
+    return;
+  }
+
+  try {
+    // Mapa de UUIDs das categorias
+    const categoryUUIDs = {
+      'armas-fogo': '3eebaee1-c85d-4b67-9af1-5619764b7307',
+      'armas-pressao': 'd3f1376d-92ea-4a9b-a367-80456b9f0063',
+      'airsoft': 'b8ce0b20-63ad-44a2-b0a0-f383d5f8ec32',
+      'pesca': '3b6c5fb9-e0f3-474b-8cc2-e36dd327d2aa',
+      'caca': 'e3afc893-b4c0-43a6-9900-c1208b1372ed',
+      'vestuario': '2a6c0a33-0025-4cce-a306-db578a19a4f2'
+    };
+    
+    const categoryUUID = categoryUUIDs[props.categoryData?.slug];
+    
+    if (!categoryUUID) {
+      return;
+    }
+    
+    // Buscar marcas únicas para a categoria
+    const brands = await productsStore.getUniqueBrands(categoryUUID);
+    dynamicBrands.value = brands;
+
+    // Buscar calibres únicos apenas para categorias que usam calibre
+    const categoriesWithCaliber = ['armas-fogo', 'armas-pressao'];
+    if (categoriesWithCaliber.includes(props.categoryData?.slug)) {
+      const calibers = await productsStore.getUniqueCalibers(categoryUUID);
+      dynamicCalibers.value = calibers;
+    }
+
+  } catch (error) {
+    console.error('Erro ao buscar filtros dinâmicos:', error);
+  }
 };
 
 
@@ -849,6 +929,9 @@ onMounted(async () => {
     if (categories.value.length === 0) {
       await categoriesStore.fetchCategories();
     }
+
+    // Buscar filtros dinâmicos
+    await fetchDynamicFilters();
 
     // Reset página e força busca de produtos
     currentPage.value = 1;

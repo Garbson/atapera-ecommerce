@@ -2,7 +2,9 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Mobile Header -->
-    <div class="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+    <div
+      class="lg:hidden bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40"
+    >
       <div class="flex items-center justify-between px-4 py-3">
         <div class="flex items-center gap-3">
           <button
@@ -23,7 +25,9 @@
               />
             </svg>
           </button>
-          <h1 class="text-lg font-semibold text-gray-800">{{ currentPageName }}</h1>
+          <h1 class="text-lg font-semibold text-gray-800">
+            {{ currentPageName }}
+          </h1>
         </div>
         <button
           @click="logout"
@@ -57,7 +61,9 @@
         class="relative flex flex-col w-80 max-w-xs bg-white shadow-xl"
         @click.stop
       >
-        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+        <div
+          class="flex items-center justify-between p-4 border-b border-gray-200"
+        >
           <h2 class="text-lg font-semibold text-gray-800">Menu Admin</h2>
           <button
             @click="closeMobileSidebar"
@@ -201,36 +207,15 @@
               </NuxtLink>
             </li>
           </ul>
-
-          <!-- Quick Stats -->
-          <div class="mt-8 p-4 bg-gray-50 rounded-lg">
-            <h3 class="text-sm font-medium text-gray-700 mb-3">
-              Resumo Rápido
-            </h3>
-            <div class="space-y-2">
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Produtos</span>
-                <span class="font-medium">{{ stats.produtosAtivos }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Pedidos Hoje</span>
-                <span class="font-medium">{{ stats.pedidosHoje }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Vendas Hoje</span>
-                <span class="font-medium text-green-600">{{
-                  formatCurrency(stats.vendasHoje)
-                }}</span>
-              </div>
-            </div>
-          </div>
         </div>
       </nav>
     </div>
 
     <div class="flex">
       <!-- Desktop Sidebar -->
-      <aside class="hidden lg:flex w-64 bg-white shadow-sm h-screen sticky top-0 overflow-y-auto">
+      <aside
+        class="hidden lg:flex w-64 bg-white shadow-sm h-screen sticky top-0 overflow-y-auto"
+      >
         <nav class="w-full p-6">
           <ul class="space-y-2">
             <li>
@@ -350,29 +335,6 @@
               </NuxtLink>
             </li>
           </ul>
-
-          <!-- Quick Stats -->
-          <div class="mt-8 p-4 bg-gray-50 rounded-lg">
-            <h3 class="text-sm font-medium text-gray-700 mb-3">
-              Resumo Rápido
-            </h3>
-            <div class="space-y-2">
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Produtos</span>
-                <span class="font-medium">{{ stats.produtosAtivos }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Pedidos Hoje</span>
-                <span class="font-medium">{{ stats.pedidosHoje }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Vendas Hoje</span>
-                <span class="font-medium text-green-600">{{
-                  formatCurrency(stats.vendasHoje)
-                }}</span>
-              </div>
-            </div>
-          </div>
         </nav>
       </aside>
 
@@ -444,9 +406,12 @@ const logout = async () => {
 };
 
 // Fechar sidebar mobile quando a rota muda
-watch(() => route.path, () => {
-  closeMobileSidebar();
-});
+watch(
+  () => route.path,
+  () => {
+    closeMobileSidebar();
+  }
+);
 
 // Click outside directive
 const vClickOutside = {

@@ -150,11 +150,11 @@ export const useProductsStore = defineStore("products", () => {
       }
 
       if (filters.brand) {
-        query = query.eq("brand", filters.brand);
+        query = query.ilike("brand", filters.brand);
       }
 
       if (filters.caliber) {
-        query = query.eq("caliber", filters.caliber);
+        query = query.ilike("caliber", filters.caliber);
       }
 
       if (filters.model) {
@@ -601,6 +601,61 @@ export const useProductsStore = defineStore("products", () => {
     products.value = [];
   };
 
+  // ✅ FUNÇÕES PARA FILTROS DINÂMICOS
+  const getUniqueFilterValues = async (field: string, categoryId?: string) => {
+    try {
+      const supabase = getSupabaseClient();
+      let query = supabase
+        .from("products")
+        .select(field)
+        .eq("is_active", true)
+        .not(field, "is", null)
+        .not(field, "eq", "");
+
+      if (categoryId) {
+        query = query.eq("category_id", categoryId);
+      }
+
+      const { data, error: fetchError } = await query;
+
+      if (fetchError) throw fetchError;
+
+      // Extrair valores únicos e filtrar nulos/vazios, ignorando case
+      const uniqueValues = [...new Set(
+        data
+          ?.map(item => item[field])
+          .filter(value => value && value.trim() !== "")
+          .map(value => value.toLowerCase()) // Normalizar para lowercase
+      )] || [];
+
+      // Retornar com case original preservado
+      return uniqueValues.map(lowerValue => {
+        const originalValue = data?.find(item => 
+          item[field] && item[field].toLowerCase() === lowerValue
+        )?.[field];
+        return {
+          value: lowerValue,
+          label: originalValue,
+          count: data?.filter(item => 
+            item[field] && item[field].toLowerCase() === lowerValue
+          ).length || 0
+        };
+      }).sort((a, b) => a.label.localeCompare(b.label));
+
+    } catch (err: any) {
+      console.error(`Erro ao buscar valores únicos para ${field}:`, err);
+      return [];
+    }
+  };
+
+  const getUniqueBrands = async (categoryId?: string) => {
+    return await getUniqueFilterValues("brand", categoryId);
+  };
+
+  const getUniqueCalibers = async (categoryId?: string) => {
+    return await getUniqueFilterValues("caliber", categoryId);
+  };
+
   return {
     // Estado
     products: readonly(products),
@@ -635,5 +690,10 @@ export const useProductsStore = defineStore("products", () => {
     clearError,
     clearCurrentProduct,
     clearProductsCache,
+
+    // Filtros dinâmicos
+    getUniqueFilterValues,
+    getUniqueBrands,
+    getUniqueCalibers,
   };
 });

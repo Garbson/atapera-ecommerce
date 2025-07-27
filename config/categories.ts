@@ -158,18 +158,6 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
           { value: "cbc", label: "CBC" },
         ],
       },
-      {
-        key: "action",
-        label: "Ação",
-        placeholder: "Todas as Ações",
-        options: [
-          { value: "semi-auto", label: "Semi-automática" },
-          { value: "revolver", label: "Revólver" },
-          { value: "ferrolho", label: "Ferrolho" },
-          { value: "alavanca", label: "Alavanca" },
-          { value: "bomba", label: "Bomba" },
-        ],
-      },
     ],
     quickCategories: [
       { id: 1, name: "Pistolas", icon: "🔫", value: "pistolas" },
@@ -213,16 +201,6 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
           { value: "4.5mm", label: "4.5mm" },
           { value: "5.5mm", label: "5.5mm" },
           { value: "6.35mm", label: "6.35mm" },
-        ],
-      },
-      {
-        key: "power",
-        label: "Potência",
-        placeholder: "Todas as Potências",
-        options: [
-          { value: "baixa", label: "Baixa (até 3J)" },
-          { value: "media", label: "Média (3-6J)" },
-          { value: "alta", label: "Alta (acima de 6J)" },
         ],
       },
       {
@@ -326,16 +304,6 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
           { value: "mochilas", label: "Mochilas e Equipamentos" },
           { value: "optica", label: "Óptica e Binóculos" },
           { value: "acessorios", label: "Acessórios" },
-        ],
-      },
-      {
-        key: "hunting_type",
-        label: "Tipo de Caça",
-        placeholder: "Todos os Tipos",
-        options: [
-          { value: "javali", label: "Caça ao Javali" },
-          { value: "aves", label: "Caça de Aves" },
-          { value: "geral", label: "Caça Geral" },
         ],
       },
       {

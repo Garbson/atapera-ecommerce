@@ -269,6 +269,12 @@ const initializeCategories = async () => {
         slug: 'vestuario',
         description: 'Roupas e acessórios outdoor',
         is_active: true
+      },
+      {
+        name: 'Camping',
+        slug: 'camping',
+        description: 'Equipamentos para camping e aventuras outdoor',
+        is_active: true
       }
     ];
 
