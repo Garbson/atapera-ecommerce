@@ -71,16 +71,16 @@
         <!-- Lista de Produtos (3 colunas) -->
         <div class="lg:col-span-3">
           <!-- Header do carrinho -->
-          <div class="flex items-center justify-between border-b border-gray-200 pb-4 mb-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-4 mb-6 gap-2">
             <div class="flex items-center gap-2">
-              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6.5-5v5a2 2 0 01-2 2H9a2 2 0 01-2-2v-5m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
               </svg>
-              <span class="text-lg font-normal text-gray-900">
+              <span class="text-base sm:text-lg font-normal text-gray-900">
                 {{ cartItems.length }} {{ cartItems.length === 1 ? 'item' : 'itens' }}
               </span>
             </div>
-            <div class="text-right">
+            <div class="text-right hidden sm:block">
               <span class="text-sm text-gray-600">Preço</span>
             </div>
           </div>
@@ -90,26 +90,26 @@
             <div
               v-for="item in cartItems"
               :key="item.id"
-              class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-sm transition-shadow"
+              class="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-sm transition-shadow"
             >
-              <div class="flex gap-4">
+              <div class="flex flex-col sm:flex-row gap-4">
                 <!-- Imagem do produto -->
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0 mx-auto sm:mx-0">
                   <NuxtLink :to="`/produtos/${item.slug}`" class="block">
                     <img
                       :src="item.image || '/placeholder-product.jpg'"
                       :alt="item.name"
-                      class="w-32 h-32 object-contain border border-gray-200 rounded"
+                      class="w-24 h-24 sm:w-32 sm:h-32 object-contain border border-gray-200 rounded"
                     />
                   </NuxtLink>
                 </div>
 
                 <!-- Informações do produto -->
                 <div class="flex-1 min-w-0">
-                  <div class="flex justify-between">
-                    <div class="flex-1 pr-4">
+                  <div class="flex flex-col lg:flex-row lg:justify-between">
+                    <div class="flex-1 lg:pr-4">
                       <!-- Nome do produto -->
-                      <h3 class="text-lg font-normal text-blue-600 hover:text-orange-600 mb-2 line-clamp-2">
+                      <h3 class="text-sm lg:text-lg font-normal text-blue-600 hover:text-orange-600 mb-2 line-clamp-2">
                         <NuxtLink :to="`/produtos/${item.slug}`">
                           {{ item.name }}
                         </NuxtLink>
@@ -127,7 +127,7 @@
                       </p>
 
                       <!-- Ações do produto -->
-                      <div class="flex flex-wrap items-center gap-4 text-sm">
+                      <div class="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2 sm:gap-4 text-sm">
                         <!-- Quantidade -->
                         <div class="flex items-center gap-2">
                           <span class="text-gray-600">Qtd:</span>
@@ -135,17 +135,17 @@
                             <button
                               @click="updateQuantity(item.id, item.quantity - 1)"
                               :disabled="item.quantity <= 1"
-                              class="px-3 py-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                              class="px-2 lg:px-3 py-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-xs lg:text-sm"
                             >
                               −
                             </button>
-                            <span class="px-3 py-1 border-l border-r border-gray-300 bg-gray-50 min-w-[3rem] text-center">
+                            <span class="px-2 lg:px-3 py-1 border-l border-r border-gray-300 bg-gray-50 min-w-[2.5rem] lg:min-w-[3rem] text-center text-xs lg:text-sm">
                               {{ item.quantity }}
                             </span>
                             <button
                               @click="updateQuantity(item.id, item.quantity + 1)"
                               :disabled="item.quantity >= (item.maxStock || 10)"
-                              class="px-3 py-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                              class="px-2 lg:px-3 py-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-xs lg:text-sm"
                             >
                               +
                             </button>
@@ -153,27 +153,24 @@
                         </div>
 
                         <!-- Separador -->
-                        <span class="text-gray-300">|</span>
+                        <span class="text-gray-300 hidden sm:inline">|</span>
 
                         <!-- Remover -->
                         <button
                           @click="removeItem(item.id)"
-                          class="text-blue-600 hover:text-orange-600 hover:underline"
+                          class="text-blue-600 hover:text-orange-600 hover:underline text-xs lg:text-sm"
                         >
                           Excluir
                         </button>
-
-                        <!-- Separador -->
-                        <span class="text-gray-300">|</span>
                       </div>
                     </div>
 
                     <!-- Preço -->
-                    <div class="text-right">
-                      <div class="text-xl font-bold text-red-700">
+                    <div class="text-right mt-2 lg:mt-0">
+                      <div class="text-lg lg:text-xl font-bold text-red-700">
                         {{ formatPrice(item.price) }}
                       </div>
-                      <div v-if="item.avistaPrice && item.avistaPrice < item.price" class="text-sm text-gray-600 mt-1">
+                      <div v-if="item.avistaPrice && item.avistaPrice < item.price" class="text-xs lg:text-sm text-gray-600 mt-1">
                         {{ formatPrice(item.avistaPrice) }} à vista
                       </div>
                     </div>

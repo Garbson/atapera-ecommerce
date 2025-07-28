@@ -192,9 +192,18 @@
                       <p class="text-xs text-gray-600 md:hidden">
                         {{ getCategoryName(product) }}
                       </p>
-                      <p class="text-xs text-gray-600 line-clamp-1 hidden sm:block">
-                        {{ product.short_description || product.description }}
-                      </p>
+                      <div class="flex items-center gap-2 hidden sm:flex">
+                        <button
+                          @click="showDescriptionDialog(product)"
+                          class="text-blue-600 hover:text-blue-800 text-xs"
+                          title="Ver descrição"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </button>
+                        <span class="text-xs text-gray-500">Ver descrição</span>
+                      </div>
                     </div>
                   </div>
                 </td>
@@ -391,6 +400,43 @@
       @close="closeModal"
       @save="saveProduct"
     />
+
+    <!-- Description Dialog -->
+    <div
+      v-if="showDescriptionModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="closeDescriptionDialog"
+    >
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Descrição do Produto</h3>
+          <button
+            @click="closeDescriptionDialog"
+            class="text-gray-400 hover:text-gray-600"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="p-4 overflow-y-auto max-h-96">
+          <h4 class="font-semibold text-gray-900 mb-2">{{ selectedProductForDescription?.name }}</h4>
+          <div class="space-y-3 text-sm text-gray-700">
+            <div v-if="selectedProductForDescription?.short_description">
+              <h5 class="font-medium text-gray-900">Descrição Curta:</h5>
+              <p>{{ selectedProductForDescription.short_description }}</p>
+            </div>
+            <div v-if="selectedProductForDescription?.description">
+              <h5 class="font-medium text-gray-900">Descrição Completa:</h5>
+              <div v-html="selectedProductForDescription.description" class="prose prose-sm max-w-none"></div>
+            </div>
+            <div v-if="!selectedProductForDescription?.short_description && !selectedProductForDescription?.description">
+              <p class="text-gray-500 italic">Nenhuma descrição disponível para este produto.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
@@ -421,6 +467,8 @@ const showAddModal = ref(false);
 const editingProduct = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
+const showDescriptionModal = ref(false);
+const selectedProductForDescription = ref(null);
 
 // Computed
 const totalProducts = computed(() => products.value.length);
@@ -542,6 +590,16 @@ const closeModal = () => {
   editingProduct.value = null;
 };
 
+const showDescriptionDialog = (product: any) => {
+  selectedProductForDescription.value = product;
+  showDescriptionModal.value = true;
+};
+
+const closeDescriptionDialog = () => {
+  showDescriptionModal.value = false;
+  selectedProductForDescription.value = null;
+};
+
 const saveProduct = async (productData: any) => {
   await fetchProducts(); // Recarregar lista após salvar
   closeModal();
@@ -645,6 +703,16 @@ watch(
   (newVal) => {
     selectAll.value =
       newVal.length === products.value.length && newVal.length > 0;
+  },
+  { deep: true }
+);
+
+// Watch filtros para recarregar produtos automaticamente
+watch(
+  () => filters.value,
+  () => {
+    currentPage.value = 1; // Reset página ao filtrar
+    fetchProducts();
   },
   { deep: true }
 );
