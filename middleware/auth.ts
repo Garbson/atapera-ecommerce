@@ -1,20 +1,14 @@
-// middleware/auth.ts - VERSÃO CORRIGIDA E DEFINITIVA
+// middleware/auth.ts
 export default defineNuxtRouteMiddleware((to, from) => {
+  const { isLoggedIn, loading } = useAuth()
 
-
-  const { isLoggedIn, loading, user, session } = useAuth();
-
-
-
-  // ✅ Aguardar carregamento - CRÍTICO
+  // Se está carregando, aguarda
   if (loading.value) {
-    return; // Não redireciona enquanto carrega
+    return // Aguarda a autenticação terminar
   }
 
-  // ✅ Verificar autenticação
+  // Se não está logado, redireciona para login
   if (!isLoggedIn.value) {
-
-
-    return navigateTo("/login");
+    return navigateTo(`/login?redirect=${to.path}`)
   }
-});
+})

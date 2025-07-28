@@ -497,8 +497,19 @@ const fetchAddresses = async () => {
 };
 
 // Lifecycle
-onMounted(() => {
-  fetchAddresses();
+onMounted(async () => {
+  // Aguardar autenticação estar pronta antes de buscar endereços
+  const { isLoggedIn } = useAuth()
+  
+  let attempts = 0
+  while (!isLoggedIn.value && attempts < 20) {
+    await new Promise(resolve => setTimeout(resolve, 100))
+    attempts++
+  }
+  
+  if (isLoggedIn.value) {
+    fetchAddresses()
+  }
 });
 
 // Máscara para CEP

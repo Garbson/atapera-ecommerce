@@ -22,6 +22,16 @@
             <span class="sm:hidden">Corrigir</span>
           </button>
           <button
+            @click="refreshData"
+            class="bg-blue-100 text-blue-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-2 text-sm sm:text-base"
+            :disabled="loading"
+          >
+            <svg class="w-4 h-4 sm:w-5 sm:h-5" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span class="hidden sm:inline">Atualizar</span>
+          </button>
+          <button
             @click="exportOrders"
             class="bg-gray-100 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm sm:text-base"
           >
@@ -45,13 +55,13 @@
               class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
             />
           </div>
-          <div>
+          <div class="relative">
             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Status</label>
             <select
               v-model="filters.status"
               class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
             >
-              <option value="">Todos</option>
+              <option value="">Todos os Status</option>
               <option value="pending">Pendente</option>
               <option value="confirmed">Confirmado</option>
               <option value="processing">Processando</option>
@@ -66,11 +76,12 @@
               v-model="filters.period"
               class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
             >
-              <option value="">Todos</option>
+              <option value="">Todos os Períodos</option>
               <option value="today">Hoje</option>
               <option value="week">Esta semana</option>
               <option value="month">Este mês</option>
               <option value="quarter">Este trimestre</option>
+              <option value="year">Este ano</option>
             </select>
           </div>
           <div class="sm:col-span-2 lg:col-span-1">
@@ -86,8 +97,8 @@
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
           <div class="flex items-center">
             <div class="p-2 sm:p-3 bg-blue-100 rounded-lg flex-shrink-0">
               <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,19 +140,6 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6">
-          <div class="flex items-center">
-            <div class="p-3 bg-emerald-100 rounded-lg">
-              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">Receita Total</p>
-              <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(stats.revenue || 0) }}</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Orders Table -->
@@ -176,7 +174,7 @@
                 </td>
                 <td class="py-4 px-6">
                   <div>
-                    <p class="font-medium text-gray-800">{{ order.user?.full_name || order.customer_name }}</p>
+                    <p class="font-medium text-gray-800">{{ order.user?.name || order.customer_name }}</p>
                     <p class="text-sm text-gray-600">{{ order.user?.email || order.customer_email }}</p>
                   </div>
                 </td>
@@ -192,7 +190,7 @@
                   </span>
                 </td>
                 <td class="py-4 px-6 font-semibold text-gray-800">
-                  {{ formatCurrency(order.total_amount) }}
+                  {{ formatCurrency(order.total) }}
                 </td>
                 <td class="py-4 px-6">
                   <div class="flex items-center gap-2">
@@ -275,12 +273,19 @@
     </div>
 
     <!-- Order Details Modal -->
-    <OrderModal
+    <div
       v-if="showOrderModal"
-      :order="selectedOrder"
-      @close="closeOrderModal"
-      @update="handleOrderUpdate"
-    />
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="closeOrderModal"
+    >
+      <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <OrderModal
+          :order="selectedOrder"
+          @close="closeOrderModal"
+          @update="handleOrderUpdate"
+        />
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
@@ -321,14 +326,14 @@ const fetchOrders = async () => {
       .from('orders')
       .select(`
         *,
-        user:user_id(full_name, email),
+        user_profiles!orders_user_id_fkey(name, email),
         order_items(*)
-      `)
+      `, { count: 'exact' })
       .order('created_at', { ascending: false });
 
     // Aplicar filtros
     if (filters.value.search) {
-      query = query.or(`order_number.ilike.%${filters.value.search}%,customer_email.ilike.%${filters.value.search}%`);
+      query = query.or(`order_number.ilike.%${filters.value.search}%,customer_email.ilike.%${filters.value.search}%,customer_name.ilike.%${filters.value.search}%`);
     }
 
     if (filters.value.status) {
@@ -352,6 +357,9 @@ const fetchOrders = async () => {
         case 'quarter':
           startDate = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
           break;
+        case 'year':
+          startDate = new Date(now.getFullYear(), 0, 1);
+          break;
       }
       
       if (startDate) {
@@ -370,7 +378,8 @@ const fetchOrders = async () => {
 
     orders.value = (data || []).map(order => ({
       ...order,
-      items: order.order_items || []
+      items: order.order_items || [],
+      user: order.user_profiles
     }));
     
     totalOrders.value = count || 0;
@@ -387,7 +396,7 @@ const fetchStats = async () => {
     // Buscar estatísticas
     const { data: statsData, error } = await supabase
       .from('orders')
-      .select('status, total_amount');
+      .select('status');
 
     if (error) throw error;
 
@@ -396,8 +405,7 @@ const fetchStats = async () => {
     stats.value = {
       total: ordersData.length,
       pending: ordersData.filter(o => o.status === 'pending').length,
-      delivered: ordersData.filter(o => o.status === 'delivered').length,
-      revenue: ordersData.reduce((sum, o) => sum + (o.total_amount || 0), 0)
+      delivered: ordersData.filter(o => o.status === 'delivered').length
     };
   } catch (error) {
     console.error('Erro ao buscar estatísticas:', error);
@@ -574,12 +582,22 @@ const fixPaidOrders = async () => {
   }
 };
 
+const refreshData = async () => {
+  await Promise.all([
+    fetchOrders(),
+    fetchStats()
+  ]);
+};
+
 const exportOrders = () => {
   // Implementar exportação CSV/Excel
   const csv = orders.value
-    .map(order =>
-      `${order.order_number},${order.customer_name || order.user?.full_name},${order.customer_email || order.user?.email},${formatDate(order.created_at)},${getStatusLabel(order.status)},${order.total_amount}`
-    )
+    .map(order => {
+      const customerName = order.customer_name || order.user?.name || 'N/A';
+      const customerEmail = order.customer_email || order.user?.email || 'N/A';
+      const total = order.total || 0;
+      return `"${order.order_number}","${customerName}","${customerEmail}","${formatDate(order.created_at)}","${getStatusLabel(order.status)}","${formatCurrency(total)}"`;
+    })
     .join("\n");
 
   const blob = new Blob([`Pedido,Cliente,Email,Data,Status,Total\n${csv}`], { type: "text/csv" });

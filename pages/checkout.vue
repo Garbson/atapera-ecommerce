@@ -454,42 +454,13 @@
 
           <!-- Método de Pagamento -->
           <div class="bg-white rounded-lg shadow-sm border p-6">
-            <h2 class="text-lg font-semibold mb-4">Método de Pagamento</h2>
-            <div class="space-y-3">
-              <label
-                class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
-                :class="{
-                  'border-red-500 bg-red-50': paymentMethod === 'card',
-                }"
-              >
-                <input
-                  v-model="paymentMethod"
-                  type="radio"
-                  value="card"
-                  class="text-red-600 focus:ring-red-500"
-                />
-                <div class="ml-3">
-                  <h3 class="text-sm font-medium">Cartão de Crédito/Débito</h3>
-                  <p class="text-sm text-gray-500">Visa, Mastercard, Elo</p>
-                </div>
-              </label>
-
-              <label
-                class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50"
-                :class="{ 'border-red-500 bg-red-50': paymentMethod === 'pix' }"
-              >
-                <input
-                  v-model="paymentMethod"
-                  type="radio"
-                  value="pix"
-                  class="text-red-600 focus:ring-red-500"
-                />
-                <div class="ml-3">
-                  <h3 class="text-sm font-medium">PIX</h3>
-                  <p class="text-sm text-gray-500">Pagamento instantâneo</p>
-                </div>
-              </label>
-            </div>
+            <PaymentSelector
+              :avista-price="cartTotal.avistaPrice"
+              :parcelado-price="cartTotal.parceladoPrice"
+              @update:method="updatePaymentMethod"
+              @update:installments="updateInstallments"
+              @update:final-price="updateFinalPrice"
+            />
           </div>
         </div>
 
@@ -621,7 +592,9 @@ const { calculateShipping } = useShipping();
 // Estado reativo
 const loading = ref(false);
 const deliveryMethod = ref<"delivery" | "pickup">("delivery");
-const paymentMethod = ref<"card" | "pix">("card");
+const paymentMethod = ref<'pix' | 'debit' | 'credit'>(cartStore.paymentMethod);
+const installments = ref(cartStore.installments);
+const finalPrice = ref(0);
 const shippingCost = ref(0);
 const selectedShippingMethod = ref("");
 
@@ -678,9 +651,28 @@ const hasFirearms = computed(() => {
   return hasFirearmsResult;
 });
 
+// Totais do carrinho com preços específicos
+const cartTotal = computed(() => {
+  const items = cartStore.items;
+  
+  const avistaPrice = items.reduce((total, item) => {
+    return total + (item.avistaPrice || item.price) * item.quantity;
+  }, 0);
+  
+  const parceladoPrice = items.reduce((total, item) => {
+    return total + (item.parceladoPrice || item.price) * item.quantity;
+  }, 0);
+  
+  return {
+    avistaPrice,
+    parceladoPrice,
+    discount: parceladoPrice - avistaPrice
+  };
+});
+
 // Total final incluindo frete
 const finalTotal = computed(() => {
-  const total = cartStore.totalValue + shippingCost.value;
+  const total = finalPrice.value + shippingCost.value;
   return total;
 });
 
@@ -717,6 +709,21 @@ const formatPrice = (price: number) => {
     style: "currency",
     currency: "BRL",
   }).format(price);
+};
+
+// Métodos para PaymentSelector
+const updatePaymentMethod = (method: 'pix' | 'debit' | 'credit') => {
+  paymentMethod.value = method;
+  cartStore.updatePaymentMethod(method);
+};
+
+const updateInstallments = (installmentCount: number) => {
+  installments.value = installmentCount;
+  cartStore.updateInstallments(installmentCount);
+};
+
+const updateFinalPrice = (price: number) => {
+  finalPrice.value = price;
 };
 
 const fetchAddressFromCEP = async () => {
@@ -931,9 +938,9 @@ const processPayment = async () => {
       throw new Error(orderError || "Erro ao criar pedido");
     }
 
-    if (paymentMethod.value === "card") {
+    if (paymentMethod.value === "credit") {
       await processCardPayment(order.id!);
-    } else if (paymentMethod.value === "pix") {
+    } else if (paymentMethod.value === "pix" || paymentMethod.value === "debit") {
       await processPixPayment(order.id!);
     } else {
       console.error(
@@ -981,6 +988,9 @@ const processPixPayment = async (orderId: string) => {
 
 // Verificar autenticação e carregar dados
 onMounted(async () => {
+  // Inicializar preço final
+  finalPrice.value = cartTotal.value.avistaPrice;
+  
   if (!isLoggedIn.value) {
     navigateTo("/login?redirect=/checkout");
   } else {

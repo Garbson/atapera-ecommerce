@@ -19,6 +19,12 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const { amount, currency = 'brl', metadata = {} } = body
 
+    console.log('💰 Criando Payment Intent:', {
+      amount,
+      currency,
+      metadata
+    })
+
     if (!amount || amount <= 0) {
       throw createError({
         statusCode: 400,
@@ -34,6 +40,8 @@ export default defineEventHandler(async (event) => {
         enabled: true,
       },
     })
+
+    console.log('✅ Payment Intent criado:', paymentIntent.id, 'Metadata:', paymentIntent.metadata)
 
     return {
       clientSecret: paymentIntent.client_secret,

@@ -37,9 +37,12 @@ export interface Database {
           sku: string | null;
           price: number;
           sale_price: number | null;
+          avista_price: number | null;
+          parcelado_price: number | null;
           category_id: string | null;
           brand: string | null;
           model: string | null;
+          subcategory: string | null;
 
           // ESTOQUE
           stock: number;
@@ -86,9 +89,12 @@ export interface Database {
           sku?: string | null;
           price: number;
           sale_price?: number | null;
+          avista_price?: number | null;
+          parcelado_price?: number | null;
           category_id?: string | null;
           brand?: string | null;
           model?: string | null;
+          subcategory?: string | null;
           stock?: number;
           min_stock?: number;
           weight?: number | null;
@@ -115,9 +121,12 @@ export interface Database {
           sku?: string | null;
           price?: number;
           sale_price?: number | null;
+          avista_price?: number | null;
+          parcelado_price?: number | null;
           category_id?: string | null;
           brand?: string | null;
           model?: string | null;
+          subcategory?: string | null;
           stock?: number;
           min_stock?: number;
           weight?: number | null;

@@ -135,7 +135,7 @@ onMounted(async () => {
       throw new Error('Erro ao carregar Stripe')
     }
 
-    // Criar elementos
+    // Criar elementos com configuração para Brasil
     elements.value = stripe.value.elements({
       appearance: {
         theme: 'stripe',
@@ -143,9 +143,10 @@ onMounted(async () => {
           colorPrimary: '#dc2626',
         },
       },
+      locale: 'pt-BR'
     })
 
-    // Criar elemento do cartão
+    // Criar elemento do cartão com configuração para Brasil
     cardElement.value = elements.value.create('card', {
       style: {
         base: {
@@ -156,6 +157,13 @@ onMounted(async () => {
           },
         },
       },
+      hidePostalCode: false,
+      iconStyle: 'default',
+      hideIcon: false,
+      // Configurações para Brasil
+      fields: {
+        postalCode: 'always'
+      }
     })
 
     // Aguardar o DOM estar pronto antes de montar

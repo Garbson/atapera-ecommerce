@@ -1,260 +1,587 @@
 <template>
-  <div v-if="product" class="container mx-auto px-4 py-8">
+  <div v-if="product" class="bg-white">
     <!-- Breadcrumbs -->
-    <nav class="mb-6">
-      <ol class="flex items-center space-x-2 text-sm">
-        <li>
-          <NuxtLink to="/" class="text-gray-500 hover:text-gray-700"
-            >Início</NuxtLink
-          >
-        </li>
-        <li class="text-gray-400">/</li>
-        <li>
-          <NuxtLink to="/produtos" class="text-gray-500 hover:text-gray-700"
-            >Produtos</NuxtLink
-          >
-        </li>
-        <li class="text-gray-400">/</li>
-        <li class="text-gray-900 font-medium">{{ product.name }}</li>
-      </ol>
-    </nav>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-      <!-- Galeria de Imagens -->
-      <div class="space-y-4">
-        <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-          <img
-            :src="selectedImage"
-            :alt="product.name"
-            class="w-full h-full object-cover"
-          />
-        </div>
-
-        <div
-          class="grid grid-cols-4 gap-2"
-          v-if="product.images && product.images.length > 1"
-        >
-          <button
-            v-for="(image, index) in product.images"
-            :key="index"
-            @click="selectedImage = getProductImage(image)"
-            class="aspect-square bg-gray-100 rounded border-2"
-            :class="
-              selectedImage === getProductImage(image)
-                ? 'border-red-500'
-                : 'border-transparent'
-            "
-          >
-            <img
-              :src="getProductImage(image, 'small')"
-              :alt="`${product.name} ${index + 1}`"
-              class="w-full h-full object-cover rounded"
-            />
-          </button>
-        </div>
+    <div class="border-b border-gray-200 bg-gray-50">
+      <div class="container mx-auto px-4 py-3">
+        <nav class="text-sm">
+          <ol class="flex items-center space-x-2">
+            <li>
+              <NuxtLink
+                to="/"
+                class="text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                Início
+              </NuxtLink>
+            </li>
+            <li class="text-gray-400">›</li>
+            <li>
+              <NuxtLink
+                to="/produtos"
+                class="text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                Produtos
+              </NuxtLink>
+            </li>
+            <li class="text-gray-400">›</li>
+            <li class="text-gray-900">{{ product.name }}</li>
+          </ol>
+        </nav>
       </div>
+    </div>
 
-      <!-- Informações do Produto -->
-      <div class="space-y-6">
-        <div>
-          <h1 class="text-3xl font-bold mb-2">{{ product.name }}</h1>
-          <p class="text-gray-600">SKU: {{ product.sku }}</p>
-        </div>
-
-        <!-- Preço -->
-        <div class="space-y-2">
-          <div class="flex items-center gap-3">
-            <span
-              v-if="product.sale_price"
-              class="text-2xl font-bold text-red-600"
-            >
-              {{ formatPrice(product.sale_price) }}
-            </span>
-            <span
-              :class="
-                product.sale_price
-                  ? 'text-lg text-gray-500 line-through'
-                  : 'text-2xl font-bold text-gray-900'
-              "
-            >
-              {{ formatPrice(product.price) }}
-            </span>
-          </div>
-
-          <div v-if="product.sale_price" class="text-sm text-green-600">
-            Economize {{ formatPrice(product.price - product.sale_price) }}
-          </div>
-        </div>
-
-
-        <!-- Campos Específicos -->
-        <div
-          v-if="product.requires_license"
-          class="bg-yellow-50 border border-yellow-200 rounded-lg p-4"
-        >
-          <div class="flex items-center gap-2 text-yellow-800">
-            <span class="material-icons text-yellow-600">warning</span>
-            <span class="font-medium">Requer Licença</span>
-          </div>
-          <p class="text-sm text-yellow-700 mt-1">
-            Este produto requer
-            {{ product.license_type || "documentação" }} para compra.
-          </p>
-        </div>
-
-        <!-- Especificações Técnicas -->
-        <div
-          v-if="
-            product.specifications &&
-            Object.keys(product.specifications).length > 0
-          "
-          class="border rounded-lg p-4"
-        >
-          <h3 class="font-semibold mb-3">Especificações Técnicas</h3>
-          <dl class="space-y-2">
-            <div
-              v-for="(value, key) in product.specifications"
-              :key="key"
-              class="flex justify-between"
-            >
-              <dt class="text-gray-600">{{ formatSpecKey(key) }}:</dt>
-              <dd class="font-medium">{{ value }}</dd>
+    <div class="container mx-auto px-4 py-4">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Galeria de Imagens - Amazon Style -->
+        <div class="lg:col-span-5">
+          <div class="sticky top-4">
+            <!-- Imagem Principal -->
+            <div class="mb-4">
+              <div
+                class="aspect-square bg-white border border-gray-200 rounded-lg overflow-hidden"
+              >
+                <img
+                  :src="selectedImage"
+                  :alt="product.name"
+                  class="w-full h-full object-contain hover:scale-105 transition-transform duration-300 cursor-zoom-in"
+                  @click="openImageModal"
+                />
+              </div>
             </div>
-          </dl>
+
+            <!-- Thumbnails -->
+            <div
+              v-if="product.images && product.images.length > 1"
+              class="grid grid-cols-6 gap-2"
+            >
+              <button
+                v-for="(image, index) in product.images"
+                :key="index"
+                @click="selectImage(image)"
+                class="aspect-square border-2 rounded-lg overflow-hidden transition-all duration-200"
+                :class="
+                  selectedImage === getProductImage(image)
+                    ? 'border-orange-500 ring-2 ring-orange-200'
+                    : 'border-gray-200 hover:border-gray-300'
+                "
+              >
+                <img
+                  :src="getProductImage(image, 'small')"
+                  :alt="`${product.name} ${index + 1}`"
+                  class="w-full h-full object-contain"
+                />
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Informações do Produto -->
-        <div
-          v-if="product.brand || product.caliber"
-          class="border rounded-lg p-4"
-        >
-          <h3 class="font-semibold mb-3">Informações</h3>
-          <dl class="space-y-2">
-            <div v-if="product.brand" class="flex justify-between">
-              <dt class="text-gray-600">Marca:</dt>
-              <dd class="font-medium">{{ product.brand }}</dd>
+        <div class="lg:col-span-4">
+          <div class="space-y-4">
+            <!-- Título e Marca -->
+            <div>
+              <div
+                v-if="product.brand"
+                class="text-sm text-blue-600 font-medium mb-1"
+              >
+                {{ product.brand }}
+              </div>
+              <h1 class="text-2xl font-normal text-gray-900 leading-tight">
+                {{ product.name }}
+              </h1>
+              <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                <span>SKU: {{ product.sku }}</span>
+                <span v-if="product.model">Modelo: {{ product.model }}</span>
+              </div>
             </div>
-            <div v-if="product.model" class="flex justify-between">
-              <dt class="text-gray-600">Modelo:</dt>
-              <dd class="font-medium">{{ product.model }}</dd>
-            </div>
-            <div v-if="product.caliber" class="flex justify-between">
-              <dt class="text-gray-600">Calibre:</dt>
-              <dd class="font-medium">{{ product.caliber }}</dd>
-            </div>
-            <div v-if="product.weight" class="flex justify-between">
-              <dt class="text-gray-600">Peso:</dt>
-              <dd class="font-medium">{{ product.weight }}kg</dd>
-            </div>
-          </dl>
-        </div>
 
-        <!-- Adicionar ao Carrinho -->
-        <div class="space-y-4">
-          <div class="flex items-center gap-4">
-            <label class="text-sm font-medium">Quantidade:</label>
-            <div class="flex items-center border rounded">
-              <button
-                @click="quantity = Math.max(1, quantity - 1)"
-                class="px-3 py-2 hover:bg-gray-100"
+            <!-- Avaliações (placeholder) -->
+            <div class="flex items-center gap-2 text-sm">
+              <div class="flex text-orange-400">
+                <span class="text-lg">★★★★☆</span>
+              </div>
+              <span class="text-blue-600 hover:underline cursor-pointer"
+                >4.2 de 5 estrelas</span
               >
-                -
-              </button>
-              <input
-                v-model="quantity"
-                type="number"
-                min="1"
-                class="w-16 text-center border-l border-r px-2 py-2"
-              />
-              <button
-                @click="quantity++"
-                class="px-3 py-2 hover:bg-gray-100"
-              >
-                +
-              </button>
+              <span class="text-gray-500">(127 avaliações)</span>
+            </div>
+
+            <!-- Preços - Amazon Style -->
+            <div class="space-y-3 py-2">
+              <!-- Preço Principal -->
+              <div class="flex items-baseline gap-2">
+                <span class="text-sm text-gray-600">Preço:</span>
+                <div class="flex items-baseline gap-2">
+                  <span
+                    v-if="hasDiscount"
+                    class="text-sm text-gray-500 line-through"
+                  >
+                    {{ formatCurrency(product.price) }}
+                  </span>
+                  <span class="text-2xl text-red-700 font-normal">
+                    {{ formatCurrency(pricing.avistaPrice) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Economia -->
+              <div v-if="pricing.discountPercentage > 0" class="text-sm">
+                <span class="text-red-700">
+                  Economize {{ formatCurrency(pricing.discount) }} ({{
+                    formatDiscount(pricing.discountPercentage)
+                  }})
+                </span>
+                <span class="text-gray-600 ml-1">com PIX ou Débito</span>
+              </div>
+
+              <!-- Parcelamento -->
+              <div class="text-sm text-gray-700">
+                ou
+                <span class="font-medium">{{
+                  formatInstallment(
+                    pricing.installmentValue,
+                    pricing.maxInstallments
+                  )
+                }}</span>
+                no cartão
+              </div>
+
+              <!-- Frete Grátis -->
+              <div class="text-sm">
+                <span class="text-blue-600 font-medium">Frete GRÁTIS</span>
+                <span class="text-gray-600"> para pedidos acima de R$ 299</span>
+              </div>
+            </div>
+
+            <!-- Disponibilidade -->
+            <div class="py-2">
+              <div class="flex items-center gap-2 text-sm">
+                <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                <span class="text-green-700 font-medium">Em estoque</span>
+              </div>
+              <div class="text-sm text-gray-600 mt-1">
+                Pronto para envio em 24h úteis
+              </div>
+            </div>
+
+            <!-- Características Principais -->
+            <div
+              v-if="mainFeatures.length > 0"
+              class="border-t border-gray-200 pt-4"
+            >
+              <h3 class="text-lg font-medium text-gray-900 mb-3">
+                Sobre este produto
+              </h3>
+              <ul class="space-y-2">
+                <li
+                  v-for="feature in mainFeatures"
+                  :key="feature"
+                  class="flex items-start gap-2 text-sm"
+                >
+                  <span class="text-gray-400 mt-1">•</span>
+                  <span class="text-gray-700">{{ feature }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Requisitos de Licença -->
+            <div
+              v-if="product.requires_license"
+              class="bg-yellow-50 border border-yellow-200 rounded-lg p-4"
+            >
+              <div class="flex items-start gap-3">
+                <svg
+                  class="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <div>
+                  <h4 class="font-medium text-yellow-800">
+                    Requer Documentação
+                  </h4>
+                  <p class="text-sm text-yellow-700 mt-1">
+                    Este produto requer
+                    {{ product.license_type || "documentação específica" }} para
+                    compra e entrega.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div class="flex gap-4">
-            <button
-              @click="addToCart"
-              :disabled="loading"
-              class="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 disabled:opacity-50"
-            >
-              {{ loading ? "Adicionando..." : "Adicionar ao Carrinho" }}
-            </button>
-
-            <button
-              @click="toggleFavorite"
-              class="p-3 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              <span
-                class="material-icons"
-                :class="isFavorite ? 'text-red-500' : 'text-gray-400'"
-              >
-                {{ isFavorite ? "favorite" : "favorite_border" }}
-              </span>
-            </button>
-          </div>
         </div>
 
-        <!-- Simulador de Frete -->
-        <ShippingCalculator :product="product" :weight="1" />
+        <!-- Sidebar de Compra - Amazon Style -->
+        <div class="lg:col-span-3">
+          <div
+            class="border border-gray-300 rounded-lg p-4 bg-white sticky top-4"
+          >
+            <!-- Preços na Sidebar -->
+            <div class="space-y-2 mb-4">
+              <div class="text-xl text-red-700 font-normal">
+                {{ formatCurrency(pricing.avistaPrice) }}
+              </div>
+              <div class="text-sm text-gray-600">
+                {{
+                  formatInstallment(
+                    pricing.installmentValue,
+                    pricing.maxInstallments
+                  )
+                }}
+              </div>
+              <div
+                v-if="pricing.discountPercentage > 0"
+                class="text-sm text-green-700"
+              >
+                {{ formatDiscount(pricing.discountPercentage) }} com PIX/Débito
+              </div>
+            </div>
+
+            <!-- Entrega -->
+            <div class="border-t border-gray-200 pt-4 mb-4">
+              <div class="text-sm">
+                <div class="font-medium text-gray-900 mb-1">Entrega</div>
+                <div class="text-gray-600">
+                  <div class="flex justify-between">
+                    <span>Frete:</span>
+                    <span class="text-green-600">GRÁTIS</span>
+                  </div>
+                  <div class="flex justify-between mt-1">
+                    <span>Chegará:</span>
+                    <span class="font-medium">Amanhã</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seletor de Quantidade -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-900 mb-2"
+                >Quantidade:</label
+              >
+              <div
+                class="flex items-center border border-gray-300 rounded w-fit"
+              >
+                <button
+                  @click="decreaseQuantity"
+                  class="px-3 py-2 hover:bg-gray-100 text-gray-600"
+                  :disabled="quantity <= 1"
+                >
+                  −
+                </button>
+                <input
+                  v-model="quantity"
+                  type="number"
+                  min="1"
+                  max="10"
+                  class="w-16 text-center border-0 focus:ring-0 focus:outline-none"
+                />
+                <button
+                  @click="increaseQuantity"
+                  class="px-3 py-2 hover:bg-gray-100 text-gray-600"
+                  :disabled="quantity >= 10"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="space-y-2">
+              <button
+                @click="addToCart"
+                :disabled="loading"
+                class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium py-2 px-4 rounded-full transition-colors disabled:opacity-50"
+              >
+                {{ loading ? "Adicionando..." : "Adicionar ao carrinho" }}
+              </button>
+
+              <button
+                @click="buyNow"
+                class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-full transition-colors"
+              >
+                Comprar agora
+              </button>
+
+              <button
+                @click="toggleWishlist"
+                class="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-full transition-colors flex items-center justify-center gap-2"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+                Adicionar à lista de desejos
+              </button>
+            </div>
+
+            <!-- Vendido por -->
+            <div
+              class="border-t border-gray-200 pt-4 mt-4 text-sm text-gray-600"
+            >
+              <div>
+                Vendido por
+                <span class="text-blue-600 font-medium">Atapera Oficial</span>
+              </div>
+              <div class="mt-1">Enviado por Atapera</div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Descrição Detalhada -->
-    <div v-if="product.description" class="prose max-w-none mb-12">
-      <h2 class="text-2xl font-bold mb-4">Descrição</h2>
-      <div v-html="product.description"></div>
-    </div>
-
-    <!-- Produtos Relacionados -->
-    <div class="mt-16">
-      <h2 class="text-2xl font-bold mb-6">Produtos Relacionados</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div
-          v-for="relatedProduct in relatedProducts"
-          :key="relatedProduct.id"
-          class="bg-white rounded-lg shadow-sm border hover:shadow-lg transition-all duration-300"
-        >
-          <div class="aspect-square overflow-hidden bg-gray-50 rounded-t-lg">
-            <NuxtLink :to="`/produtos/${relatedProduct.slug}`">
-              <img
-                :src="getFirstProductImage(relatedProduct.images)"
-                :alt="relatedProduct.name"
-                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              />
-            </NuxtLink>
-          </div>
-          <div class="p-4">
-            <NuxtLink :to="`/produtos/${relatedProduct.slug}`">
-              <h3
-                class="font-medium text-gray-900 mb-2 hover:text-red-600 transition-colors"
+      <!-- Informações Detalhadas -->
+      <div class="mt-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Descrição Principal -->
+        <div class="lg:col-span-3">
+          <!-- Tabs de Informações -->
+          <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8">
+              <button
+                v-for="tab in tabs"
+                :key="tab.id"
+                @click="activeTab = tab.id"
+                class="py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap"
+                :class="
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                "
               >
+                {{ tab.name }}
+              </button>
+            </nav>
+          </div>
+
+          <div class="mt-6">
+            <!-- Descrição -->
+            <div v-if="activeTab === 'description'" class="prose max-w-none">
+              <div
+                v-if="product.description"
+                v-html="product.description"
+              ></div>
+              <div v-else-if="product.short_description" class="text-gray-700">
+                {{ product.short_description }}
+              </div>
+              <div v-else class="text-gray-500 italic">
+                Descrição não disponível para este produto.
+              </div>
+            </div>
+
+            <!-- Especificações -->
+            <div v-else-if="activeTab === 'specs'" class="space-y-6">
+              <!-- Informações Básicas -->
+              <div v-if="basicSpecs.length > 0">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  Informações do Produto
+                </h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                    <div
+                      v-for="spec in basicSpecs"
+                      :key="spec.label"
+                      class="flex justify-between"
+                    >
+                      <dt class="text-sm text-gray-600">{{ spec.label }}:</dt>
+                      <dd class="text-sm font-medium text-gray-900">
+                        {{ spec.value }}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+
+              <!-- Especificações Técnicas -->
+              <div
+                v-if="
+                  product.specifications &&
+                  Object.keys(product.specifications).length > 0
+                "
+              >
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  Especificações Técnicas
+                </h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                    <div
+                      v-for="(value, key) in product.specifications"
+                      :key="key"
+                      class="flex justify-between"
+                    >
+                      <dt class="text-sm text-gray-600">
+                        {{ formatSpecKey(key) }}:
+                      </dt>
+                      <dd class="text-sm font-medium text-gray-900">
+                        {{ value }}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+            </div>
+
+            <!-- Avaliações -->
+            <div v-else-if="activeTab === 'reviews'" class="space-y-6">
+              <div class="text-center py-8 text-gray-500">
+                <svg
+                  class="w-12 h-12 mx-auto mb-4 text-gray-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                  />
+                </svg>
+                <p>Seja o primeiro a avaliar este produto</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar com Mais Informações -->
+        <div class="lg:col-span-1">
+          <div class="space-y-4">
+            <!-- Calculadora de Frete -->
+            <div class="border border-gray-200 rounded-lg p-4">
+              <h3 class="font-medium text-gray-900 mb-3">Calcular Frete</h3>
+              <ShippingCalculator
+                :product="product"
+                :weight="product.weight || 1"
+              />
+            </div>
+
+            <!-- Informações de Segurança -->
+            <div class="border border-gray-200 rounded-lg p-4">
+              <h3 class="font-medium text-gray-900 mb-3">Compra Segura</h3>
+              <div class="space-y-2 text-sm text-gray-600">
+                <div class="flex items-center gap-2">
+                  <svg
+                    class="w-4 h-4 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Pagamento 100% seguro</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg
+                    class="w-4 h-4 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Entrega rastreada</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg
+                    class="w-4 h-4 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Garantia de qualidade</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Produtos Relacionados -->
+      <div
+        v-if="relatedProducts.length > 0"
+        class="mt-12 border-t border-gray-200 pt-8"
+      >
+        <h2 class="text-xl font-medium text-gray-900 mb-6">
+          Produtos relacionados
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div
+            v-for="relatedProduct in relatedProducts"
+            :key="relatedProduct.id"
+            class="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow"
+          >
+            <NuxtLink :to="`/produtos/${relatedProduct.slug}`" class="block">
+              <div
+                class="aspect-square bg-gray-50 rounded mb-2 overflow-hidden"
+              >
+                <img
+                  :src="getFirstProductImage(relatedProduct.images)"
+                  :alt="relatedProduct.name"
+                  class="w-full h-full object-contain hover:scale-105 transition-transform"
+                />
+              </div>
+              <h3 class="text-sm text-gray-900 line-clamp-2 mb-1">
                 {{ relatedProduct.name }}
               </h3>
+              <div class="text-sm">
+                <div class="text-red-700 font-medium">
+                  {{
+                    formatCurrency(calculatePricing(relatedProduct).avistaPrice)
+                  }}
+                </div>
+                <div class="text-gray-500 text-xs">
+                  {{
+                    formatInstallment(
+                      calculatePricing(relatedProduct).installmentValue,
+                      12
+                    )
+                  }}
+                </div>
+              </div>
             </NuxtLink>
-            <p class="text-lg font-bold text-red-600">
-              {{
-                formatPrice(relatedProduct.sale_price || relatedProduct.price)
-              }}
-            </p>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Loading State -->
   <div v-else class="container mx-auto px-4 py-8">
-    <div class="animate-pulse">
-      <div class="h-8 bg-gray-200 rounded w-3/4 mb-6"></div>
+    <div class="animate-pulse space-y-6">
+      <div class="h-4 bg-gray-200 rounded w-1/2"></div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div class="aspect-square bg-gray-200 rounded-lg"></div>
         <div class="space-y-4">
-          <div class="h-8 bg-gray-200 rounded w-full"></div>
-          <div class="h-6 bg-gray-200 rounded w-1/2"></div>
-          <div class="h-12 bg-gray-200 rounded w-full"></div>
+          <div class="h-8 bg-gray-200 rounded w-3/4"></div>
+          <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div class="h-6 bg-gray-200 rounded w-1/3"></div>
+          <div class="space-y-2">
+            <div class="h-4 bg-gray-200 rounded"></div>
+            <div class="h-4 bg-gray-200 rounded"></div>
+            <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -262,10 +589,18 @@
 </template>
 
 <script setup lang="ts">
-// ✅ IMPORTAR SUPABASE E CLOUDINARY
+import {
+  calculatePricing,
+  formatCurrency,
+  formatDiscount,
+  formatInstallment,
+} from "~/utils/pricing";
+
+// Composables
 const supabase = useSupabase();
 const { getProductImage } = useCloudinary();
 const route = useRoute();
+const cartStore = useCartStore();
 
 // Estados
 const product = ref(null);
@@ -273,75 +608,138 @@ const relatedProducts = ref([]);
 const selectedImage = ref("");
 const quantity = ref(1);
 const loading = ref(false);
-const isFavorite = ref(false);
+const activeTab = ref("description");
+
+// Computed
+const pricing = computed(() =>
+  product.value
+    ? calculatePricing(product.value)
+    : {
+        avistaPrice: 0,
+        parceladoPrice: 0,
+        discount: 0,
+        discountPercentage: 0,
+        installmentValue: 0,
+        maxInstallments: 12,
+      }
+);
+
+const hasDiscount = computed(() => {
+  return (
+    product.value?.sale_price && product.value.sale_price < product.value.price
+  );
+});
+
+const tabs = computed(() => [
+  { id: "description", name: "Descrição" },
+  { id: "specs", name: "Especificações" },
+  { id: "reviews", name: "Avaliações (0)" },
+]);
+
+const mainFeatures = computed(() => {
+  const features = [];
+  if (product.value?.brand) features.push(`Marca: ${product.value.brand}`);
+  if (product.value?.model) features.push(`Modelo: ${product.value.model}`);
+  if (product.value?.caliber)
+    features.push(`Calibre: ${product.value.caliber}`);
+  if (product.value?.weight) features.push(`Peso: ${product.value.weight}kg`);
+  if (product.value?.short_description)
+    features.push(product.value.short_description);
+  return features.slice(0, 5); // Máximo 5 características
+});
+
+const basicSpecs = computed(() => {
+  const specs = [];
+  if (product.value?.brand)
+    specs.push({ label: "Marca", value: product.value.brand });
+  if (product.value?.model)
+    specs.push({ label: "Modelo", value: product.value.model });
+  if (product.value?.sku)
+    specs.push({ label: "SKU", value: product.value.sku });
+  if (product.value?.caliber)
+    specs.push({ label: "Calibre", value: product.value.caliber });
+  if (product.value?.weight)
+    specs.push({ label: "Peso", value: `${product.value.weight}kg` });
+  return specs;
+});
 
 // Métodos
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(price);
+const selectImage = (image: string) => {
+  selectedImage.value = getProductImage(image);
+};
+
+const openImageModal = () => {
+  // TODO: Implementar modal de zoom da imagem
+  console.log("Open image modal");
+};
+
+const decreaseQuantity = () => {
+  if (quantity.value > 1) quantity.value--;
+};
+
+const increaseQuantity = () => {
+  if (quantity.value < 10) quantity.value++;
+};
+
+const addToCart = async () => {
+  loading.value = true;
+  try {
+    const cartItem = {
+      id: product.value.id,
+      name: product.value.name,
+      price: pricing.value.parceladoPrice, // Preço padrão (parcelado)
+      avistaPrice: pricing.value.avistaPrice,
+      parceladoPrice: pricing.value.parceladoPrice,
+      image: product.value.images?.[0] || "/placeholder-product.jpg",
+      category: product.value.categories?.slug || "produto",
+      product_id: product.value.id,
+      slug: product.value.slug,
+    };
+
+    await cartStore.addItem(cartItem, quantity.value);
+
+    // Feedback
+    const { success } = useNotifications();
+    success(
+      "Produto adicionado!",
+      `${product.value.name} foi adicionado ao carrinho`
+    );
+  } catch (error: any) {
+    console.error("Erro ao adicionar ao carrinho:", error);
+    const { error: showError } = useNotifications();
+    showError("Erro", error.message || "Erro ao adicionar produto ao carrinho");
+  } finally {
+    loading.value = false;
+  }
+};
+
+const buyNow = async () => {
+  await addToCart();
+  if (!loading.value) {
+    navigateTo("/checkout");
+  }
+};
+
+const toggleWishlist = () => {
+  // TODO: Implementar lista de desejos
+  const { success } = useNotifications();
+  success("Lista de desejos", "Produto adicionado à lista de desejos");
 };
 
 const formatSpecKey = (key: string) => {
   return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
-const addToCart = async () => {
-  loading.value = true;
-
-  try {
-    const cartStore = useCartStore();
-
-    // Preparar dados do produto para o carrinho
-    const cartItem = {
-      id: product.value.id,
-      name: product.value.name,
-      price: product.value.sale_price || product.value.price,
-      image: product.value.images?.[0] || "/placeholder-product.jpg",
-      category: product.value.categories?.slug || "produto", // Categoria real do produto
-      product_id: product.value.id,
-    };
-
-    // Adicionar ao carrinho usando a store
-    await cartStore.addItem(cartItem, quantity.value);
-
-    // Feedback visual
-    const originalText = "Produto adicionado ao carrinho!";
-    alert(originalText);
-
-    // Opcional: abrir carrinho automaticamente
-    // cartStore.openCart();
-  } catch (error: any) {
-    console.error("Erro ao adicionar ao carrinho:", error);
-    alert(error.message || "Erro ao adicionar produto ao carrinho");
-  } finally {
-    loading.value = false;
-  }
-};
-
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
-};
-
-// ✅ FUNÇÃO PARA EXIBIR PRIMEIRA IMAGEM DO CLOUDINARY
 const getFirstProductImage = (images: string[]) => {
   if (!images || images.length === 0) {
     return "/placeholder-product.jpg";
   }
-
-  if (typeof images[0] === "string" && !images[0].startsWith("http")) {
-    return getProductImage(images[0], "medium");
-  }
-
-  return images[0];
+  return getProductImage(images[0], "medium");
 };
 
-// ✅ FUNÇÃO CORRIGIDA - Buscar produto usando Supabase
+// Buscar produto
 const fetchProduct = async () => {
   try {
-
-    // ✅ USAR SUPABASE DIRETAMENTE
     const { data, error } = await supabase
       .from("products")
       .select("*")
@@ -349,17 +747,12 @@ const fetchProduct = async () => {
       .eq("is_active", true)
       .single();
 
-    if (error) {
-      console.error("❌ Erro do Supabase:", error);
-      throw error;
-    }
-
-    if (!data) {
+    if (error) throw error;
+    if (!data)
       throw createError({
         statusCode: 404,
         statusMessage: "Produto não encontrado",
       });
-    }
 
     product.value = data;
 
@@ -373,7 +766,7 @@ const fetchProduct = async () => {
     // Buscar produtos relacionados
     await fetchRelatedProducts(data.category_id, data.id);
   } catch (error) {
-    console.error("❌ Erro ao buscar produto:", error);
+    console.error("Erro ao buscar produto:", error);
     throw createError({
       statusCode: 404,
       statusMessage: "Produto não encontrado",
@@ -381,7 +774,6 @@ const fetchProduct = async () => {
   }
 };
 
-// ✅ BUSCAR PRODUTOS RELACIONADOS
 const fetchRelatedProducts = async (
   categoryId: string,
   currentProductId: string
@@ -389,24 +781,26 @@ const fetchRelatedProducts = async (
   try {
     const { data, error } = await supabase
       .from("products")
-      .select("id, name, slug, price, sale_price, images")
+      .select(
+        "id, name, slug, price, sale_price, avista_price, parcelado_price, images"
+      )
       .eq("category_id", categoryId)
       .eq("is_active", true)
       .neq("id", currentProductId)
-      .limit(4);
+      .limit(5);
 
     if (error) {
-      console.error("❌ Erro ao buscar produtos relacionados:", error);
+      console.error("Erro ao buscar produtos relacionados:", error);
       return;
     }
 
     relatedProducts.value = data || [];
   } catch (error) {
-    console.error("❌ Erro ao buscar produtos relacionados:", error);
+    console.error("Erro ao buscar produtos relacionados:", error);
   }
 };
 
-// Lifecycle - buscar produto
+// Lifecycle
 await fetchProduct();
 
 // SEO
@@ -421,3 +815,12 @@ if (product.value) {
   });
 }
 </script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>

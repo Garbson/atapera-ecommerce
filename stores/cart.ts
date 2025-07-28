@@ -13,6 +13,11 @@ export interface CartItem {
   product_id?: string; // ID do produto na tabela products
   slug?: string;
   sale_price?: number;
+  priceType?: 'avista' | 'parcelado'; // Tipo de preço escolhido
+  avistaPrice?: number;
+  parceladoPrice?: number;
+  selectedPaymentMethod?: 'pix' | 'debit' | 'credit';
+  selectedInstallments?: number;
 }
 
 export interface CartState {
@@ -20,6 +25,8 @@ export interface CartState {
   isOpen: boolean;
   loading: boolean;
   sessionId: string;
+  paymentMethod: 'pix' | 'debit' | 'credit';
+  installments: number;
 }
 
 export const useCartStore = defineStore("cart", {
@@ -28,6 +35,8 @@ export const useCartStore = defineStore("cart", {
     isOpen: false,
     loading: false,
     sessionId: "",
+    paymentMethod: "pix",
+    installments: 1,
   }),
 
   getters: {
@@ -36,12 +45,33 @@ export const useCartStore = defineStore("cart", {
       return state.items.reduce((total, item) => total + item.quantity, 0);
     },
 
-    // Valor total do carrinho
+    // Valor total do carrinho (baseado na forma de pagamento)
     totalValue: (state) => {
+      return state.items.reduce((total, item) => {
+        const itemPrice = state.paymentMethod === 'credit' 
+          ? (item.parceladoPrice || item.price)
+          : (item.avistaPrice || item.price);
+        return total + itemPrice * item.quantity;
+      }, 0);
+    },
+
+    // Valor total original (sem desconto de forma de pagamento)
+    originalTotalValue: (state) => {
       return state.items.reduce(
-        (total, item) => total + item.price * item.quantity,
+        (total, item) => total + (item.parceladoPrice || item.price) * item.quantity,
         0
       );
+    },
+
+    // Desconto total da forma de pagamento
+    paymentDiscount: (state) => {
+      if (state.paymentMethod === 'credit') return 0;
+      
+      return state.items.reduce((discount, item) => {
+        const originalPrice = item.parceladoPrice || item.price;
+        const discountedPrice = item.avistaPrice || item.price;
+        return discount + (originalPrice - discountedPrice) * item.quantity;
+      }, 0);
     },
 
     // Valor total formatado
@@ -492,7 +522,24 @@ export const useCartStore = defineStore("cart", {
         total: this.totalValue,
         totalFormatted: this.totalValueFormatted,
         itemCount: this.totalItems,
+        paymentMethod: this.paymentMethod,
+        installments: this.installments,
+        originalTotal: this.originalTotalValue,
+        paymentDiscount: this.paymentDiscount,
       };
+    },
+
+    // ✅ ATUALIZAR FORMA DE PAGAMENTO
+    updatePaymentMethod(method: 'pix' | 'debit' | 'credit') {
+      this.paymentMethod = method;
+      if (method !== 'credit') {
+        this.installments = 1;
+      }
+    },
+
+    // ✅ ATUALIZAR NÚMERO DE PARCELAS
+    updateInstallments(installments: number) {
+      this.installments = installments;
     },
   },
 });

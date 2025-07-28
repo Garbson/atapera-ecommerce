@@ -12,7 +12,6 @@
         </p>
       </div>
 
-
       <!-- Loading State -->
       <div
         v-if="loading"
@@ -82,7 +81,6 @@
                 ❤️
               </button>
             </div>
-
           </div>
 
           <!-- Product Info -->
@@ -170,125 +168,128 @@
 
 <script setup>
 // Stores
-const productsStore = useProductsStore()
-const cartStore = useCartStore()
-const categoriesStore = useCategoriesStore()
+const productsStore = useProductsStore();
+const cartStore = useCartStore();
+const categoriesStore = useCategoriesStore();
 
 // Composables
-const { getProductImage } = useCloudinary()
+const { getProductImage } = useCloudinary();
 
 // Estado reativo
-const { categories } = storeToRefs(categoriesStore)
+const { categories } = storeToRefs(categoriesStore);
 
 // Estados locais - usar estado local para featured products
-const featuredProducts = ref([])
-const loading = ref(false)
-const error = ref(null)
+const featuredProducts = ref([]);
+const loading = ref(false);
+const error = ref(null);
 
 // Produtos filtrados e processados
 const products = computed(() => {
-  if (!featuredProducts.value) return []
-  
+  if (!featuredProducts.value) return [];
+
   return featuredProducts.value
-    .filter(product => product.is_featured && product.is_active)
+    .filter((product) => product.is_featured && product.is_active)
     .slice(0, 8) // Limitar a 8 produtos
-    .map(product => ({
+    .map((product) => ({
       ...product,
-      image: product.images?.[0] ? getProductImage(product.images[0], 'medium') : '/placeholder-product.jpg',
+      image: product.images?.[0]
+        ? getProductImage(product.images[0], "medium")
+        : "/placeholder-product.jpg",
       originalPrice: product.sale_price ? product.price : null,
       price: product.sale_price || product.price,
-      discount: product.sale_price ? Math.round(((product.price - product.sale_price) / product.price) * 100) : null,
+      discount: product.sale_price
+        ? Math.round(
+            ((product.price - product.sale_price) / product.price) * 100
+          )
+        : null,
       isNew: isNewProduct(product.created_at),
       requiresLicense: product.requires_license,
       rating: 4 + Math.random(), // Temporário até implementar avaliações
       reviews: Math.floor(Math.random() * 200) + 10, // Temporário
-    }))
-})
-
+    }));
+});
 
 // Métodos auxiliares
 const isNewProduct = (createdAt) => {
-  if (!createdAt) return false
-  const created = new Date(createdAt)
-  const now = new Date()
-  const daysDiff = (now - created) / (1000 * 60 * 60 * 24)
-  return daysDiff <= 30 // Produto é "novo" se foi criado nos últimos 30 dias
-}
-
+  if (!createdAt) return false;
+  const created = new Date(createdAt);
+  const now = new Date();
+  const daysDiff = (now - created) / (1000 * 60 * 60 * 24);
+  return daysDiff <= 30; // Produto é "novo" se foi criado nos últimos 30 dias
+};
 
 const getCategoryName = (categoryId) => {
-  if (!categories.value || !categoryId) return "Produto"
-  
-  const category = categories.value.find(cat => cat.id === categoryId)
-  return category?.title || "Produto"
-}
+  if (!categories.value || !categoryId) return "Produto";
+
+  const category = categories.value.find((cat) => cat.id === categoryId);
+  return category?.title || "Produto";
+};
 
 // Métodos
 const formatPrice = (price) => {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
-  }).format(price)
-}
+  }).format(price);
+};
 
 const addToCart = async (product) => {
   try {
-    await cartStore.addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      product_id: product.id,
-      slug: product.slug,
-      sale_price: product.sale_price,
-      category: product.categories?.slug || "produto",
-    }, 1)
-
+    await cartStore.addItem(
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        product_id: product.id,
+        slug: product.slug,
+        sale_price: product.sale_price,
+        category: product.categories?.slug || "produto",
+      },
+      1
+    );
   } catch (error) {
-    console.error("❌ Erro ao adicionar produto ao carrinho:", error)
+    console.error("❌ Erro ao adicionar produto ao carrinho:", error);
     // TODO: Mostrar notificação de erro
   }
-}
+};
 
 // Função para buscar produtos em destaque separadamente
 const fetchFeaturedProducts = async () => {
-
-  
   try {
-    loading.value = true
-    error.value = null
-    
+    loading.value = true;
+    error.value = null;
+
     // Carregar categorias se não estiverem carregadas
     if (categories.value.length === 0) {
-      await categoriesStore.fetchCategories()
+      await categoriesStore.fetchCategories();
     }
-    
+
     // ✅ BUSCAR PRODUTOS DIRETAMENTE - SEM USAR A STORE GLOBAL
-    const supabase = useSupabase()
+    const supabase = useSupabase();
     const { data, error: fetchError } = await supabase
       .from("products")
       .select("*")
       .eq("is_featured", true)
       .eq("is_active", true)
       .limit(20)
-      .order("created_at", { ascending: false })
-    
-    if (fetchError) throw fetchError
-    
-    featuredProducts.value = data || []
-    
+      .order("created_at", { ascending: false });
+
+    if (fetchError) throw fetchError;
+
+    featuredProducts.value = data || [];
   } catch (err) {
-    console.error("❌ Erro ao carregar produtos em destaque:", err)
-    error.value = err.message
+    console.error("❌ Erro ao carregar produtos em destaque:", err);
+    error.value = err.message;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // Carregar dados ao montar
 onMounted(async () => {
-  await fetchFeaturedProducts()
-})
+  await fetchFeaturedProducts();
+});
 </script>
 
 <style scoped>

@@ -1,9 +1,9 @@
 <template>
   <div
-    class="bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden group"
+    class="bg-gray-200/30 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden group"
   >
     <!-- Image Container -->
-    <div class="relative aspect-square bg-gray-100 overflow-hidden">
+    <div class="relative aspect-square bg-white overflow-hidden">
       <img
         v-if="selectedImage"
         :src="selectedImage"
@@ -11,10 +11,23 @@
         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         loading="lazy"
         @error="onImageError"
+      />
+      <div
+        v-else
+        class="w-full h-full flex items-center justify-center text-gray-400"
       >
-      <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <svg
+          class="w-16 h-16"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       </div>
 
@@ -27,10 +40,10 @@
           Destaque
         </span>
         <span
-          v-if="hasDiscount"
+          v-if="pricing.discountPercentage > 0"
           class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
         >
-          -{{ discountPercentage }}%
+          {{ formatDiscount(pricing.discountPercentage) }}
         </span>
       </div>
 
@@ -109,21 +122,36 @@
         <span class="text-xs">SKU: {{ product.sku }}</span>
       </div>
 
-      <!-- Price -->
+      <!-- Price (Amazon style) -->
       <div class="mb-3">
-        <div v-if="hasDiscount" class="flex items-baseline gap-2">
-          <span class="text-lg font-bold text-green-600">
-            {{ formatCurrency(product.sale_price) }}
+        <!-- Preço principal -->
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="text-xl font-bold text-gray-900">
+            {{ formatCurrency(pricing.avistaPrice) }}
           </span>
-          <span class="text-sm text-gray-500 line-through">
+          <!-- Preço original riscado (se houver promoção) -->
+          <span v-if="hasDiscount" class="text-sm text-gray-500 line-through">
             {{ formatCurrency(product.price) }}
           </span>
         </div>
-        <div v-else class="text-lg font-bold text-gray-900">
-          {{ formatCurrency(product.price) }}
+
+        <!-- Informações adicionais discretas -->
+        <div class="space-y-1">
+          <!-- Desconto à vista (se houver) -->
+          <div
+            v-if="pricing.discountPercentage > 0"
+            class="text-xs text-green-600"
+          >
+            {{ formatDiscount(pricing.discountPercentage) }} no PIX ou débito
+          </div>
+
+          <!-- Parcelamento -->
+          <div class="text-xs text-gray-600">
+            em até {{ pricing.maxInstallments }}x de
+            {{ formatCurrency(pricing.installmentValue) }} no cartão
+          </div>
         </div>
       </div>
-
 
       <!-- License Info -->
       <div
@@ -179,6 +207,12 @@
 </template>
 
 <script setup>
+import {
+  calculatePricing,
+  formatCurrency,
+  formatDiscount,
+} from "~/utils/pricing";
+
 const props = defineProps({
   product: {
     type: Object,
@@ -190,38 +224,32 @@ const emit = defineEmits(["add-to-cart", "add-to-wishlist", "quick-view"]);
 
 // Estado local
 const addingToCart = ref(false);
-const selectedImage = ref('');
+const selectedImage = ref("");
 
 // Composables
 const { getProductImage } = useCloudinary();
 
-// Função para formatar moeda
-const formatCurrency = (value) => {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
-};
-
 // Computed
+const pricing = computed(() => calculatePricing(props.product));
+
 const productImages = computed(() => {
   let images = props.product.images;
-  
+
   // Se for string, tentar converter para array
-  if (typeof images === 'string') {
+  if (typeof images === "string") {
     try {
       images = JSON.parse(images);
     } catch (e) {
-      console.error('Erro ao converter string de imagens para array:', e);
+      console.error("Erro ao converter string de imagens para array:", e);
       return [];
     }
   }
-  
+
   // Garantir que é array
   if (!Array.isArray(images)) {
     return [];
   }
-  
+
   return images;
 });
 
@@ -231,13 +259,6 @@ const hasDiscount = computed(() => {
   );
 });
 
-const discountPercentage = computed(() => {
-  if (!hasDiscount.value) return 0;
-
-  const discount = props.product.price - props.product.sale_price;
-  return Math.round((discount / props.product.price) * 100);
-});
-
 // Methods
 const handleAddToCart = async () => {
   if (addingToCart.value) return;
@@ -245,7 +266,15 @@ const handleAddToCart = async () => {
   addingToCart.value = true;
 
   try {
-    await emit("add-to-cart", props.product);
+    // Preparar produto com informações de preço
+    const productWithPricing = {
+      ...props.product,
+      avistaPrice: pricing.value.avistaPrice,
+      parceladoPrice: pricing.value.parceladoPrice,
+      // Preço padrão é sempre o parcelado (será ajustado no checkout)
+      price: pricing.value.parceladoPrice,
+    };
+    await emit("add-to-cart", productWithPricing);
   } finally {
     addingToCart.value = false;
   }
@@ -264,18 +293,25 @@ const onImageError = (event) => {
 };
 
 // Watcher para atualizar selectedImage quando o produto muda
-watch(() => props.product, (newProduct) => {
-  if (newProduct?.images?.length) {
-    // Usar getProductImage para gerar a URL correta do Cloudinary
-    selectedImage.value = getProductImage(newProduct.images[0], 'medium');
-  } else {
-    selectedImage.value = '';
-  }
-}, { immediate: true });
+watch(
+  () => props.product,
+  (newProduct) => {
+    if (newProduct?.images?.length) {
+      // Usar getProductImage para gerar a URL correta do Cloudinary
+      selectedImage.value = getProductImage(newProduct.images[0], "medium");
+    } else {
+      selectedImage.value = "";
+    }
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
-  if (typeof props.product.images === 'string') {
-    console.warn('⚠️ Imagens estão como string, não como array:', props.product.images);
+  if (typeof props.product.images === "string") {
+    console.warn(
+      "⚠️ Imagens estão como string, não como array:",
+      props.product.images
+    );
   }
 });
 </script>
