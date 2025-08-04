@@ -24,11 +24,11 @@
             :class="category.bgClass"
           >
             <div class="absolute inset-0 bg-black/20"></div>
-            <div
-              class="relative z-10 text-white text-6xl group-hover:scale-110 transition-transform duration-300"
-            >
-              {{ category.icon }}
-            </div>
+            <img
+              :src="category.image"
+              :alt="category.name"
+              class="relative z-10 w-full h-full object-cover rounded-lg group-hover:scale-110 transition-transform duration-300 filter brightness-110"
+            />
 
             <!-- Badge se necessário -->
             <div
@@ -116,7 +116,7 @@ const categories = [
     name: "Armas de Fogo",
     description:
       "Pistolas, revólveres e rifles registrados com documentação completa e suporte especializado.",
-    icon: "🔫",
+    image: "/images/armas.jpg",
     bgClass: "bg-gradient-to-br from-gray-800 to-gray-900",
     link: "/categoria/armas-fogo",
     productCount: 250,
@@ -132,7 +132,7 @@ const categories = [
     name: "Armas de Pressão",
     description:
       "Carabinas e pistolas de pressão certificadas pelo Exército brasileiro para tiro esportivo.",
-    icon: "🎯",
+    image: "/images/cacaC.jpg",
     bgClass: "bg-gradient-to-br from-blue-600 to-blue-800",
     link: "/categoria/armas-pressao",
     productCount: 180,
@@ -147,7 +147,7 @@ const categories = [
     name: "Equipamentos de Pesca",
     description:
       "Varas, molinetes, iscas e acessórios para pesca em água doce, salgada e esportiva.",
-    icon: "🎣",
+    image: "/images/pescaC.jpg",
     bgClass: "bg-gradient-to-br from-green-600 to-green-800",
     link: "/categoria/pesca",
     productCount: 420,
@@ -158,7 +158,7 @@ const categories = [
     name: "Airsoft",
     description:
       "Equipamentos táticos, réplicas e acessórios para airsoft e simulação militar.",
-    icon: "⚔️",
+    image: "/images/airsoftC.jpg",
     bgClass: "bg-gradient-to-br from-purple-600 to-purple-800",
     link: "/categoria/airsoft",
     productCount: 320,
@@ -173,7 +173,7 @@ const categories = [
     name: "Caça",
     description:
       "Arco e flecha, equipamentos e acessórios para caça esportiva e modalidades tradicionais.",
-    icon: "🏹",
+    image: "/images/caca4.jpg",
     bgClass: "bg-gradient-to-br from-orange-600 to-orange-800",
     link: "/categoria/caca",
     productCount: 150,
@@ -184,7 +184,7 @@ const categories = [
     name: "Vestuário Outdoor",
     description:
       "Roupas táticas, calçados e equipamentos para aventuras outdoor e atividades ao ar livre.",
-    icon: "👕",
+    image: "/images/vestuarioC.jpg",
     bgClass: "bg-gradient-to-br from-yellow-600 to-yellow-800",
     link: "/categoria/vestuario",
     productCount: 280,
