@@ -2,7 +2,7 @@
 import Stripe from 'stripe'
 
 export default defineEventHandler(async (event) => {
-  console.log('🔄 Webhook recebido:', new Date().toISOString())
+
   
   const config = useRuntimeConfig()
   
@@ -21,8 +21,7 @@ export default defineEventHandler(async (event) => {
   const body = await readRawBody(event)
   const signature = getHeader(event, 'stripe-signature')
 
-  console.log('📝 Webhook signature presente:', !!signature)
-  console.log('📝 Webhook body size:', body?.length || 0)
+
 
   if (!signature || !body) {
     console.error('❌ Webhook inválido - faltando signature ou body')
@@ -39,24 +38,20 @@ export default defineEventHandler(async (event) => {
       config.stripeWebhookSecret
     )
 
-    console.log('✅ Evento Stripe validado:', stripeEvent.type, 'ID:', stripeEvent.id)
 
     switch (stripeEvent.type) {
       case 'payment_intent.succeeded':
-        console.log('💰 Processando pagamento bem-sucedido')
         await handlePaymentSuccess(stripeEvent.data.object as Stripe.PaymentIntent)
         break
       
       case 'payment_intent.payment_failed':
-        console.log('❌ Processando pagamento falhado')
         await handlePaymentFailure(stripeEvent.data.object as Stripe.PaymentIntent)
         break
       
       default:
-        console.log('ℹ️ Evento não processado:', stripeEvent.type)
     }
 
-    console.log('✅ Webhook processado com sucesso')
+
     return { received: true }
   } catch (error: any) {
     console.error('❌ Erro no webhook:', error)
@@ -69,8 +64,7 @@ export default defineEventHandler(async (event) => {
 
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   try {
-    console.log('🔍 Payment Intent ID:', paymentIntent.id)
-    console.log('🔍 Metadata disponível:', paymentIntent.metadata)
+
     
     const orderId = paymentIntent.metadata.orderId
     
@@ -79,7 +73,6 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
       return
     }
 
-    console.log('📋 Atualizando pedido:', orderId)
 
     // Atualizar status do pedido para pago
     const { createClient } = await import('@supabase/supabase-js')
@@ -107,8 +100,6 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
       return
     }
 
-    console.log('📋 Pedido encontrado:', existingOrder)
-
     const { error } = await supabase
       .from('orders')
       .update({
@@ -121,8 +112,6 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 
     if (error) {
       console.error('❌ Erro ao atualizar pedido:', error)
-    } else {
-      console.log('✅ Pedido atualizado com sucesso:', orderId)
     }
   } catch (error) {
     console.error('❌ Erro ao processar pagamento bem-sucedido:', error)
@@ -131,8 +120,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 
 async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
   try {
-    console.log('🔍 Payment Intent Failed ID:', paymentIntent.id)
-    console.log('🔍 Metadata disponível:', paymentIntent.metadata)
+
     
     const orderId = paymentIntent.metadata.orderId
     
@@ -141,7 +129,7 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
       return
     }
 
-    console.log('📋 Marcando pedido como falhado:', orderId)
+
 
     // Atualizar status do pedido para falha no pagamento
     const { createClient } = await import('@supabase/supabase-js')
@@ -163,8 +151,6 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
 
     if (error) {
       console.error('❌ Erro ao atualizar pedido falhado:', error)
-    } else {
-      console.log('✅ Pedido marcado como falhado:', orderId)
     }
   } catch (error) {
     console.error('❌ Erro ao processar falha de pagamento:', error)

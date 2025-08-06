@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  console.log('🧪 Teste manual do webhook:', { orderId, paymentIntentId })
+
 
   // Simular um Payment Intent bem-sucedido
   const mockPaymentIntent = {
@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    console.log('📋 Pedido encontrado:', existingOrder)
+
 
     const { error } = await supabase
       .from('orders')
@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    console.log('✅ Pedido atualizado com sucesso via teste:', orderId)
+
 
     return {
       success: true,

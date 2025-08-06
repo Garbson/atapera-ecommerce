@@ -17,12 +17,7 @@ export const useStripe = () => {
   // Criar Payment Intent
   const createPaymentIntent = async (amount: number, currency = 'brl', metadata = {}) => {
     try {
-      console.log('🚀 Composable - Criando Payment Intent:', {
-        amount: amount,
-        amountInCents: Math.round(amount * 100),
-        currency,
-        metadata
-      })
+
       
       const data = await $fetch('/api/stripe/create-payment-intent', {
         method: 'POST',
@@ -33,7 +28,6 @@ export const useStripe = () => {
         }
       })
       
-      console.log('✅ Composable - Payment Intent criado:', data)
       return { data, error: null }
     } catch (error: any) {
       console.error('❌ Composable - Erro ao criar Payment Intent:', error)

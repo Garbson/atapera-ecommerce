@@ -18,6 +18,12 @@ export interface CartItem {
   parceladoPrice?: number;
   selectedPaymentMethod?: 'pix' | 'debit' | 'credit';
   selectedInstallments?: number;
+  products?: {
+    categories?: {
+      slug: string;
+    };
+    requires_license?: boolean;
+  };
 }
 
 export interface CartState {
@@ -198,7 +204,6 @@ export const useCartStore = defineStore("cart", {
         if (insertError) {
           throw insertError;
         }
-
         this.items.push({
           ...product,
           quantity,
@@ -391,6 +396,13 @@ export const useCartStore = defineStore("cart", {
               product_id: item.products.id,
               slug: item.products.slug,
               sale_price: item.products.sale_price,
+              category: item.products.categories?.slug,
+              products: {
+                categories: {
+                  slug: item.products.categories?.slug
+                },
+                requires_license: item.products.requires_license
+              }
             };
 
             return cartItem;

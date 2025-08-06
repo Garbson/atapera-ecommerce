@@ -694,6 +694,12 @@ const addToCart = async () => {
       category: product.value.categories?.slug || "produto",
       product_id: product.value.id,
       slug: product.value.slug,
+      products: {
+        categories: {
+          slug: product.value.categories?.slug
+        },
+        requires_license: product.value.requires_license
+      }
     };
 
     await cartStore.addItem(cartItem, quantity.value);

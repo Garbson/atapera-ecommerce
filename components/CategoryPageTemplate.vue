@@ -710,7 +710,7 @@ const fetchProducts = async () => {
   if (props.categoryData?.slug === 'ofertas') {
     // Para ofertas, buscar produtos em promoção (com sale_price)
     filterParams.has_sale = true; // Novo filtro para produtos com desconto
-    console.log("🏷️  Categoria especial: Ofertas - buscando produtos em promoção");
+
     
     // Se um filtro de categoria específica foi selecionado na página de ofertas
     if (filters.category && filters.category !== '') {
@@ -719,7 +719,6 @@ const fetchProducts = async () => {
       const targetCategory = categoriesStore.getCategoryBySlug(filters.category);
       if (targetCategory?.id) {
         filterParams.category = targetCategory.id;
-        console.log("🎯 Filtrando ofertas por categoria:", filters.category, "->", targetCategory.id);
       }
     }
   } else {
@@ -757,24 +756,13 @@ const fetchProducts = async () => {
     filterParams.order = "desc";
   }
 
-  // Debug dos filtros
-  console.log("🔍 Filtros aplicados:", {
-    categoria: props.categoryData?.title,
-    slug: props.categoryData?.slug,
-    isOffers: props.categoryData?.slug === 'ofertas',
-    filtros: filters,
-    parametros: filterParams
-  });
+
 
   try {
     const result = await productsStore.fetchProducts(filterParams);
     if (result?.data) {
       totalPages.value = result.data.totalPages || 1;
       totalProducts.value = result.data.total || 0;
-      console.log("✅ Produtos carregados:", {
-        total: totalProducts.value,
-        produtos: result.data.data?.length || 0
-      });
     }
   } catch (err) {
     console.error("❌ Erro ao buscar produtos:", err);
@@ -891,7 +879,6 @@ watch(
 watch(
   () => route.path,
   async () => {
-    console.log("🔄 Mudança de rota detectada:", route.path);
 
     // Extrair slug da rota diretamente
     const routeSlug = route.params.slug || route.path.split("/").pop();

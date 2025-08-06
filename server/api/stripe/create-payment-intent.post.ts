@@ -19,11 +19,7 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const { amount, currency = 'brl', metadata = {} } = body
 
-    console.log('💰 Criando Payment Intent:', {
-      amount,
-      currency,
-      metadata
-    })
+
 
     if (!amount || amount <= 0) {
       throw createError({
