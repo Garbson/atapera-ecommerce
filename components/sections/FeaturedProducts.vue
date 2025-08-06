@@ -92,11 +92,14 @@
             </div>
 
             <NuxtLink :to="`/produtos/${product.slug}`">
-              <h3
-                class="font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors"
-              >
-                {{ product.name }}
-              </h3>
+              <div class="font-semibold text-gray-800 mb-2 sm:h-6 h-12 overflow-hidden group-hover:text-red-600 transition-colors">
+                <h3 
+                  class="sm:truncate line-clamp-2 sm:line-clamp-none"
+                  :title="product.name"
+                >
+                  {{ product.name }}
+                </h3>
+              </div>
             </NuxtLink>
 
             <!-- Rating -->

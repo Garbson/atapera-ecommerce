@@ -339,7 +339,7 @@
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-4 lg:p-6">
+      <main class="flex-1 p-4 lg:p-6 min-w-0 max-w-full">
         <slot />
       </main>
     </div>

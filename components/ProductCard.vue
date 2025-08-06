@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-gray-200/30 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden group"
+    class="bg-gray-200/30 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden group flex flex-col h-full"
   >
     <!-- Image Container -->
     <div class="relative aspect-square bg-white overflow-hidden">
@@ -106,24 +106,28 @@
     </div>
 
     <!-- Content -->
-    <div class="p-4">
-      <!-- Title -->
-      <h3 class="font-medium text-gray-900 mb-2 line-clamp-2 min-h-[3rem]">
-        <NuxtLink :to="`/produtos/${product.slug}`" class="hover:text-blue-600">
+    <div class="p-4 flex flex-col flex-1">
+      <!-- Title - Desktop: 1 linha com tooltip, Mobile: 2 linhas -->
+      <div class="font-medium text-gray-900 mb-3 leading-6 sm:h-6 h-12 overflow-hidden">
+        <NuxtLink 
+          :to="`/produtos/${product.slug}`" 
+          class="hover:text-blue-600 block sm:truncate line-clamp-2 sm:line-clamp-none"
+          :title="product.name"
+        >
           {{ product.name }}
         </NuxtLink>
-      </h3>
-
-      <!-- Brand and SKU -->
-      <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
-        <span v-if="product.brand" class="font-medium">{{
-          product.brand
-        }}</span>
-        <span class="text-xs">SKU: {{ product.sku }}</span>
       </div>
 
-      <!-- Price (Amazon style) -->
-      <div class="mb-3">
+      <!-- Brand and SKU - Altura fixa -->
+      <div class="flex items-center justify-between text-sm text-gray-600 mb-3 h-5">
+        <span v-if="product.brand" class="font-medium truncate">{{
+          product.brand
+        }}</span>
+        <span class="text-xs flex-shrink-0">SKU: {{ product.sku }}</span>
+      </div>
+
+      <!-- Price Section - Altura fixa -->
+      <div class="mb-4 h-20">
         <!-- Preço principal -->
         <div class="flex items-baseline gap-2 mb-1">
           <span class="text-xl font-bold text-gray-900">
@@ -140,39 +144,42 @@
           <!-- Desconto à vista (se houver) -->
           <div
             v-if="pricing.discountPercentage > 0"
-            class="text-xs text-green-600"
+            class="text-xs text-green-600 h-4"
           >
             {{ formatDiscount(pricing.discountPercentage) }} no PIX ou débito
           </div>
+          <div v-else class="h-4"></div>
 
           <!-- Parcelamento -->
-          <div class="text-xs text-gray-600">
+          <div class="text-xs text-gray-600 h-4">
             em até {{ pricing.maxInstallments }}x de
             {{ formatCurrency(pricing.installmentValue) }} no cartão
           </div>
         </div>
       </div>
 
-      <!-- License Info -->
-      <div
-        v-if="product.requires_license"
-        class="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-md"
-      >
-        <div class="flex items-center text-xs text-yellow-800">
-          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fill-rule="evenodd"
-              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-              clip-rule="evenodd"
-            />
-          </svg>
-          <span class="font-medium"
-            >Requer {{ product.license_type || "documentação" }}</span
-          >
+      <!-- License Info - Altura fixa para manter alinhamento -->
+      <div class="mb-3 h-12 flex items-start">
+        <div
+          v-if="product.requires_license"
+          class="w-full p-2 bg-yellow-50 border border-yellow-200 rounded-md"
+        >
+          <div class="flex items-center text-xs text-yellow-800">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span class="font-medium"
+              >Requer {{ product.license_type || "documentação" }}</span
+            >
+          </div>
         </div>
       </div>
 
-      <!-- Add to Cart Button -->
+      <!-- Add to Cart Button - Sempre na parte inferior -->
       <button
         @click="handleAddToCart"
         :disabled="addingToCart"

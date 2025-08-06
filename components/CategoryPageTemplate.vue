@@ -792,6 +792,12 @@ const addToCart = async (product) => {
         slug: product.slug,
         sale_price: product.sale_price,
         category: props.categoryData?.slug || product.categories?.slug || "produto",
+        products: {
+          categories: {
+            slug: props.categoryData?.slug || product.categories?.slug
+          },
+          requires_license: product.requires_license
+        }
       },
       1
     );

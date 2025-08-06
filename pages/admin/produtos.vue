@@ -114,137 +114,138 @@
       </div>
 
       <!-- Products Table -->
-      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="overflow-x-auto -mx-4 sm:mx-0">
-          <table class="w-full min-w-full">
-            <thead class="bg-gray-50">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
               <tr>
-                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm">
+                <th class="w-12 px-6 py-4 text-left">
                   <input
                     type="checkbox"
                     v-model="selectAll"
                     @change="toggleSelectAll"
-                    class="rounded"
+                    class="rounded border-gray-300 text-red-600 focus:ring-red-500"
                   />
                 </th>
-                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
                   Produto
                 </th>
-                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm hidden sm:table-cell">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider hidden sm:table-cell">
                   SKU
                 </th>
-                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm hidden md:table-cell">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider hidden md:table-cell">
                   Categoria
                 </th>
-                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
                   Preço
                 </th>
-                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
                   Estoque
                 </th>
-                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm hidden lg:table-cell">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider hidden lg:table-cell">
                   Status
                 </th>
-                <th class="text-left py-2 sm:py-4 px-2 sm:px-6 font-medium text-gray-600 text-xs sm:text-sm">
+                <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900 uppercase tracking-wider">
                   Ações
                 </th>
               </tr>
             </thead>
-            <tbody>
-              <tr v-if="loading" class="border-b border-gray-100">
-                <td colspan="8" class="py-8 text-center">
-                  <div class="flex items-center justify-center gap-3">
-                    <svg class="animate-spin h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span class="text-gray-600">Carregando produtos...</span>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-if="loading" class="bg-gray-50">
+                <td colspan="8" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center justify-center gap-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                    <span class="text-sm font-medium text-gray-600">Carregando produtos...</span>
                   </div>
                 </td>
               </tr>
               <tr
                 v-for="product in products"
                 :key="product.id"
-                class="border-b border-gray-100 hover:bg-gray-50"
+                class="hover:bg-gray-50 transition-colors duration-150"
               >
-                <td class="py-2 sm:py-4 px-2 sm:px-6">
+                <td class="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
                     v-model="selectedProducts"
                     :value="product.id"
-                    class="rounded"
+                    class="rounded border-gray-300 text-red-600 focus:ring-red-500"
                   />
                 </td>
-                <td class="py-2 sm:py-4 px-2 sm:px-6">
-                  <div class="flex items-center gap-2 sm:gap-4">
-                    <img
-                      :src="product.images?.[0] ? getProductImage(product.images[0], 'small') : '/placeholder-product.jpg'"
-                      :alt="product.name"
-                      class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
-                    />
-                    <div class="min-w-0">
-                      <p class="text-xs sm:text-sm font-medium text-gray-800 truncate">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0 h-16 w-16">
+                      <img
+                        :src="product.images?.[0] ? getProductImage(product.images[0], 'small') : '/placeholder-product.jpg'"
+                        :alt="product.name"
+                        class="h-16 w-16 rounded-lg object-cover shadow-sm border border-gray-200"
+                      />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-semibold text-gray-900 truncate max-w-xs">
                         {{ product.name }}
                       </p>
-                      <p class="text-xs text-gray-600 sm:hidden">
+                      <p class="text-xs text-gray-500 mt-1 sm:hidden">
                         SKU: {{ product.sku }}
                       </p>
-                      <p class="text-xs text-gray-600 md:hidden">
+                      <p class="text-xs text-gray-500 mt-1 md:hidden">
                         {{ getCategoryName(product) }}
                       </p>
-                      <div class="flex items-center gap-2 hidden sm:flex">
+                      <div class="flex items-center gap-2 mt-2 hidden sm:flex">
                         <button
                           @click="showDescriptionDialog(product)"
-                          class="text-blue-600 hover:text-blue-800 text-xs"
+                          class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors"
                           title="Ver descrição"
                         >
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
+                          Descrição
                         </button>
-                        <span class="text-xs text-gray-500">Ver descrição</span>
                       </div>
                     </div>
                   </div>
                 </td>
-                <td class="py-2 sm:py-4 px-2 sm:px-6 font-mono text-xs sm:text-sm text-gray-600 hidden sm:table-cell">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500 hidden sm:table-cell">
                   {{ product.sku }}
                 </td>
-                <td class="py-2 sm:py-4 px-2 sm:px-6 hidden md:table-cell">
+                <td class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
                   <span
-                    class="inline-block px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800"
                   >
                     {{ getCategoryName(product) }}
                   </span>
                 </td>
-                <td class="py-2 sm:py-4 px-2 sm:px-6 font-semibold text-gray-800 text-xs sm:text-sm">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                   {{ formatCurrency(product.price) }}
                 </td>
-                <td class="py-2 sm:py-4 px-2 sm:px-6">
+                <td class="px-6 py-4 whitespace-nowrap">
                   <span
-                    class="inline-block px-1 sm:px-2 py-1 text-xs rounded-full"
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
                     :class="getStockClass(product.stock || 0)"
                   >
-                    {{ product.stock || 0 }}
+                    <span class="w-2 h-2 rounded-full mr-2" :class="getStockDotClass(product.stock || 0)"></span>
+                    {{ product.stock || 0 }} un.
                   </span>
                 </td>
-                <td class="py-2 sm:py-4 px-2 sm:px-6 hidden lg:table-cell">
+                <td class="px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                   <span
-                    class="inline-block px-2 py-1 text-xs rounded-full"
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
                     :class="getStatusClass(product)"
                   >
+                    <span class="w-2 h-2 rounded-full mr-2" :class="getStatusDotClass(product)"></span>
                     {{ getStatusLabel(product) }}
                   </span>
                 </td>
-                <td class="py-2 sm:py-4 px-2 sm:px-6">
-                  <div class="flex items-center gap-1 sm:gap-2">
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <div class="flex items-center justify-center space-x-2">
                     <button
                       @click="editProduct(product)"
-                      class="p-1 sm:p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                      title="Editar"
+                      class="inline-flex items-center justify-center w-8 h-8 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-150"
+                      title="Editar produto"
                     >
                       <svg
-                        class="w-3 h-3 sm:w-4 sm:h-4"
+                        class="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -259,14 +260,13 @@
                     </button>
                     <button
                       @click="toggleProductStatus(product)"
-                      class="p-1 sm:p-2 text-yellow-600 hover:bg-yellow-100 rounded-lg transition-colors"
-                      :title="
-                        product.is_active ? 'Desativar' : 'Ativar'
-                      "
+                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-150"
+                      :class="product.is_active ? 'text-yellow-600 bg-yellow-50 hover:bg-yellow-100' : 'text-green-600 bg-green-50 hover:bg-green-100'"
+                      :title="product.is_active ? 'Desativar produto' : 'Ativar produto'"
                     >
                       <svg
                         v-if="product.is_active"
-                        class="w-3 h-3 sm:w-4 sm:h-4"
+                        class="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -551,10 +551,22 @@ const getStockClass = (stock: number) => {
   return "bg-green-100 text-green-800";
 };
 
+const getStockDotClass = (stock: number) => {
+  if (stock === 0) return "bg-red-500";
+  if (stock <= 5) return "bg-yellow-500";
+  return "bg-green-500";
+};
+
 const getStatusClass = (product: any) => {
   if (product.stock === 0) return "bg-red-100 text-red-800";
   if (!product.is_active) return "bg-gray-100 text-gray-800";
   return "bg-green-100 text-green-800";
+};
+
+const getStatusDotClass = (product: any) => {
+  if (product.stock === 0) return "bg-red-500";
+  if (!product.is_active) return "bg-gray-500";
+  return "bg-green-500";
 };
 
 const getStatusLabel = (product: any) => {

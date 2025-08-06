@@ -1041,6 +1041,10 @@ const processCardPayment = async (orderId: string) => {
 
   const { data, error } = await createPaymentIntent(finalTotal.value, "brl", {
     orderId,
+    paymentMethod: paymentMethod.value,
+    installments: installments.value.toString(),
+    customerName: customerInfo.value.name,
+    customerEmail: customerInfo.value.email,
   });
 
   if (error || !data) {
@@ -1053,7 +1057,13 @@ const processCardPayment = async (orderId: string) => {
 };
 
 const processPixPayment = async (orderId: string) => {
-  const { data, error } = await createPixPayment(finalTotal.value, { orderId });
+  const { data, error } = await createPixPayment(finalTotal.value, { 
+    orderId,
+    paymentMethod: paymentMethod.value,
+    installments: installments.value.toString(),
+    customerName: customerInfo.value.name,
+    customerEmail: customerInfo.value.email,
+  });
 
   if (error || !data) {
     console.error("Erro no PIX:", error);

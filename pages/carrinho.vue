@@ -226,24 +226,6 @@
               Comprar agora
             </button>
 
-            <!-- PaymentSelector integrado -->
-            <div class="border-t border-gray-200 pt-4">
-              <ClientOnly>
-                <PaymentSelector
-                  :avista-price="avistaTotal"
-                  :parcelado-price="total"
-                  @update:method="updatePaymentMethod"
-                  @update:installments="updateInstallments"
-                  @update:final-price="updateFinalPrice"
-                />
-                <template #fallback>
-                  <div class="animate-pulse">
-                    <div class="h-6 bg-gray-200 rounded mb-2"></div>
-                    <div class="h-16 bg-gray-200 rounded"></div>
-                  </div>
-                </template>
-              </ClientOnly>
-            </div>
 
             <!-- Informações adicionais -->
             <div class="border-t border-gray-200 pt-4 mt-4 space-y-2 text-xs text-gray-600">
@@ -317,17 +299,7 @@ const removeItem = async (itemId: string) => {
   }
 };
 
-const updatePaymentMethod = (method: 'pix' | 'debit' | 'credit') => {
-  cartStore.updatePaymentMethod(method);
-};
-
-const updateInstallments = (installments: number) => {
-  cartStore.updateInstallments(installments);
-};
-
-const updateFinalPrice = (price: number) => {
-  // Método de pagamento já atualiza o total automaticamente via store getters
-};
+// Funções de pagamento removidas - serão definidas no checkout
 
 const goToCheckout = async () => {
   // Verificar se está logado
