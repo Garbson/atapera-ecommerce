@@ -204,6 +204,20 @@ export const useShipping = () => {
     const destinationState = cepInfo.uf
     const destinationCity = cepInfo.localidade
     
+    // Verificar se entregamos na região (apenas AC, RO, AM)
+    const allowedStates = ['AC', 'RO', 'AM']
+    if (!allowedStates.includes(destinationState)) {
+      return [
+        {
+          method: 'unavailable',
+          name: 'Não atendemos esta região',
+          price: 0,
+          deliveryTime: 'Atendemos apenas Acre, Rondônia e Amazonas',
+          available: false
+        }
+      ]
+    }
+    
     let shippingOptions: ShippingCalculation[] = []
 
     // Dentro do Acre (mesmo estado da loja)
@@ -245,23 +259,46 @@ export const useShipping = () => {
           }
         ]
       }
-    } else {
-      // Outras regiões do Brasil
-      const regionPricing = calculateRegionalPricing(destinationState, weight)
-      
+    } else if (destinationState === 'RO') {
+      // Rondônia - Estado vizinho
       shippingOptions = [
         {
           method: 'pac',
           name: 'PAC - Correios',
-          price: regionPricing.pac,
-          deliveryTime: '8 a 12 dias úteis',
+          price: 25,
+          deliveryTime: '3 a 5 dias úteis',
           available: true
         },
         {
           method: 'sedex',
           name: 'SEDEX - Correios',
-          price: regionPricing.sedex,
-          deliveryTime: '3 a 6 dias úteis',
+          price: 40,
+          deliveryTime: '2 a 3 dias úteis',
+          available: true
+        },
+        {
+          method: 'pickup',
+          name: 'Retirada na Loja',
+          price: 0,
+          deliveryTime: 'Retire em nossa loja',
+          available: true
+        }
+      ]
+    } else if (destinationState === 'AM') {
+      // Amazonas - Estado vizinho
+      shippingOptions = [
+        {
+          method: 'pac',
+          name: 'PAC - Correios',
+          price: 30,
+          deliveryTime: '4 a 6 dias úteis',
+          available: true
+        },
+        {
+          method: 'sedex',
+          name: 'SEDEX - Correios',
+          price: 50,
+          deliveryTime: '2 a 4 dias úteis',
           available: true
         },
         {

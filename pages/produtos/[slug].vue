@@ -145,10 +145,10 @@
                 no cartão
               </div>
 
-              <!-- Frete Grátis -->
+              <!-- Informação de Entrega -->
               <div class="text-sm">
-                <span class="text-blue-600 font-medium">Frete GRÁTIS</span>
-                <span class="text-gray-600"> para pedidos acima de R$ 299</span>
+                <span class="text-blue-600 font-medium">Entregamos em</span>
+                <span class="text-gray-600"> AC, RO e AM</span>
               </div>
             </div>
 

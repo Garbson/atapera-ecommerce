@@ -8,9 +8,9 @@
         <div class="max-w-4xl mx-auto text-center">
           <h1 class="text-5xl font-bold mb-6">Sobre a Atapera</h1>
           <p class="text-xl text-gray-300 leading-relaxed">
-            Há mais de 10 anos, a Atapera é referência nacional em equipamentos
-            para caça, pesca e tiro esportivo. Nossa missão é fornecer produtos
-            de qualidade superior com total conformidade à legislação
+            Há mais de 10 anos, a Atapera é referência na região Norte em equipamentos
+            para caça, pesca e tiro esportivo. Atendemos Acre, Rondônia e Amazonas
+            com produtos de qualidade superior e total conformidade à legislação
             brasileira.
           </p>
         </div>
@@ -31,7 +31,7 @@
                   Fundada em 2013, a Atapera nasceu da paixão de um grupo de
                   entusiastas do tiro esportivo e da pesca. O que começou como
                   uma pequena loja especializada, hoje se tornou uma das
-                  principais referências do mercado nacional.
+                  principais referências da região Norte.
                 </p>
                 <p>
                   Nossa trajetória foi construída com base em três pilares
@@ -137,7 +137,7 @@
                 Visão
               </h3>
               <p class="text-gray-600 text-center leading-relaxed">
-                Ser a principal referência nacional em equipamentos esportivos
+                Ser a principal referência da região Norte em equipamentos esportivos
                 outdoor, reconhecida pela excelência no atendimento e qualidade
                 dos produtos.
               </p>

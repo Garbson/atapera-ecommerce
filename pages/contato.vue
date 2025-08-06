@@ -231,8 +231,9 @@
               </button>
               <div v-show="openFaq === 0" class="px-6 pb-6">
                 <p class="text-gray-600">
-                  O prazo de entrega varia conforme a região: Sudeste (2-5 dias úteis), 
-                  demais regiões (5-10 dias úteis). Produtos especiais podem ter prazo estendido.
+                  Atualmente realizamos entregas apenas para Acre (1-2 dias úteis), 
+                  Rondônia (3-5 dias úteis) e Amazonas (4-6 dias úteis). 
+                  Produtos especiais podem ter prazo estendido.
                 </p>
               </div>
             </div>
