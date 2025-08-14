@@ -207,7 +207,7 @@
           </svg>
           Adicionando...
         </span>
-        <span v-else>Adicionar ao Carrinho</span>
+        <span style="cursor: pointer;" v-else>Adicionar ao Carrinho</span>
       </button>
     </div>
   </div>

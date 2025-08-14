@@ -364,13 +364,21 @@
             class="bg-white rounded-lg shadow-sm border p-6"
           >
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-              <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+              <svg
+                class="w-6 h-6 text-green-600"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"
+                />
               </svg>
               Finalização via WhatsApp
             </h2>
-            
-            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+
+            <div
+              class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4"
+            >
               <div class="flex items-start gap-3">
                 <svg
                   class="w-6 h-6 text-green-600 mt-0.5 flex-shrink-0"
@@ -388,32 +396,38 @@
                     Atendimento Especializado para Armas de Fogo
                   </h3>
                   <p class="text-sm text-green-700 mb-3">
-                    Em casos de compra de armas de fogo, a finalização da compra será realizada 
-                    com nossa atendente da loja pelo WhatsApp. Isso nos permite:
+                    Em casos de compra de armas de fogo, a finalização da compra
+                    será realizada com nossa atendente da loja pelo WhatsApp.
+                    Isso nos permite:
                   </p>
                   <ul class="text-sm text-green-700 space-y-1 mb-3">
                     <li>• ✅ Validar seus documentos de forma segura</li>
-                    <li>• ✅ Oferecer atendimento mais rápido e personalizado</li>
-                    <li>• ✅ Esclarecer dúvidas sobre documentação e retirada</li>
+                    <li>
+                      • ✅ Oferecer atendimento mais rápido e personalizado
+                    </li>
+                    <li>
+                      • ✅ Esclarecer dúvidas sobre documentação e retirada
+                    </li>
                     <li>• ✅ Agendar horário conveniente para retirada</li>
                   </ul>
                 </div>
               </div>
             </div>
 
-            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+            <div
+              class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4"
+            >
               <h3 class="text-sm font-medium text-orange-800 mb-2">
                 📍 Retirada Obrigatória na Loja
               </h3>
               <p class="text-sm text-orange-700 mb-2">
-                Conforme a legislação brasileira, armas de fogo devem ser retiradas pessoalmente:
+                Conforme a legislação brasileira, armas de fogo devem ser
+                retiradas pessoalmente:
               </p>
               <div class="text-sm text-orange-700">
                 <p>📍 Av. Epaminondas Jácome Centro, 2199</p>
                 <p>Cadeia Velha, Rio Branco - AC, 69905-074</p>
-                <p class="mt-2 font-medium">
-                  📞 WhatsApp: +55 68 9282-7730
-                </p>
+                <p class="mt-2 font-medium">📞 WhatsApp: +55 68 9282-7730</p>
               </div>
             </div>
 
@@ -427,7 +441,8 @@
                 <li>• CPF</li>
               </ul>
               <p class="text-xs text-blue-600 mt-2 italic">
-                * A validação dos documentos será feita via WhatsApp pela nossa atendente
+                * A validação dos documentos será feita via WhatsApp pela nossa
+                atendente
               </p>
             </div>
           </div>
@@ -539,13 +554,17 @@
               </span>
               <span v-else class="flex items-center justify-center gap-2">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                  <path
+                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"
+                  />
                 </svg>
                 Finalizar pelo WhatsApp
               </span>
             </button>
-            
+
+            <!-- TEMPORARIAMENTE COMENTADO - PROBLEMAS COM GATEWAY DE PAGAMENTO -->
             <!-- Botão normal para produtos sem armas -->
+            <!-- 
             <button
               v-else
               @click="processPayment"
@@ -577,11 +596,56 @@
               </span>
               <span v-else>Finalizar Compra</span>
             </button>
+            -->
+
+            <!-- BOTÃO TEMPORÁRIO - TODOS OS PRODUTOS VÃO PARA WHATSAPP -->
+            <button
+              @click="processFirearmOrder"
+              :disabled="!canProceedToPayment || loading"
+              class="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span v-if="loading" class="flex items-center justify-center">
+                <svg
+                  class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Processando...
+              </span>
+              <span v-else class="flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"
+                  />
+                </svg>
+                Finalizar pelo WhatsApp
+              </span>
+            </button>
 
             <div class="mt-4 pt-4 border-t border-gray-200">
-              <div v-if="hasFirearms" class="flex items-center gap-2 text-sm text-orange-600 mb-2">
+              <div
+                v-if="hasFirearms"
+                class="flex items-center gap-2 text-sm text-orange-600 mb-2"
+              >
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                  <path
+                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"
+                  />
                 </svg>
                 Finalização via WhatsApp para verificação de documentos
               </div>
@@ -611,7 +675,8 @@
 const cartStore = useCartStore();
 const ordersStore = useOrdersStore();
 const addressStore = useAddressStore();
-const { getStripe, createPaymentIntent, createPixPayment } = useStripe();
+// const { getStripe, createPaymentIntent, createPixPayment } = useStripe();
+// const { createPreference } = useMercadoPago();
 const { isLoggedIn } = useAuth();
 const { calculateShipping } = useShipping();
 const { createFirearmOrder } = useWhatsApp();
@@ -619,7 +684,9 @@ const { createFirearmOrder } = useWhatsApp();
 // Estado reativo
 const loading = ref(false);
 const deliveryMethod = ref<"delivery" | "pickup">("delivery");
-const paymentMethod = ref<'pix' | 'debit' | 'credit'>(cartStore.paymentMethod);
+const paymentMethod = ref<"pix" | "debit" | "credit" | "mercadopago">(
+  cartStore.paymentMethod
+);
 const installments = ref(cartStore.installments);
 const finalPrice = ref(0);
 const shippingCost = ref(0);
@@ -653,8 +720,6 @@ const shippingAddress = ref({
 
 // Verificar se há armas de fogo no carrinho
 const hasFirearms = computed(() => {
-
-  
   const hasFirearmsResult = cartStore.items.some((item) => {
     const category = item.category?.toLowerCase() || "";
     const name = item.name?.toLowerCase() || "";
@@ -663,11 +728,11 @@ const hasFirearms = computed(() => {
     const productCategory = item.products?.categories?.slug || item.category;
     const requiresLicense = item.products?.requires_license;
 
-    
     const isFirearm =
       productCategory === "armas-fogo" ||
       requiresLicense === true ||
-      (productCategory?.includes("armas-fogo") && !productCategory?.includes("pressao")) ||
+      (productCategory?.includes("armas-fogo") &&
+        !productCategory?.includes("pressao")) ||
       (category.includes("armas-fogo") && !category.includes("pressao"));
 
     return isFirearm;
@@ -679,19 +744,19 @@ const hasFirearms = computed(() => {
 // Totais do carrinho com preços específicos
 const cartTotal = computed(() => {
   const items = cartStore.items;
-  
+
   const avistaPrice = items.reduce((total, item) => {
     return total + (item.avistaPrice || item.price) * item.quantity;
   }, 0);
-  
+
   const parceladoPrice = items.reduce((total, item) => {
     return total + (item.parceladoPrice || item.price) * item.quantity;
   }, 0);
-  
+
   return {
     avistaPrice,
     parceladoPrice,
-    discount: parceladoPrice - avistaPrice
+    discount: parceladoPrice - avistaPrice,
   };
 });
 
@@ -716,10 +781,7 @@ const canProceedToPayment = computed(() => {
 
   // Para armas de fogo, não precisamos validar documentos aqui pois será feito no WhatsApp
   return (
-    hasCustomerInfo &&
-    hasDeliveryMethod &&
-    hasShippingInfo &&
-    hasPaymentMethod
+    hasCustomerInfo && hasDeliveryMethod && hasShippingInfo && hasPaymentMethod
   );
 });
 
@@ -732,7 +794,9 @@ const formatPrice = (price: number) => {
 };
 
 // Métodos para PaymentSelector
-const updatePaymentMethod = (method: 'pix' | 'debit' | 'credit') => {
+const updatePaymentMethod = (
+  method: "pix" | "debit" | "credit" | "mercadopago"
+) => {
   paymentMethod.value = method;
   cartStore.updatePaymentMethod(method);
 };
@@ -897,51 +961,53 @@ const useNewAddress = () => {
 
 const processFirearmOrder = async () => {
   if (!canProceedToPayment.value) {
-    console.warn('⚠️ Não pode prosseguir com o pagamento');
+    console.warn("⚠️ Não pode prosseguir com o pagamento");
     return;
   }
-
 
   loading.value = true;
 
   try {
     const { success } = useNotifications();
-    
+
     // Preparar dados dos itens do carrinho
-    const orderItems = cartStore.items.map(item => {
-      const itemPrice = paymentMethod.value === 'credit' 
-        ? (item.parceladoPrice || item.price)
-        : (item.avistaPrice || item.price);
+    const orderItems = cartStore.items.map((item) => {
+      const itemPrice =
+        paymentMethod.value === "credit"
+          ? item.parceladoPrice || item.price
+          : item.avistaPrice || item.price;
       return {
         name: item.name,
         quantity: item.quantity,
-        price: itemPrice
+        price: itemPrice,
       };
     });
-
-
 
     // Enviar para WhatsApp
     createFirearmOrder(
       customerInfo.value,
       orderItems,
       finalTotal.value,
-      undefined, // Documentos serão validados no WhatsApp
+      hasFirearms.value, // Passar se há armas de fogo no carrinho
       paymentMethod.value,
+      deliveryMethod.value, // Modalidade de entrega
+      deliveryMethod.value === "delivery" ? shippingAddress.value : undefined, // Endereço apenas se for entrega
+      undefined, // Documentos serão validados no WhatsApp se necessário
       installments.value > 1 ? installments.value : undefined
     );
 
     success(
       "Pedido enviado!",
-      "Seu pedido foi enviado para o WhatsApp. Aguarde o contato da loja para confirmar os documentos e finalizar a compra."
+      hasFirearms.value
+        ? "Seu pedido foi enviado para o WhatsApp. Aguarde o contato da loja para confirmar os documentos e finalizar a compra."
+        : "Seu pedido foi enviado para o WhatsApp. Aguarde o contato da loja para confirmar a forma de entrega e finalizar a compra."
     );
 
     // Opcional: Limpar carrinho após envio
     // await cartStore.clearCart();
-    
+
     // Redirecionar para página de confirmação ou manter na mesma página
     // await navigateTo('/pedido-confirmado');
-    
   } catch (error: any) {
     console.error("Erro ao enviar pedido para WhatsApp:", error);
     const { error: showError } = useNotifications();
@@ -1019,8 +1085,13 @@ const processPayment = async () => {
 
     if (paymentMethod.value === "credit") {
       await processCardPayment(order.id!);
-    } else if (paymentMethod.value === "pix" || paymentMethod.value === "debit") {
+    } else if (
+      paymentMethod.value === "pix" ||
+      paymentMethod.value === "debit"
+    ) {
       await processPixPayment(order.id!);
+    } else if (paymentMethod.value === "mercadopago") {
+      await processMercadoPagoPayment(order.id!);
     } else {
       console.error(
         "❌ Método de pagamento não reconhecido:",
@@ -1053,11 +1124,13 @@ const processCardPayment = async (orderId: string) => {
   }
 
   // Redirecionar para página de pagamento com Stripe Elements
-  await navigateTo(`/pagamento?intent=${data.clientSecret}&order=${orderId}&total=${finalTotal.value}`);
+  await navigateTo(
+    `/pagamento?intent=${data.clientSecret}&order=${orderId}&total=${finalTotal.value}`
+  );
 };
 
 const processPixPayment = async (orderId: string) => {
-  const { data, error } = await createPixPayment(finalTotal.value, { 
+  const { data, error } = await createPixPayment(finalTotal.value, {
     orderId,
     paymentMethod: paymentMethod.value,
     installments: installments.value.toString(),
@@ -1075,11 +1148,76 @@ const processPixPayment = async (orderId: string) => {
   );
 };
 
+const processMercadoPagoPayment = async (orderId: string) => {
+  // Preparar itens do pedido para o MercadoPago
+  const items = cartStore.items.map((item) => {
+    const itemPrice =
+      paymentMethod.value === "credit"
+        ? item.parceladoPrice || item.price
+        : item.avistaPrice || item.price;
+
+    return {
+      id: item.id,
+      title: item.name,
+      quantity: item.quantity,
+      unit_price: itemPrice,
+      currency_id: "BRL",
+    };
+  });
+
+  // Preparar dados do pagador
+  const payer = {
+    name: customerInfo.value.name.split(" ")[0] || "",
+    surname: customerInfo.value.name.split(" ").slice(1).join(" ") || "",
+    email: customerInfo.value.email,
+    ...(customerInfo.value.phone && {
+      phone: {
+        area_code: customerInfo.value.phone.replace(/\D/g, "").substring(0, 2),
+        number: customerInfo.value.phone.replace(/\D/g, "").substring(2),
+      },
+    }),
+    ...(customerInfo.value.document && {
+      identification: {
+        type: "CPF",
+        number: customerInfo.value.document.replace(/\D/g, ""),
+      },
+    }),
+    ...(deliveryMethod.value === "delivery" && {
+      address: {
+        street_name: shippingAddress.value.street,
+        street_number: parseInt(shippingAddress.value.number) || 0,
+        zip_code: shippingAddress.value.postalCode.replace(/\D/g, ""),
+      },
+    }),
+  };
+
+  // Criar preferência no MercadoPago
+  const { data, error } = await createPreference({
+    items,
+    payer,
+    external_reference: orderId,
+    metadata: {
+      order_id: orderId,
+      payment_method: paymentMethod.value,
+      customer_name: customerInfo.value.name,
+      customer_email: customerInfo.value.email,
+    },
+  });
+
+  if (error || !data) {
+    console.error("Erro no MercadoPago:", error);
+    throw new Error(error || "Erro ao criar preferência de pagamento");
+  }
+
+  // Redirecionar para o checkout do MercadoPago
+  window.location.href = data.init_point;
+};
+
 // Verificar autenticação e carregar dados
 onMounted(async () => {
   // Inicializar preço final
   finalPrice.value = cartTotal.value.avistaPrice;
-  
+
   if (!isLoggedIn.value) {
     navigateTo("/login?redirect=/checkout");
   } else {

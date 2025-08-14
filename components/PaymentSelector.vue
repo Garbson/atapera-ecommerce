@@ -128,8 +128,7 @@
           <div v-else class="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
         </div>
       </label>
-    </div>
-
+      </div>
     <!-- Seletor de Parcelas (para cartão de crédito) -->
     <div v-if="selectedMethod === 'credit'" class="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
       <h4 class="font-semibold text-purple-900 mb-3">Escolha o número de parcelas</h4>
@@ -171,7 +170,7 @@
 </template>
 
 <script setup lang="ts">
-import { formatCurrency } from '~/utils/pricing'
+import { formatCurrency } from '~/utils/pricing';
 
 interface Props {
   avistaPrice: number
@@ -184,13 +183,13 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  'update:method': [method: 'pix' | 'debit' | 'credit']
+  'update:method': [method: 'pix' | 'debit' | 'credit' | 'mercadopago']
   'update:installments': [installments: number]
   'update:finalPrice': [price: number]
 }>()
 
 // Estados
-const selectedMethod = ref<'pix' | 'debit' | 'credit'>('pix')
+const selectedMethod = ref<'pix' | 'debit' | 'credit' | 'mercadopago'>('pix')
 const selectedInstallments = ref(1)
 
 // Computed
