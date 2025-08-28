@@ -7,7 +7,7 @@
         <!-- Logo -->
         <NuxtLink to="/" class="flex items-center">
           <img
-            src="public/marca/ataperaWhite.png"
+            src="/marca/ATAPERA.png"
             alt="Atapera - Armas, Pesca & Aventura"
             class="h-16 w-auto object-contain"
           />
