@@ -1,13 +1,13 @@
 <!-- components/AppHeader.vue - VERSÃO COMPLETA CORRIGIDA -->
 <template>
-  <header class="bg-white shadow-sm sticky top-0 z-40">
+  <header class="bg-gray-800 shadow-sm sticky top-0 z-40">
     <!-- Main Header -->
     <div class="container mx-auto px-4 py-4">
       <div class="flex items-center justify-between">
         <!-- Logo -->
         <NuxtLink to="/" class="flex items-center">
           <img
-            src="/marca/ataperaSlogan.png"
+            src="/marca/ataperaWhite.png"
             alt="Atapera - Armas, Pesca & Aventura"
             class="h-16 w-auto object-contain"
           />
@@ -20,12 +20,12 @@
               v-model="searchQuery"
               type="text"
               placeholder="Buscar produtos..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              class="w-full px-4 py-3 border border-white rounded-lg placeholder-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               @keyup.enter="performSearch"
             />
             <button
               @click="performSearch"
-              class="absolute right-0 top-0 h-full px-6 bg-red-600 text-white rounded-r-lg hover:bg-red-700 transition-colors"
+              class="absolute right-0 top-0 h-full border border-white  px-6 bg-red-600 text-white rounded-r-lg hover:bg-red-700 transition-colors"
             >
               <svg
                 class="w-5 h-5"
@@ -54,7 +54,7 @@
               class="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <svg
-                class="w-6 h-6 text-gray-600"
+                class="w-6 h-6 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -66,7 +66,7 @@
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
-              <span class="hidden sm:block text-sm text-gray-700">
+              <span class="hidden sm:block text-sm text-white">
                 {{ isLoggedIn ? "Minha Conta" : "Entrar" }}
               </span>
             </button>
@@ -75,17 +75,17 @@
             <div
               v-if="showUserMenu"
               v-click-outside="handleClickOutside"
-              class="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
+              class="absolute right-0 top-full mt-2 w-64 bg-gray-800 rounded-lg shadow-xl border border-gray-600 py-2 z-50"
             >
               <!-- Usuário Logado -->
               <template v-if="isLoggedIn">
                 <div class="px-4 py-3 border-b border-gray-100">
                   <div
-                    class="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1"
+                    class="text-xs text-white uppercase tracking-wider font-medium mb-1"
                   >
                     Conta
                   </div>
-                  <div class="text-sm text-gray-900 font-medium break-all">
+                  <div class="text-sm text-white font-medium break-all">
                     {{ authStore.userEmail }}
                   </div>
                 </div>
@@ -93,27 +93,27 @@
                 <div class="py-1">
                   <button
                     @click="goToMinhaAccount"
-                    class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-150"
                   >
                     <span
-                      class="material-icons-outlined text-gray-400 mr-3 text-lg"
+                      class="material-icons-outlined text-white mr-3 text-lg"
                       >person</span
                     >
                     Minha Conta
                   </button>
                   <button
                     @click="goToPedidos"
-                    class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-150"
                   >
                     <span
-                      class="material-icons-outlined text-gray-400 mr-3 text-lg"
+                      class="material-icons-outlined text-white mr-3 text-lg"
                       >inventory_2</span
                     >
                     Meus Pedidos
                   </button>
                   <button
                     @click="goToEnderecos"
-                    class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-150"
                   >
                     <span
                       class="material-icons-outlined text-gray-400 mr-3 text-lg"
@@ -157,7 +157,7 @@
                 <div class="py-1">
                   <button
                     @click="goToLogin"
-                    class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-150"
                   >
                     <span
                       class="material-icons-outlined text-gray-400 mr-3 text-lg"
@@ -167,7 +167,7 @@
                   </button>
                   <button
                     @click="goToCadastro"
-                    class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                    class="w-full text-left flex items-center px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors duration-150"
                   >
                     <span
                       class="material-icons-outlined text-gray-400 mr-3 text-lg"
@@ -184,9 +184,9 @@
           <!-- Cart -->
           <NuxtLink
             to="/carrinho"
-            class="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            class="relative p-2 hover:bg-gray-700 rounded-lg transition-colors"
           >
-            <span class="material-icons-outlined text-gray-700"
+            <span class="material-icons-outlined text-white"
               >shopping_cart</span
             >
             <span
@@ -236,53 +236,53 @@
 
       <!-- Navigation -->
       <nav class="hidden md:block mt-4 pt-4 border-t border-gray-200">
-        <ul class="flex items-center gap-8">
+        <ul class="flex items-center text-white gap-8">
           <li>
             <NuxtLink
               to="/categoria/armas-fogo"
-              class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              class=" hover:text-red-600 font-medium transition-colors"
               >Armas de Fogo</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/armas-pressao"
-              class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              class=" hover:text-red-600 font-medium transition-colors"
               >Armas de Pressão</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/pesca"
-              class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              class=" hover:text-red-600 font-medium transition-colors"
               >Pesca</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/airsoft"
-              class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              class=" hover:text-red-600 font-medium transition-colors"
               >Airsoft</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/caca"
-              class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              class=" hover:text-red-600 font-medium transition-colors"
               >Caça</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/vestuario"
-              class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              class=" hover:text-red-600 font-medium transition-colors"
               >Vestuário</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/camping"
-              class="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              class=" hover:text-red-600 font-medium transition-colors"
               >Camping</NuxtLink
             >
           </li>
@@ -299,13 +299,13 @@
       <!-- Mobile Search -->
       <div v-if="showMobileSearch" class="md:hidden mt-4">
         <div class="flex">
-          <input
+            <input
             v-model="searchQuery"
             type="text"
             placeholder="Buscar produtos..."
-            class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-red-500 placeholder-white"
             @keyup.enter="performSearch"
-          />
+            />
           <button
             @click="performSearch"
             class="px-6 bg-red-600 text-white rounded-r-lg hover:bg-red-700 transition-colors"

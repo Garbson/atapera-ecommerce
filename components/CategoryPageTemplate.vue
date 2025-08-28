@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="categoryData?.slug && categoryData?.title"
-    class="min-h-screen bg-gray-50"
+    class="min-h-screen bg-gray-800"
   >
     <!-- Hero Section -->
     <div
@@ -56,12 +56,12 @@
       <nav class="mb-6">
         <ol class="flex items-center space-x-2 text-sm">
           <li>
-            <NuxtLink to="/" class="text-gray-500 hover:text-gray-700"
+            <NuxtLink to="/" class="text-white hover:text-gray-100"
               >Início</NuxtLink
             >
           </li>
           <li class="text-gray-400">/</li>
-          <li class="text-gray-900 font-medium">
+          <li class="text-gray-100 font-medium">
             {{ categoryData?.title || "" }}
           </li>
         </ol>
@@ -312,19 +312,19 @@
           <button
             @click="currentPage = Math.max(1, currentPage - 1)"
             :disabled="currentPage === 1"
-            class="px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            class="px-3 py-2 text-sm border border-gray-300 bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
           >
             Anterior
           </button>
 
-          <span class="px-4 py-2 text-sm text-gray-600">
+          <span class="px-4 py-2 text-sm text-gray-100">
             Página {{ currentPage }} de {{ totalPages }}
           </span>
 
           <button
             @click="currentPage = Math.min(totalPages, currentPage + 1)"
             :disabled="currentPage === totalPages"
-            class="px-3 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            class="px-3 py-2 text-sm border bg-gray-100 border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
           >
             Próximo
           </button>

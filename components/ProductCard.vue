@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-gray-200/30 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden group flex flex-col h-full"
+    class="bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden group flex flex-col h-full"
   >
     <!-- Image Container -->
     <div class="relative aspect-square bg-white overflow-hidden">
@@ -14,7 +14,7 @@
       />
       <div
         v-else
-        class="w-full h-full flex items-center justify-center text-gray-400"
+        class="w-full h-full flex items-center justify-center text-white"
       >
         <svg
           class="w-16 h-16"

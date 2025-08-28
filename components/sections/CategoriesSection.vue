@@ -1,12 +1,12 @@
 <!-- components/sections/CategoriesSection.vue -->
 <template>
-  <section class="py-16 bg-gray-50">
+  <section class="py-16 bg-gray-800">
     <div class="container mx-auto px-4">
       <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold text-gray-800 mb-4">
+        <h2 class="text-4xl font-bold text-gray-100 mb-4">
           Nossas Especialidades
         </h2>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p class="text-xl text-gray-100 max-w-2xl mx-auto">
           Equipamentos de qualidade para cada tipo de aventura e modalidade
           esportiva
         </p>
@@ -46,14 +46,14 @@
             >
               {{ category.name }}
             </h3>
-            <p class="text-gray-600 mb-4 leading-relaxed">
+            <p class="text-gray-800 mb-4 leading-relaxed">
               {{ category.description }}
             </p>
 
             <!-- Features -->
             <ul
               v-if="category.features"
-              class="text-sm text-gray-500 mb-4 space-y-1"
+              class="text-sm text-gray-800 mb-4 space-y-1"
             >
               <li
                 v-for="feature in category.features"
@@ -86,10 +86,6 @@
                   />
                 </svg>
               </NuxtLink>
-
-              <span class="text-sm text-gray-400">
-                {{ category.productCount }}+ produtos
-              </span>
             </div>
           </div>
         </div>
@@ -97,7 +93,7 @@
 
       <!-- CTA Section -->
       <div class="text-center mt-12">
-        <p class="text-gray-600 mb-6">Não encontrou o que procura?</p>
+        <p class="text-gray-100 mb-6">Não encontrou o que procura?</p>
         <NuxtLink
           to="/produtos"
           class="inline-flex items-center bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"

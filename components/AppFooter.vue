@@ -17,7 +17,7 @@
           </div>
           <p class="text-gray-300 text-sm leading-relaxed max-w-sm">
             Mais de 10 anos fornecendo equipamentos de qualidade para
-            aventureiros, caçadores esportivos e pescadores em todo o Brasil.
+            aventureiros, caçadores esportivos e pescadores.
             Produtos certificados e atendimento especializado.
           </p>
         </div>

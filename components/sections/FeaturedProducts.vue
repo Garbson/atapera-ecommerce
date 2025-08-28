@@ -1,12 +1,12 @@
 <!-- components/sections/FeaturedProducts.vue -->
 <template>
-  <section class="py-16 bg-white">
+  <section class="py-16 bg-gray-800">
     <div class="container mx-auto px-4">
       <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold text-gray-800 mb-4">
+        <h2 class="text-4xl font-bold text-gray-100 mb-4">
           Produtos em Destaque
         </h2>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p class="text-xl text-gray-100 max-w-2xl mx-auto">
           Os produtos mais procurados pelos nossos clientes. Qualidade
           comprovada e preços especiais.
         </p>
@@ -32,7 +32,7 @@
         <div
           v-for="product in products"
           :key="product.id"
-          class="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+          class="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
         >
           <!-- Product Image -->
           <div class="relative aspect-square overflow-hidden bg-gray-50">
@@ -48,13 +48,13 @@
             <div class="absolute top-3 left-3 flex flex-col gap-2">
               <span
                 v-if="product.isNew"
-                class="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full"
+                class="bg-green-500 text-gray-800 text-xs font-bold px-2 py-1 rounded-full"
               >
                 NOVO
               </span>
               <span
                 v-if="product.discount"
-                class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full"
+                class="bg-red-500 text-gray-800 text-xs font-bold px-2 py-1 rounded-full"
               >
                 -{{ product.discount }}%
               </span>
@@ -86,7 +86,7 @@
           <!-- Product Info -->
           <div class="p-4">
             <div class="mb-2">
-              <span class="text-xs text-gray-500 uppercase tracking-wide">{{
+              <span class="text-xs text-gray-800 uppercase tracking-wide">{{
                 getCategoryName(product.category_id)
               }}</span>
             </div>
@@ -109,7 +109,7 @@
                   {{ i <= product.rating ? "★" : "☆" }}
                 </span>
               </div>
-              <span class="text-sm text-gray-500">({{ product.reviews }})</span>
+              <span class="text-sm text-gray-800">({{ product.reviews }})</span>
             </div>
 
             <!-- Price -->
@@ -122,7 +122,7 @@
                   <span class="text-lg font-bold text-red-600">
                     {{ formatPrice(product.price) }}
                   </span>
-                  <span class="text-sm text-gray-400 line-through">
+                  <span class="text-sm text-gray-800 line-through">
                     {{ formatPrice(product.originalPrice) }}
                   </span>
                 </div>

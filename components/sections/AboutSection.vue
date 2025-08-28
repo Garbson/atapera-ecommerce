@@ -1,14 +1,14 @@
 <!-- components/sections/AboutSection.vue -->
 <template>
-  <section class="py-16 bg-gradient-to-br from-gray-50 to-white">
+  <section class="py-16  bg-gray-800">
     <div class="container mx-auto px-4">
       <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="text-center mb-16">
-          <h2 class="text-4xl font-bold text-gray-800 mb-4">
+          <h2 class="text-4xl font-bold text-gray-100 mb-4">
             Por que escolher a Atapera?
           </h2>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p class="text-xl text-gray-100 max-w-3xl mx-auto">
             Mais de 10 anos de experiência fornecendo equipamentos de qualidade
             para aventureiros, caçadores esportivos e pescadores em todo o
             Brasil.
@@ -19,25 +19,25 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
           <div class="text-center">
             <div class="text-4xl font-bold text-red-600 mb-2">10+</div>
-            <div class="text-sm text-gray-600 uppercase tracking-wide">
+            <div class="text-sm text-gray-100 uppercase tracking-wide">
               Anos de Experiência
             </div>
           </div>
           <div class="text-center">
             <div class="text-4xl font-bold text-red-600 mb-2">50k+</div>
-            <div class="text-sm text-gray-600 uppercase tracking-wide">
+            <div class="text-sm text-gray-100 uppercase tracking-wide">
               Clientes Satisfeitos
             </div>
           </div>
           <div class="text-center">
             <div class="text-4xl font-bold text-red-600 mb-2">1000+</div>
-            <div class="text-sm text-gray-600 uppercase tracking-wide">
+            <div class="text-sm text-gray-100 uppercase tracking-wide">
               Produtos Disponíveis
             </div>
           </div>
           <div class="text-center">
             <div class="text-4xl font-bold text-red-600 mb-2">99%</div>
-            <div class="text-sm text-gray-600 uppercase tracking-wide">
+            <div class="text-sm text-gray-100 uppercase tracking-wide">
               Aprovação dos Clientes
             </div>
           </div>
@@ -153,7 +153,7 @@
                 </svg>
               </div>
               <h4 class="font-semibold text-gray-800 mb-1">Entrega Rápida</h4>
-              <p class="text-sm text-gray-600">Todo o Brasil</p>
+              <p class="text-sm text-gray-600">Interestadual</p>
             </div>
 
             <div class="text-center p-4">
@@ -183,7 +183,7 @@
         <!-- Testimonial -->
         <div class="mt-16 text-center">
           <div class="max-w-4xl mx-auto">
-            <blockquote class="text-2xl italic text-gray-700 mb-6">
+            <blockquote class="text-2xl italic text-gray-100 mb-6">
               "A Atapera não é apenas uma loja, é um parceiro para nossas
               aventuras. Qualidade excepcional e atendimento que realmente
               entende nossas necessidades."
@@ -195,8 +195,8 @@
                 class="w-12 h-12 rounded-full"
               />
               <div class="text-left">
-                <div class="font-semibold text-gray-800">João Silva</div>
-                <div class="text-sm text-gray-600">Pescador Esportivo</div>
+                <div class="font-semibold text-white">João Silva</div>
+                <div class="text-sm text-gray-100">Pescador Esportivo</div>
               </div>
             </div>
           </div>
@@ -224,9 +224,9 @@ const features = [
   {
     id: 2,
     icon: "🚚",
-    title: "Entrega Nacional",
+    title: "Entrega Interestadual",
     description:
-      "Entregamos com segurança para todo o Brasil através dos Correios e transportadoras parceiras.",
+      "Entregamos com segurança para Acre, Rondonia e Amazonas através dos Correios e transportadoras parceiras.",
     bgColor: "bg-blue-100",
     benefits: ["Embalagem segura", "Rastreamento online", "Seguro incluído"],
   },
