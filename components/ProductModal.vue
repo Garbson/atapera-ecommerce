@@ -244,6 +244,19 @@
               />
             </div>
 
+            <!-- Cor -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Cor
+              </label>
+              <input
+                v-model="form.color"
+                type="text"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="Ex: Preto, Verde Militar, Marrom"
+              />
+            </div>
+
             <!-- Categoria -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -748,6 +761,7 @@ interface Product {
   subcategory?: string;
   brand?: string;
   model?: string;
+  color?: string;
   sku: string;
   stock: number | null;
   min_stock: number;
@@ -832,6 +846,7 @@ const form = reactive<Product>({
   subcategory: "",
   brand: "",
   model: "",
+  color: "",
   sku: "",
   stock: null,
   min_stock: 5,
@@ -1029,6 +1044,7 @@ const handleSubmit = async (event?: Event) => {
       subcategory: form.subcategory || null,
       brand: form.brand || null,
       model: form.model || null,
+      color: form.color || null,
       sku: form.sku,
       stock: form.stock || 0,
       min_stock: form.min_stock || 5,

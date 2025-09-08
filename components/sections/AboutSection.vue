@@ -87,7 +87,7 @@
             </p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 d-flex justify-center">
             <div class="text-center p-4">
               <div
                 class="w-12 h-12 mx-auto mb-3 bg-green-100 rounded-full flex items-center justify-center"
@@ -134,27 +134,6 @@
               <p class="text-sm text-gray-600">SSL e criptografia</p>
             </div>
 
-            <div class="text-center p-4">
-              <div
-                class="w-12 h-12 mx-auto mb-3 bg-yellow-100 rounded-full flex items-center justify-center"
-              >
-                <svg
-                  class="w-6 h-6 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
-              <h4 class="font-semibold text-gray-800 mb-1">Entrega Rápida</h4>
-              <p class="text-sm text-gray-600">Interestadual</p>
-            </div>
 
             <div class="text-center p-4">
               <div
@@ -223,15 +202,6 @@ const features = [
   },
   {
     id: 2,
-    icon: "🚚",
-    title: "Entrega Interestadual",
-    description:
-      "Entregamos com segurança para Acre, Rondonia e Amazonas através dos Correios e transportadoras parceiras.",
-    bgColor: "bg-blue-100",
-    benefits: ["Embalagem segura", "Rastreamento online", "Seguro incluído"],
-  },
-  {
-    id: 3,
     icon: "🏆",
     title: "Qualidade Garantida",
     description:
@@ -240,29 +210,7 @@ const features = [
     benefits: ["Marcas premium", "Garantia estendida", "Produtos testados"],
   },
   {
-    id: 4,
-    icon: "📞",
-    title: "Suporte Especializado",
-    description:
-      "Nossa equipe é formada por especialistas que praticam as modalidades e conhecem os produtos.",
-    bgColor: "bg-purple-100",
-    benefits: [
-      "Consultoria técnica",
-      "Suporte pós-venda",
-      "Conhecimento prático",
-    ],
-  },
-  {
-    id: 5,
-    icon: "💳",
-    title: "Pagamento Facilitado",
-    description:
-      "Aceitamos diversas formas de pagamento incluindo PIX, cartões e parcelamento sem juros.",
-    bgColor: "bg-indigo-100",
-    benefits: ["Parcelamento 12x", "Pagamento seguro", "Transferência PIX"],
-  },
-  {
-    id: 6,
+    id: 3,
     icon: "🔒",
     title: "Ambiente Seguro",
     description:

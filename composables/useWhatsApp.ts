@@ -79,32 +79,13 @@ export const useWhatsApp = () => {
     }
     message += `*Total: ${formatPrice(orderData.total)}*\n\n`;
 
-    // Informações de entrega/retirada
-    message += `*ENTREGA:*\n`;
-    if (hasFirearms || orderData.deliveryMethod === "pickup") {
-      message += `Modalidade: Retirada na loja\n`;
-      if (hasFirearms) {
-        message += `- Retirada obrigatoria para armas de fogo\n`;
-        message += `- Apresentar documentos originais\n`;
-        message += `- Verificacao de documentacao necessaria\n`;
-      }
-    } else {
-      message += `Modalidade: ${
-        orderData.deliveryMethod === "delivery" ? "Entrega" : "Retirada na loja"
-      }\n`;
-
-      if (
-        orderData.deliveryMethod === "delivery" &&
-        orderData.shippingAddress
-      ) {
-        message += `*Endereco de entrega:*\n`;
-        message += `${orderData.shippingAddress.street}, ${orderData.shippingAddress.number}\n`;
-        if (orderData.shippingAddress.complement) {
-          message += `${orderData.shippingAddress.complement}\n`;
-        }
-        message += `${orderData.shippingAddress.neighborhood}, ${orderData.shippingAddress.city} - ${orderData.shippingAddress.state}\n`;
-        message += `CEP: ${orderData.shippingAddress.postalCode}\n`;
-      }
+    // Informações de retirada
+    message += `*RETIRADA:*\n`;
+    message += `Modalidade: Retirada na loja\n`;
+    if (hasFirearms) {
+      message += `- Retirada obrigatoria para armas de fogo\n`;
+      message += `- Apresentar documentos originais\n`;
+      message += `- Verificacao de documentacao necessaria\n`;
     }
     message += `\n`;
 
@@ -117,9 +98,7 @@ export const useWhatsApp = () => {
     if (hasFirearms) {
       message += `Por favor, confirme este pedido e informe quando posso retirar o produto.`;
     } else {
-      message += `Por favor, confirme este pedido para prosseguirmos com a ${
-        orderData.deliveryMethod === "delivery" ? "entrega" : "retirada"
-      }.`;
+      message += `Por favor, confirme este pedido para prosseguirmos com a retirada.`;
     }
 
     return message;
@@ -222,8 +201,39 @@ export const useWhatsApp = () => {
     sendToWhatsApp(message);
   };
 
+  const sendWhatsAppOrder = (orderData: {
+    customer: {
+      name: string;
+      email: string;
+      phone: string;
+      document: string;
+    };
+    items: Array<any>;
+    total: number;
+    paymentMethod: string;
+    installments?: number;
+    hasFirearms?: boolean;
+  }) => {
+    const message = formatOrderMessage({
+      customer: orderData.customer,
+      items: orderData.items.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price
+      })),
+      total: orderData.total,
+      paymentMethod: orderData.paymentMethod,
+      installments: orderData.installments,
+      hasFirearms: orderData.hasFirearms || false,
+      deliveryMethod: "pickup" // Sempre retirada na loja agora
+    });
+
+    sendToWhatsApp(message);
+  };
+
   return {
     createFirearmOrder,
+    sendWhatsAppOrder,
     sendToWhatsApp,
     formatOrderMessage,
     WHATSAPP_NUMBER,

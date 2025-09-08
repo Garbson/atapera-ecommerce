@@ -91,6 +91,7 @@
               <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
                 <span>SKU: {{ product.sku }}</span>
                 <span v-if="product.model">Modelo: {{ product.model }}</span>
+                <span v-if="product.color">Cor: {{ product.color }}</span>
               </div>
             </div>
 
@@ -145,11 +146,6 @@
                 no cartão
               </div>
 
-              <!-- Informação de Entrega -->
-              <div class="text-sm">
-                <span class="text-blue-600 font-medium">Entregamos em</span>
-                <span class="text-gray-600"> AC, RO e AM</span>
-              </div>
             </div>
 
             <!-- Disponibilidade -->
@@ -157,9 +153,6 @@
               <div class="flex items-center gap-2 text-sm">
                 <span class="w-3 h-3 bg-green-500 rounded-full"></span>
                 <span class="text-green-700 font-medium">Em estoque</span>
-              </div>
-              <div class="text-sm text-gray-600 mt-1">
-                Pronto para envio em 24h úteis
               </div>
             </div>
 
@@ -207,7 +200,7 @@
                   <p class="text-sm text-yellow-700 mt-1">
                     Este produto requer
                     {{ product.license_type || "documentação específica" }} para
-                    compra e entrega.
+                    compra.
                   </p>
                 </div>
               </div>
@@ -241,22 +234,6 @@
               </div>
             </div>
 
-            <!-- Entrega -->
-            <div class="border-t border-gray-200 pt-4 mb-4">
-              <div class="text-sm">
-                <div class="font-medium text-gray-900 mb-1">Entrega</div>
-                <div class="text-gray-600">
-                  <div class="flex justify-between">
-                    <span>Frete:</span>
-                    <span class="text-green-600">GRÁTIS</span>
-                  </div>
-                  <div class="flex justify-between mt-1">
-                    <span>Chegará:</span>
-                    <span class="font-medium">Amanhã</span>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <!-- Seletor de Quantidade -->
             <div class="mb-4">
@@ -307,25 +284,6 @@
                 Comprar agora
               </button>
 
-              <button
-                @click="toggleWishlist"
-                class="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-full transition-colors flex items-center justify-center gap-2"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
-                Adicionar à lista de desejos
-              </button>
             </div>
 
             <!-- Vendido por -->
@@ -336,7 +294,6 @@
                 Vendido por
                 <span class="text-blue-600 font-medium">Atapera Oficial</span>
               </div>
-              <div class="mt-1">Enviado por Atapera</div>
             </div>
           </div>
         </div>
@@ -457,14 +414,6 @@
         <!-- Sidebar com Mais Informações -->
         <div class="lg:col-span-1">
           <div class="space-y-4">
-            <!-- Calculadora de Frete -->
-            <div class="border border-gray-200 rounded-lg p-4">
-              <h3 class="font-medium text-gray-900 mb-3">Calcular Frete</h3>
-              <ShippingCalculator
-                :product="product"
-                :weight="product.weight || 1"
-              />
-            </div>
 
             <!-- Informações de Segurança -->
             <div class="border border-gray-200 rounded-lg p-4">
@@ -496,7 +445,7 @@
                       clip-rule="evenodd"
                     />
                   </svg>
-                  <span>Entrega rastreada</span>
+                  <span>Produtos de qualidade</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <svg
@@ -640,6 +589,7 @@ const mainFeatures = computed(() => {
   const features = [];
   if (product.value?.brand) features.push(`Marca: ${product.value.brand}`);
   if (product.value?.model) features.push(`Modelo: ${product.value.model}`);
+  if (product.value?.color) features.push(`Cor: ${product.value.color}`);
   if (product.value?.caliber)
     features.push(`Calibre: ${product.value.caliber}`);
   if (product.value?.weight) features.push(`Peso: ${product.value.weight}kg`);
@@ -654,6 +604,8 @@ const basicSpecs = computed(() => {
     specs.push({ label: "Marca", value: product.value.brand });
   if (product.value?.model)
     specs.push({ label: "Modelo", value: product.value.model });
+  if (product.value?.color)
+    specs.push({ label: "Cor", value: product.value.color });
   if (product.value?.sku)
     specs.push({ label: "SKU", value: product.value.sku });
   if (product.value?.caliber)

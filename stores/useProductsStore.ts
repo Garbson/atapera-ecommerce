@@ -24,6 +24,7 @@ export const useProductsStore = defineStore("products", () => {
     category_id: string;
     brand?: string;
     model?: string;
+    color?: string;
     sku: string;
     stock: number;
     min_stock: number;

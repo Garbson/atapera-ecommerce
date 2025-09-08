@@ -194,13 +194,6 @@
               </div>
             </div>
 
-            <!-- Informação de entrega -->
-            <div class="flex items-center justify-center gap-2 text-sm text-blue-700 mb-4">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-              </svg>
-              <span class="font-medium">Entregamos AC, RO e AM</span>
-            </div>
 
             <!-- Checkbox de presente -->
             <div class="mb-4">
@@ -247,7 +240,7 @@
                 <svg class="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM8.5 13a1.5 1.5 0 103 0 1.5 1.5 0 00-3 0z" clip-rule="evenodd" />
                 </svg>
-                <span>Entrega rastreada</span>
+                <span>Produtos de qualidade</span>
               </div>
             </div>
           </div>
