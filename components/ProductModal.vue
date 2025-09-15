@@ -244,17 +244,84 @@
               />
             </div>
 
-            <!-- Cor -->
+            <!-- Cores -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Cor
+                Cores Disponíveis
               </label>
-              <input
-                v-model="form.color"
-                type="text"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Ex: Preto, Verde Militar, Marrom"
-              />
+
+              <!-- Input para adicionar nova cor -->
+              <div class="flex gap-2 mb-3">
+                <input
+                  v-model="newColorInput"
+                  type="text"
+                  class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Ex: Preto, Verde Militar, Marrom..."
+                  @keydown.enter.prevent="addColor"
+                />
+                <button
+                  type="button"
+                  @click="addColor"
+                  class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-medium"
+                  :disabled="!newColorInput.trim()"
+                  :title="newColorInput.trim() ? `Adicionar cor '${newColorInput.trim()}'` : 'Digite uma cor para adicionar'"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Adicionar
+                </button>
+              </div>
+
+              <!-- Lista de cores adicionadas -->
+              <div v-if="form.color && form.color.length > 0" class="space-y-3">
+                <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-sm font-medium text-green-800">
+                      {{ form.color.length }} cor(es) disponível(is)
+                    </span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <div
+                      v-for="(color, index) in form.color"
+                      :key="index"
+                      class="inline-flex items-center gap-2 px-3 py-2 bg-white text-gray-800 rounded-lg border border-green-300 shadow-sm"
+                    >
+                      <span class="text-sm font-medium">{{ color }}</span>
+                      <button
+                        type="button"
+                        @click="removeColor(index)"
+                        class="text-gray-500 hover:text-red-600 transition-colors p-1 rounded hover:bg-red-50"
+                        title="Remover cor"
+                      >
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="text-xs text-green-700 mt-2">
+                    Os clientes poderão escolher entre essas cores na página do produto
+                  </p>
+                </div>
+              </div>
+
+              <!-- Estado vazio -->
+              <div v-else class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  <span class="text-sm text-gray-500">Nenhuma cor adicionada ainda</span>
+                </div>
+              </div>
+
+              <p class="text-xs text-gray-500 mt-2">
+                Deixe vazio se o produto não tiver variações de cor
+              </p>
             </div>
 
             <!-- Categoria -->
@@ -761,7 +828,7 @@ interface Product {
   subcategory?: string;
   brand?: string;
   model?: string;
-  color?: string;
+  color?: string[];
   sku: string;
   stock: number | null;
   min_stock: number;
@@ -793,6 +860,7 @@ const emit = defineEmits<{
 const loading = ref(false);
 const uploadingImages = ref(false);
 const selectedFiles = ref<File[]>([]);
+const newColorInput = ref("");
 const isEditing = computed(() => !!props.product);
 
 // Categorias disponíveis
@@ -846,7 +914,7 @@ const form = reactive<Product>({
   subcategory: "",
   brand: "",
   model: "",
-  color: "",
+  color: [],
   sku: "",
   stock: null,
   min_stock: 5,
@@ -864,6 +932,16 @@ const form = reactive<Product>({
 // Inicializar formulário se estiver editando
 if (props.product) {
   Object.assign(form, props.product);
+
+  // Converter color de string para array se necessário (compatibilidade)
+  if (props.product.color) {
+    if (typeof props.product.color === 'string') {
+      form.color = props.product.color.split(',').map(c => c.trim()).filter(c => c);
+    } else if (Array.isArray(props.product.color)) {
+      form.color = props.product.color;
+    }
+  }
+
   if (props.product.dimensions) {
     Object.assign(dimensions, props.product.dimensions);
   }
@@ -986,6 +1064,53 @@ const generateSKU = () => {
   form.sku = skuParts.join("-");
 };
 
+// Métodos para gerenciar cores
+const addColor = () => {
+  const colorToAdd = newColorInput.value.trim();
+  if (!colorToAdd) {
+    // Mostrar feedback se campo estiver vazio
+    const { error } = useNotifications();
+    error('Campo vazio', 'Digite o nome de uma cor antes de adicionar');
+    return;
+  }
+
+  // Garantir que form.color seja um array
+  if (!form.color || !Array.isArray(form.color)) {
+    form.color = [];
+  }
+
+  // Verificar se cor já existe
+  if (form.color.includes(colorToAdd)) {
+    const { warning } = useNotifications();
+    warning('Cor duplicada', `A cor "${colorToAdd}" já foi adicionada!`);
+    return;
+  }
+
+  // Adicionar cor ao array
+  form.color.push(colorToAdd);
+
+  // Limpar campo
+  newColorInput.value = '';
+
+  // Mostrar feedback de sucesso
+  const { success } = useNotifications();
+  success('Cor adicionada!', `A cor "${colorToAdd}" foi adicionada com sucesso`);
+};
+
+const removeColor = (index: number) => {
+  // Garantir que form.color seja um array
+  if (!form.color || !Array.isArray(form.color)) {
+    return;
+  }
+
+  const removedColor = form.color[index];
+  form.color.splice(index, 1);
+
+  // Mostrar feedback de remoção
+  const { info } = useNotifications();
+  info('Cor removida', `A cor "${removedColor}" foi removida`);
+};
+
 // Submit do formulário
 const handleSubmit = async (event?: Event) => {
   if (event) {
@@ -1037,31 +1162,28 @@ const handleSubmit = async (event?: Event) => {
       description: form.description,
       short_description: form.short_description,
       price: form.price,
-      sale_price: form.sale_price || null,
-      avista_price: form.avista_price || null,
-      parcelado_price: form.parcelado_price || null,
+      sale_price: form.sale_price || undefined,
       category_id: form.category_id,
-      subcategory: form.subcategory || null,
-      brand: form.brand || null,
-      model: form.model || null,
-      color: form.color || null,
+      brand: form.brand || undefined,
+      model: form.model || undefined,
+      color: form.color && form.color.length > 0 ? form.color : undefined,
       sku: form.sku,
       stock: form.stock || 0,
       min_stock: form.min_stock || 5,
-      weight: form.weight || null,
+      weight: form.weight || undefined,
       dimensions: {
-        length: dimensions.length || null,
-        width: dimensions.width || null,
-        height: dimensions.height || null,
+        length: dimensions.length || undefined,
+        width: dimensions.width || undefined,
+        height: dimensions.height || undefined,
       },
       images: allImages,
       requires_license: form.requires_license,
-      license_type: form.license_type || null,
-      caliber: form.caliber || null,
+      license_type: form.license_type || undefined,
+      caliber: form.caliber || undefined,
       is_active: form.is_active,
       is_featured: form.is_featured,
-      meta_title: form.meta_title || null,
-      meta_description: form.meta_description || null,
+      meta_title: form.meta_title || undefined,
+      meta_description: form.meta_description || undefined,
     };
 
     let result;
@@ -1079,7 +1201,7 @@ const handleSubmit = async (event?: Event) => {
       result = await productsStore.createProduct(productData);
     }
 
-    if (result.error) {
+    if (result && result.error) {
       console.error("❌ Erro da store:", result.error);
       throw new Error(result.error);
     }
@@ -1087,7 +1209,7 @@ const handleSubmit = async (event?: Event) => {
     // Limpar arquivos selecionados
     selectedFiles.value = [];
 
-    emit("save", result.data);
+    emit("save", result?.data);
     emit("close");
   } catch (error: any) {
     console.error("❌ Erro ao salvar produto:", error);

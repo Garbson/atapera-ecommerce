@@ -42,13 +42,13 @@ export const calculatePricing = (product: any): PricingInfo => {
     }
   }
   
-  // Cenário 3: Apenas preço à vista definido - calcula parcelado baseado nele
+  // Cenário 3: Apenas preço à vista definido - usar o mesmo preço para ambos
   if (product.avista_price && !product.parcelado_price) {
     const avistaPrice = product.avista_price
-    const parceladoPrice = avistaPrice / 0.95 // Inverte o desconto de 5%
-    const discount = parceladoPrice - avistaPrice
-    const discountPercentage = (discount / parceladoPrice) * 100
-    
+    const parceladoPrice = avistaPrice // Usar o mesmo preço, sem desconto artificial
+    const discount = 0 // Sem desconto
+    const discountPercentage = 0 // Sem desconto
+
     return {
       avistaPrice,
       parceladoPrice,
@@ -59,12 +59,12 @@ export const calculatePricing = (product: any): PricingInfo => {
     }
   }
   
-  // Cenário 4: Nenhum preço específico - usa o preço base com lógica padrão
+  // Cenário 4: Nenhum preço específico - usa o preço base sem desconto automático
   const basePrice = product.sale_price || product.price
-  const avistaPrice = basePrice * 0.95 // 5% de desconto à vista
+  const avistaPrice = basePrice // Sem desconto automático
   const parceladoPrice = basePrice
-  const discount = parceladoPrice - avistaPrice
-  const discountPercentage = (discount / parceladoPrice) * 100
+  const discount = 0 // Sem desconto
+  const discountPercentage = 0 // Sem desconto
   
   return {
     avistaPrice,

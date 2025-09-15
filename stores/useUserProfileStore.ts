@@ -61,8 +61,8 @@ export const useUserProfileStore = defineStore('userProfile', () => {
       loading.value = true;
       error.value = null;
 
-      const { data: userState } = useAuth();
-      if (!userState.value?.id) {
+      const { user } = useAuth();
+      if (!user.value?.id) {
         return { data: null, error: 'Usuário não autenticado' };
       }
 
@@ -70,7 +70,7 @@ export const useUserProfileStore = defineStore('userProfile', () => {
       const { data, error: fetchError } = await supabase
         .from('user_profiles')
         .select('*')
-        .eq('user_id', userState.value.id)
+        .eq('user_id', user.value.id)
         .single();
 
       if (fetchError) throw fetchError;
@@ -91,14 +91,14 @@ export const useUserProfileStore = defineStore('userProfile', () => {
       loading.value = true;
       error.value = null;
 
-      const { data: userState } = useAuth();
-      if (!userState.value?.id) {
+      const { user } = useAuth();
+      if (!user.value?.id) {
         return { data: null, error: 'Usuário não autenticado' };
       }
 
       const newProfile = {
         ...profileData,
-        user_id: userState.value.id,
+        user_id: user.value.id,
         cpf: profileData.cpf?.replace(/\D/g, ''), // Remove formatação
         phone: profileData.phone?.replace(/\D/g, ''), // Remove formatação
       };
@@ -130,8 +130,8 @@ export const useUserProfileStore = defineStore('userProfile', () => {
       loading.value = true;
       error.value = null;
 
-      const { data: userState } = useAuth();
-      if (!userState.value?.id || !profile.value?.id) {
+      const { user } = useAuth();
+      if (!user.value?.id || !profile.value?.id) {
         notify('Erro de autenticação', 'Perfil não encontrado');
         return { data: null, error: 'Perfil não encontrado' };
       }
@@ -173,8 +173,8 @@ export const useUserProfileStore = defineStore('userProfile', () => {
   };
 
   const fetchDashboardData = async (): Promise<DashboardData | null> => {
-    const { data: userState } = useAuth();
-    if (!userState.value?.id) {
+    const { user } = useAuth();
+    if (!user.value?.id) {
       return null;
     }
 
@@ -188,12 +188,12 @@ export const useUserProfileStore = defineStore('userProfile', () => {
         supabase
           .from('orders')
           .select('total_amount, status, created_at')
-          .eq('customer_id', userState.value.id),
+          .eq('customer_id', user.value.id),
         
         supabase
           .from('addresses')
           .select('id')
-          .eq('user_id', userState.value.id)
+          .eq('user_id', user.value.id)
       ]);
 
       const orders = ordersResult.data || [];

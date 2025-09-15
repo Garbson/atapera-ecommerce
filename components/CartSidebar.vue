@@ -109,6 +109,24 @@
                 <p v-if="item.category" class="text-sm text-gray-500">
                   {{ item.category }}
                 </p>
+
+                <!-- Cor selecionada ou botão para selecionar (apenas se produto tem cores) -->
+                <div v-if="item.availableColors && item.availableColors.length > 0" class="flex items-center gap-2 mt-1">
+                  <span class="text-sm text-gray-600">Cor:</span>
+                  <span v-if="item.selectedColor" class="text-sm font-medium text-gray-800 bg-gray-100 px-2 py-1 rounded">
+                    {{ item.selectedColor }}
+                  </span>
+                  <span v-else class="text-sm text-gray-500 italic">
+                    Não selecionada
+                  </span>
+                  <button
+                    @click="openColorModal(item)"
+                    class="text-xs text-blue-600 hover:text-blue-800 underline"
+                    :title="item.selectedColor ? 'Alterar cor' : 'Selecionar cor'"
+                  >
+                    {{ item.selectedColor ? 'alterar' : 'selecionar' }}
+                  </button>
+                </div>
                 <p class="text-lg font-semibold text-red-600 mt-1">
                   {{ formatPrice(item.price) }}
                 </p>
@@ -206,6 +224,82 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de alteração de cor -->
+    <div
+      v-if="colorModal.isOpen"
+      class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+      @click="closeColorModal()"
+    >
+      <div class="absolute inset-0 bg-black/50"></div>
+      <div
+        class="relative bg-white rounded-lg p-6 w-full max-w-md"
+        @click.stop
+      >
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold">Alterar Cor</h3>
+          <button
+            @click="closeColorModal()"
+            class="p-2 hover:bg-gray-100 rounded-full"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div v-if="colorModal.item">
+          <p class="text-sm text-gray-600 mb-4">
+            Produto: {{ colorModal.item.name }}
+          </p>
+
+          <div v-if="colorModal.availableColors.length > 0">
+            <label class="block text-sm font-medium text-gray-900 mb-2">
+              Cores disponíveis:
+            </label>
+            <div class="space-y-2 mb-4">
+              <button
+                v-for="color in colorModal.availableColors"
+                :key="color"
+                @click="colorModal.selectedColor = color"
+                class="w-full text-left px-3 py-2 border-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md"
+                :class="colorModal.selectedColor === color
+                  ? 'border-orange-500 bg-orange-50 text-orange-700'
+                  : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'"
+              >
+                {{ color }}
+              </button>
+            </div>
+
+            <div class="flex gap-3">
+              <button
+                @click="closeColorModal()"
+                class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                @click="updateItemColor()"
+                :disabled="!colorModal.selectedColor"
+                class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="text-center py-4">
+            <p class="text-gray-500 mb-4">Não foi possível carregar as cores disponíveis para este produto.</p>
+            <button
+              @click="closeColorModal()"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </Teleport>
 </template>
 
@@ -214,6 +308,14 @@ const cartStore = useCartStore();
 
 // Composables
 const { getProductImage } = useCloudinary();
+
+// Estado do modal de cores
+const colorModal = ref({
+  isOpen: false,
+  item: null as any,
+  selectedColor: '',
+  availableColors: [] as string[]
+});
 
 // Formatação de preço
 const formatPrice = (price: number) => {
@@ -251,24 +353,42 @@ const onImageError = (event: Event) => {
   target.src = placeholder;
 };
 
+// Funções do modal de cores
+const openColorModal = (item: any) => {
+  // Usar as cores que já estão disponíveis no item do carrinho
+  colorModal.value = {
+    isOpen: true,
+    item: item,
+    selectedColor: item.selectedColor || '',
+    availableColors: item.availableColors || []
+  };
+};
+
+const closeColorModal = () => {
+  colorModal.value = {
+    isOpen: false,
+    item: null,
+    selectedColor: '',
+    availableColors: []
+  };
+};
+
+const updateItemColor = async () => {
+  if (colorModal.value.item && colorModal.value.selectedColor) {
+    // Atualizar a cor do item no carrinho
+    await cartStore.updateItemColor(colorModal.value.item.id, colorModal.value.selectedColor);
+    closeColorModal();
+  }
+};
+
 // Ir para Pagamento
 const goToCheckout = () => {
   try {
-    const checkoutData = cartStore.prepareCheckout();
+    cartStore.prepareCheckout();
     cartStore.closeCart();
 
     // Navegar para página de checkout
     navigateTo("/checkout");
-
-    // Ou integrar com gateway de pagamento
-    // Exemplo com análise de dados
-    if (typeof gtag !== "undefined") {
-      gtag("event", "begin_checkout", {
-        currency: "BRL",
-        value: checkoutData.total,
-        items: checkoutData.items,
-      });
-    }
   } catch (error) {
     console.error("Erro ao finalizar compra:", error);
     alert("Erro ao processar checkout. Tente novamente.");

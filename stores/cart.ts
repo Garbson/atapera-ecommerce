@@ -18,6 +18,8 @@ export interface CartItem {
   parceladoPrice?: number;
   selectedPaymentMethod?: 'pix' | 'debit' | 'credit';
   selectedInstallments?: number;
+  selectedColor?: string; // Cor selecionada do produto
+  availableColors?: string[]; // Cores disponíveis do produto
   products?: {
     categories?: {
       slug: string;
@@ -148,6 +150,7 @@ export const useCartStore = defineStore("cart", {
     },
 
     async addItemToSupabase(product: Omit<CartItem, "quantity">, quantity = 1) {
+
       const supabase = useSupabase();
       const auth = useAuth();
 
@@ -170,32 +173,36 @@ export const useCartStore = defineStore("cart", {
         const existingItem = existingItems[0];
         const newQuantity = existingItem.quantity + quantity;
 
+        const updateData: any = {
+          quantity: newQuantity,
+          updated_at: new Date().toISOString(),
+        };
+
+        // Se há cor selecionada no produto, atualizar também
+        if (product.selectedColor) {
+          updateData["Product-Color"] = product.selectedColor;
+        }
+
         const { error: updateError } = await supabase
           .from("cart_items")
-          .update({
-            quantity: newQuantity,
-            updated_at: new Date().toISOString(),
-          })
+          .update(updateData)
           .eq("user_id", auth.user.value?.id);
 
         if (updateError) throw updateError;
 
-        const localItem = this.items.find((item) => item.id === product.id);
-        if (localItem) {
-          localItem.quantity = newQuantity;
-        } else {
-          this.items.push({
-            ...product,
-            quantity: newQuantity,
-            product_id: product.id,
-          });
-        }
+        // Recarregar do banco para pegar dados completos (incluindo cores)
+        await this.loadFromSupabase();
       } else {
-        const insertData = {
+        const insertData: any = {
           user_id: userId,
           product_id: product.id,
           quantity,
         };
+
+        // Incluir cor selecionada se disponível
+        if (product.selectedColor) {
+          insertData["Product-Color"] = product.selectedColor;
+        }
 
         const { error: insertError } = await supabase
           .from("cart_items")
@@ -204,11 +211,9 @@ export const useCartStore = defineStore("cart", {
         if (insertError) {
           throw insertError;
         }
-        this.items.push({
-          ...product,
-          quantity,
-          product_id: product.id,
-        });
+
+        // Recarregar do banco para pegar dados completos (incluindo cores)
+        await this.loadFromSupabase();
       }
     },
 
@@ -358,6 +363,7 @@ export const useCartStore = defineStore("cart", {
          slug,
          category_id,
          requires_license,
+         color,
          categories!inner(slug, name)
        )
      `
@@ -378,11 +384,13 @@ export const useCartStore = defineStore("cart", {
           return;
         }
 
+
         this.items = cartItems
           .map((item: any) => {
             if (!item.products) {
               return null;
             }
+
 
             const cartItem = {
               id: item.products.id,
@@ -397,6 +405,8 @@ export const useCartStore = defineStore("cart", {
               slug: item.products.slug,
               sale_price: item.products.sale_price,
               category: item.products.categories?.slug,
+              availableColors: item.products.color || [], // Cores disponíveis do produto
+              selectedColor: item["Product-Color"] || undefined, // Cor selecionada do banco
               products: {
                 categories: {
                   slug: item.products.categories?.slug
@@ -404,6 +414,7 @@ export const useCartStore = defineStore("cart", {
                 requires_license: item.products.requires_license
               }
             };
+
 
             return cartItem;
           })
@@ -433,7 +444,8 @@ export const useCartStore = defineStore("cart", {
               sale_price,
               images,
               stock,
-              slug
+              slug,
+              color
             )
           `
           )
@@ -552,6 +564,36 @@ export const useCartStore = defineStore("cart", {
     // ✅ ATUALIZAR NÚMERO DE PARCELAS
     updateInstallments(installments: number) {
       this.installments = installments;
+    },
+
+    // ✅ ATUALIZAR COR DO ITEM
+    async updateItemColor(productId: string, selectedColor: string) {
+      const item = this.items.find((item) => item.id === productId);
+      if (item) {
+        item.selectedColor = selectedColor;
+
+        // Se usuário está logado, também atualizar no Supabase
+        const auth = useAuth();
+        if (auth.user.value) {
+          try {
+            const supabase = useSupabase();
+            const { error } = await supabase
+              .from("cart_items")
+              .update({
+                "Product-Color": selectedColor,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("product_id", productId)
+              .eq("user_id", auth.user.value.id);
+
+            if (error) {
+              console.error("❌ Erro ao atualizar cor no banco:", error);
+            }
+          } catch (error) {
+            console.error("❌ Erro ao atualizar cor no banco:", error);
+          }
+        }
+      }
     },
   },
 });

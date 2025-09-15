@@ -57,17 +57,19 @@
                 v-for="(image, index) in product.images"
                 :key="index"
                 @click="selectImage(image)"
-                class="aspect-square border-2 rounded-lg overflow-hidden transition-all duration-200"
+                @dblclick="openImageFromThumbnail(index)"
+                class="aspect-square border-2 rounded-lg overflow-hidden transition-all duration-200 cursor-pointer"
                 :class="
                   selectedImage === getProductImage(image)
                     ? 'border-orange-500 ring-2 ring-orange-200'
                     : 'border-gray-200 hover:border-gray-300'
                 "
+                :title="`Clique duplo para dar zoom na imagem ${index + 1}`"
               >
                 <img
                   :src="getProductImage(image, 'small')"
                   :alt="`${product.name} ${index + 1}`"
-                  class="w-full h-full object-contain"
+                  class="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
                 />
               </button>
             </div>
@@ -88,11 +90,6 @@
               <h1 class="text-2xl font-normal text-gray-900 leading-tight">
                 {{ product.name }}
               </h1>
-              <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                <span>SKU: {{ product.sku }}</span>
-                <span v-if="product.model">Modelo: {{ product.model }}</span>
-                <span v-if="product.color">Cor: {{ product.color }}</span>
-              </div>
             </div>
 
             <!-- Avaliações (placeholder) -->
@@ -145,7 +142,6 @@
                 }}</span>
                 no cartão
               </div>
-
             </div>
 
             <!-- Disponibilidade -->
@@ -234,6 +230,27 @@
               </div>
             </div>
 
+            <!-- Seletor de Cor -->
+            <div v-if="product.color && product.color.length > 0" class="mb-4">
+              <label class="block text-sm font-medium text-gray-900 mb-2">
+                Cor disponível:
+              </label>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="color in product.color"
+                  :key="color"
+                  @click="selectedColor = color"
+                  class="px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md"
+                  :class="
+                    selectedColor === color
+                      ? 'border-orange-500 bg-orange-50 text-orange-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  "
+                >
+                  {{ color }}
+                </button>
+              </div>
+            </div>
 
             <!-- Seletor de Quantidade -->
             <div class="mb-4">
@@ -283,7 +300,6 @@
               >
                 Comprar agora
               </button>
-
             </div>
 
             <!-- Vendido por -->
@@ -414,7 +430,6 @@
         <!-- Sidebar com Mais Informações -->
         <div class="lg:col-span-1">
           <div class="space-y-4">
-
             <!-- Informações de Segurança -->
             <div class="border border-gray-200 rounded-lg p-4">
               <h3 class="font-medium text-gray-900 mb-3">Compra Segura</h3>
@@ -514,6 +529,15 @@
         </div>
       </div>
     </div>
+
+    <!-- Image Zoom Modal -->
+    <ImageZoomModal
+      :is-open="showImageZoom"
+      :images="product?.images || []"
+      :current-image-index="currentImageIndex"
+      :alt-text="product?.name"
+      @close="closeImageZoom"
+    />
   </div>
 
   <!-- Loading State -->
@@ -558,6 +582,7 @@ const selectedImage = ref("");
 const quantity = ref(1);
 const loading = ref(false);
 const activeTab = ref("description");
+const selectedColor = ref("");
 
 // Computed
 const pricing = computed(() =>
@@ -589,7 +614,7 @@ const mainFeatures = computed(() => {
   const features = [];
   if (product.value?.brand) features.push(`Marca: ${product.value.brand}`);
   if (product.value?.model) features.push(`Modelo: ${product.value.model}`);
-  if (product.value?.color) features.push(`Cor: ${product.value.color}`);
+  if (selectedColor.value) features.push(`Cor: ${selectedColor.value}`);
   if (product.value?.caliber)
     features.push(`Calibre: ${product.value.caliber}`);
   if (product.value?.weight) features.push(`Peso: ${product.value.weight}kg`);
@@ -604,14 +629,18 @@ const basicSpecs = computed(() => {
     specs.push({ label: "Marca", value: product.value.brand });
   if (product.value?.model)
     specs.push({ label: "Modelo", value: product.value.model });
-  if (product.value?.color)
-    specs.push({ label: "Cor", value: product.value.color });
-  if (product.value?.sku)
-    specs.push({ label: "SKU", value: product.value.sku });
+  if (selectedColor.value)
+    specs.push({ label: "Cor", value: selectedColor.value });
+
+  // SKU sempre presente - todos os produtos têm
+  specs.push({ label: "SKU", value: product.value?.sku });
+
   if (product.value?.caliber)
     specs.push({ label: "Calibre", value: product.value.caliber });
   if (product.value?.weight)
     specs.push({ label: "Peso", value: `${product.value.weight}kg` });
+
+
   return specs;
 });
 
@@ -620,9 +649,30 @@ const selectImage = (image: string) => {
   selectedImage.value = getProductImage(image);
 };
 
+const showImageZoom = ref(false);
+const currentImageIndex = ref(0);
+
 const openImageModal = () => {
-  // TODO: Implementar modal de zoom da imagem
-  console.log("Open image modal");
+  // Find the current image index
+  if (product.value?.images?.length) {
+    const currentImg = selectedImage.value;
+    const foundIndex = product.value.images.findIndex(
+      (img) =>
+        getProductImage(img) === currentImg ||
+        getProductImage(img, "large") === currentImg
+    );
+    currentImageIndex.value = foundIndex >= 0 ? foundIndex : 0;
+  }
+  showImageZoom.value = true;
+};
+
+const closeImageZoom = () => {
+  showImageZoom.value = false;
+};
+
+const openImageFromThumbnail = (index: number) => {
+  currentImageIndex.value = index;
+  showImageZoom.value = true;
 };
 
 const decreaseQuantity = () => {
@@ -634,6 +684,13 @@ const increaseQuantity = () => {
 };
 
 const addToCart = async () => {
+  // Validar se cor foi selecionada quando há cores disponíveis
+  if (product.value.color && product.value.color.length > 0 && !selectedColor.value) {
+    const { error } = useNotifications();
+    error("Selecione uma cor", "Por favor, escolha uma cor antes de adicionar ao carrinho");
+    return;
+  }
+
   loading.value = true;
   try {
     const cartItem = {
@@ -646,13 +703,16 @@ const addToCart = async () => {
       category: product.value.categories?.slug || "produto",
       product_id: product.value.id,
       slug: product.value.slug,
+      selectedColor: selectedColor.value, // Incluir cor selecionada
+      availableColors: product.value.color || [], // Incluir cores disponíveis
       products: {
         categories: {
-          slug: product.value.categories?.slug
+          slug: product.value.categories?.slug,
         },
-        requires_license: product.value.requires_license
-      }
+        requires_license: product.value.requires_license,
+      },
     };
+
 
     await cartStore.addItem(cartItem, quantity.value);
 
@@ -714,11 +774,17 @@ const fetchProduct = async () => {
 
     product.value = data;
 
+
     // Definir imagem selecionada
     if (data.images && data.images.length > 0) {
       selectedImage.value = getProductImage(data.images[0], "large");
     } else {
       selectedImage.value = "/placeholder-product.jpg";
+    }
+
+    // Definir primeira cor como selecionada
+    if (data.color && data.color.length > 0) {
+      selectedColor.value = data.color[0];
     }
 
     // Buscar produtos relacionados

@@ -13,6 +13,7 @@ export const useWhatsApp = () => {
       name: string;
       quantity: number;
       price: number;
+      selectedColor?: string;
     }>;
     total: number;
     hasFirearms?: boolean; // Nova propriedade para identificar se há armas
@@ -68,6 +69,9 @@ export const useWhatsApp = () => {
     message += `*PRODUTOS:*\n`;
     orderData.items.forEach((item, index) => {
       message += `${index + 1}. ${item.name}\n`;
+      if (item.selectedColor) {
+        message += `Cor: ${item.selectedColor}\n`;
+      }
       message += `Qtd: ${item.quantity}x - ${formatPrice(item.price)}\n`;
       message += `Subtotal: ${formatPrice(item.price * item.quantity)}\n\n`;
     });
@@ -162,6 +166,7 @@ export const useWhatsApp = () => {
       name: string;
       quantity: number;
       price: number;
+      selectedColor?: string;
     }>,
     total: number,
     hasFirearms: boolean, // Novo parâmetro para indicar se há armas
@@ -219,7 +224,8 @@ export const useWhatsApp = () => {
       items: orderData.items.map(item => ({
         name: item.name,
         quantity: item.quantity,
-        price: item.price
+        price: item.price,
+        selectedColor: item.selectedColor
       })),
       total: orderData.total,
       paymentMethod: orderData.paymentMethod,
