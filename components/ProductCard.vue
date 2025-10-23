@@ -111,8 +111,12 @@
       <div class="mb-4 h-20">
         <!-- Preço principal -->
         <div class="flex items-baseline gap-2 mb-1">
+          <!-- Se há variações de tamanho, mostrar "A partir de" -->
+          <span v-if="hasVariants" class="text-sm text-gray-600 mr-1">
+            A partir de
+          </span>
           <span class="text-xl font-bold text-gray-900">
-            {{ formatCurrency(pricing.avistaPrice) }}
+            {{ formatCurrency(displayPrice) }}
           </span>
           <!-- Preço original riscado (se houver promoção) -->
           <span v-if="hasDiscount" class="text-sm text-gray-500 line-through">
@@ -188,7 +192,9 @@
           </svg>
           Adicionando...
         </span>
-        <span style="cursor: pointer;" v-else>Adicionar ao Carrinho</span>
+        <span style="cursor: pointer;" v-else>
+          {{ hasVariants ? 'Ver Opções' : 'Adicionar ao Carrinho' }}
+        </span>
       </button>
     </div>
   </div>
@@ -247,9 +253,31 @@ const hasDiscount = computed(() => {
   );
 });
 
+const hasVariants = computed(() => {
+  return props.product.variants && props.product.variants.length > 0;
+});
+
+const displayPrice = computed(() => {
+  if (hasVariants.value) {
+    // Para produtos com variações, mostrar o menor preço disponível
+    const variantPrices = props.product.variants.map(v => v.price);
+    const minVariantPrice = Math.min(...variantPrices);
+    const basePrice = pricing.value.avistaPrice;
+    return Math.min(minVariantPrice, basePrice);
+  }
+  return pricing.value.avistaPrice;
+});
+
 // Methods
 const handleAddToCart = async () => {
   if (addingToCart.value) return;
+
+  // Se o produto tem variações, não adicionar diretamente - mostrar opções
+  if (hasVariants.value) {
+    // Emitir evento para mostrar modal/página de opções
+    emit("quick-view", props.product);
+    return;
+  }
 
   addingToCart.value = true;
 

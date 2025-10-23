@@ -13,6 +13,13 @@ export const useProductsStore = defineStore("products", () => {
   const currentProduct = ref(null);
 
   // Types
+  interface ProductVariant {
+    size: string;
+    price: number;
+    stock?: number;
+    sku?: string;
+  }
+
   interface Product {
     id?: string;
     name: string;
@@ -25,6 +32,7 @@ export const useProductsStore = defineStore("products", () => {
     brand?: string;
     model?: string;
     color?: string[];
+    variants?: ProductVariant[];
     sku: string;
     stock: number;
     min_stock: number;
@@ -657,6 +665,44 @@ export const useProductsStore = defineStore("products", () => {
     return await getUniqueFilterValues("caliber", categoryId);
   };
 
+  // Funções utilitárias para variações
+  const getProductPrice = (product: Product, variant?: ProductVariant) => {
+    if (variant) {
+      return variant.price;
+    }
+    return product.sale_price || product.price;
+  };
+
+  const getProductMinPrice = (product: Product) => {
+    if (!product.variants || product.variants.length === 0) {
+      return product.sale_price || product.price;
+    }
+
+    const minVariantPrice = Math.min(...product.variants.map(v => v.price));
+    const basePrice = product.sale_price || product.price;
+
+    return Math.min(minVariantPrice, basePrice);
+  };
+
+  const getProductMaxPrice = (product: Product) => {
+    if (!product.variants || product.variants.length === 0) {
+      return product.sale_price || product.price;
+    }
+
+    const maxVariantPrice = Math.max(...product.variants.map(v => v.price));
+    const basePrice = product.sale_price || product.price;
+
+    return Math.max(maxVariantPrice, basePrice);
+  };
+
+  const hasVariants = (product: Product) => {
+    return product.variants && product.variants.length > 0;
+  };
+
+  const getVariantBySize = (product: Product, size: string) => {
+    return product.variants?.find(v => v.size === size);
+  };
+
   return {
     // Estado
     products: readonly(products),
@@ -696,5 +742,12 @@ export const useProductsStore = defineStore("products", () => {
     getUniqueFilterValues,
     getUniqueBrands,
     getUniqueCalibers,
+
+    // Utilitários para variações
+    getProductPrice,
+    getProductMinPrice,
+    getProductMaxPrice,
+    hasVariants,
+    getVariantBySize,
   };
 });

@@ -133,12 +133,6 @@
                   />
                 </svg>
                 Produtos
-                <span
-                  v-if="stats.produtosBaixoEstoque > 0"
-                  class="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full ml-auto"
-                >
-                  {{ stats.produtosBaixoEstoque }}
-                </span>
               </NuxtLink>
             </li>
             <li>
@@ -263,12 +257,6 @@
                   />
                 </svg>
                 Produtos
-                <span
-                  v-if="stats.produtosBaixoEstoque > 0"
-                  class="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full ml-auto"
-                >
-                  {{ stats.produtosBaixoEstoque }}
-                </span>
               </NuxtLink>
             </li>
             <li>
@@ -294,12 +282,6 @@
                   />
                 </svg>
                 Pedidos
-                <span
-                  v-if="stats.pedidosPendentes > 0"
-                  class="bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-auto"
-                >
-                  {{ stats.pedidosPendentes }}
-                </span>
               </NuxtLink>
             </li>
             <li>

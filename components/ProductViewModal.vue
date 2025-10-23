@@ -75,7 +75,7 @@
 
             <!-- Price -->
             <div class="border-t border-b border-gray-200 py-4">
-              <div v-if="hasDiscount" class="space-y-1">
+              <div v-if="hasDiscount && !selectedVariant" class="space-y-1">
                 <div class="flex items-baseline gap-3">
                   <span class="text-3xl font-bold text-green-600">
                     {{ formatCurrency(product.sale_price) }}
@@ -89,7 +89,10 @@
                 </div>
               </div>
               <div v-else class="text-3xl font-bold text-gray-900">
-                {{ formatCurrency(product.price) }}
+                {{ formatCurrency(displayPrice) }}
+              </div>
+              <div v-if="selectedVariant" class="text-sm text-gray-600 mt-1">
+                Tamanho: {{ selectedSize }}
               </div>
             </div>
 
@@ -154,6 +157,52 @@
 
             <!-- Actions -->
             <div class="pt-4 space-y-3">
+              <!-- Size Selector (if product has variants) -->
+              <div v-if="hasVariants" class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">Tamanho:</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <button
+                    v-for="variant in product.variants"
+                    :key="variant.size"
+                    @click="selectedSize = variant.size"
+                    :class="[
+                      'px-4 py-2 border rounded-lg text-sm font-medium transition-colors',
+                      selectedSize === variant.size
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                    ]"
+                  >
+                    <div class="text-center">
+                      <div>{{ variant.size }}</div>
+                      <div class="text-xs text-gray-600">{{ formatCurrency(variant.price) }}</div>
+                    </div>
+                  </button>
+                </div>
+                <p v-if="!selectedSize" class="text-sm text-red-600">
+                  Por favor, selecione um tamanho
+                </p>
+              </div>
+
+              <!-- Color Selector (if product has colors) -->
+              <div v-if="hasColors" class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">Cor:</label>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    v-for="color in product.color"
+                    :key="color"
+                    @click="selectedColor = color"
+                    :class="[
+                      'px-3 py-2 border rounded-lg text-sm font-medium transition-colors',
+                      selectedColor === color
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                    ]"
+                  >
+                    {{ color }}
+                  </button>
+                </div>
+              </div>
+
               <!-- Quantity Selector -->
               <div class="flex items-center gap-3">
                 <label class="text-sm font-medium text-gray-700">Quantidade:</label>
@@ -186,9 +235,9 @@
 
               <!-- Action Buttons -->
               <div class="flex gap-3">
-                <button 
+                <button
                   @click="handleAddToCart"
-                  :disabled="addingToCart"
+                  :disabled="addingToCart || (hasVariants && !selectedSize)"
                   class="flex-1 py-3 px-6 rounded-lg font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   <span v-if="addingToCart" class="flex items-center justify-center">
@@ -241,6 +290,8 @@ const emit = defineEmits(['close', 'add-to-cart', 'add-to-wishlist']);
 const selectedImage = ref('');
 const quantity = ref(1);
 const addingToCart = ref(false);
+const selectedSize = ref('');
+const selectedColor = ref('');
 
 // Watchers
 watch(() => props.product, (newProduct) => {
@@ -250,6 +301,8 @@ watch(() => props.product, (newProduct) => {
     selectedImage.value = '';
   }
   quantity.value = 1;
+  selectedSize.value = '';
+  selectedColor.value = '';
 }, { immediate: true });
 
 // Computed
@@ -267,6 +320,26 @@ const discountPercentage = computed(() => {
 const hasSpecifications = computed(() => {
   const p = props.product;
   return p?.caliber || p?.fishing_type || p?.weight || p?.target_species?.length;
+});
+
+const hasVariants = computed(() => {
+  return props.product?.variants && props.product.variants.length > 0;
+});
+
+const hasColors = computed(() => {
+  return props.product?.color && props.product.color.length > 0;
+});
+
+const selectedVariant = computed(() => {
+  if (!selectedSize.value || !props.product?.variants) return null;
+  return props.product.variants.find(v => v.size === selectedSize.value);
+});
+
+const displayPrice = computed(() => {
+  if (selectedVariant.value) {
+    return selectedVariant.value.price;
+  }
+  return props.product?.sale_price || props.product?.price || 0;
 });
 
 // Methods
@@ -297,12 +370,24 @@ const decreaseQuantity = () => {
 
 const handleAddToCart = async () => {
   if (addingToCart.value) return;
-  
+
+  // Validar se tamanho foi selecionado para produtos com variações
+  if (hasVariants.value && !selectedSize.value) {
+    return;
+  }
+
   addingToCart.value = true;
-  
+
   try {
+    const productToAdd = {
+      ...props.product,
+      selectedSize: selectedSize.value || undefined,
+      selectedColor: selectedColor.value || undefined,
+      variantPrice: selectedVariant.value?.price || undefined,
+    };
+
     await emit('add-to-cart', {
-      product: props.product,
+      product: productToAdd,
       quantity: quantity.value
     });
   } finally {

@@ -324,6 +324,108 @@
               </p>
             </div>
 
+            <!-- Variações de Tamanho -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Variações de Tamanho
+              </label>
+
+              <!-- Input para adicionar nova variação -->
+              <div class="flex gap-2 mb-3">
+                <input
+                  v-model="newVariantSize"
+                  type="text"
+                  class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Ex: P, M, G, 10cm, 20cm..."
+                />
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R$</span>
+                  <input
+                    v-model="newVariantPrice"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="w-32 pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="0,00"
+                  />
+                </div>
+                <input
+                  v-model="newVariantStock"
+                  type="number"
+                  min="0"
+                  class="w-20 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Est."
+                  title="Estoque (opcional)"
+                />
+                <button
+                  type="button"
+                  @click="addVariant"
+                  class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-medium"
+                  :disabled="!newVariantSize.trim() || !newVariantPrice || newVariantPrice <= 0"
+                  :title="newVariantSize.trim() && newVariantPrice && newVariantPrice > 0 ? `Adicionar variação '${newVariantSize.trim()}'` : 'Preencha tamanho e preço'"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Adicionar
+                </button>
+              </div>
+
+              <!-- Lista de variações adicionadas -->
+              <div v-if="form.variants && form.variants.length > 0" class="space-y-3">
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-sm font-medium text-blue-800">
+                      {{ form.variants.length }} variação(ões) de tamanho
+                    </span>
+                  </div>
+                  <div class="space-y-2">
+                    <div
+                      v-for="(variant, index) in form.variants"
+                      :key="index"
+                      class="flex items-center justify-between p-3 bg-white text-gray-800 rounded-lg border border-blue-300 shadow-sm"
+                    >
+                      <div class="flex items-center gap-3">
+                        <span class="text-sm font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ variant.size }}</span>
+                        <span class="text-sm font-semibold text-green-600">R$ {{ variant.price.toFixed(2) }}</span>
+                        <span v-if="variant.stock" class="text-xs text-gray-500">(Est: {{ variant.stock }})</span>
+                      </div>
+                      <button
+                        type="button"
+                        @click="removeVariant(index)"
+                        class="text-gray-500 hover:text-red-600 transition-colors p-1 rounded hover:bg-red-50"
+                        title="Remover variação"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="text-xs text-blue-700 mt-2">
+                    Os clientes poderão escolher entre esses tamanhos na página do produto
+                  </p>
+                </div>
+              </div>
+
+              <!-- Estado vazio -->
+              <div v-else class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  <span class="text-sm text-gray-500">Nenhuma variação de tamanho adicionada</span>
+                </div>
+              </div>
+
+              <p class="text-xs text-gray-500 mt-2">
+                Deixe vazio se o produto não tiver variações de tamanho. O preço base será usado.
+              </p>
+            </div>
+
             <!-- Categoria -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -424,10 +526,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Preço Base *
-                  <span class="text-xs text-gray-500"
-                    >(usado quando não há preços específicos)</span
-                  >
+                  Preço Base <span v-if="!form.variants || form.variants.length === 0" class="text-red-500">*</span>
+                  <span class="text-xs text-gray-500">
+                    {{ form.variants && form.variants.length > 0
+                      ? '(opcional quando há variações de tamanho)'
+                      : '(obrigatório quando não há variações)' }}
+                  </span>
                 </label>
                 <div class="relative">
                   <span
@@ -814,6 +918,13 @@ const { uploadImages, getProductImage } = useCloudinary();
 const productsStore = useProductsStore();
 const categoriesStore = useCategoriesStore();
 
+interface ProductVariant {
+  size: string;
+  price: number;
+  stock?: number;
+  sku?: string;
+}
+
 interface Product {
   id?: string;
   name: string;
@@ -829,6 +940,7 @@ interface Product {
   brand?: string;
   model?: string;
   color?: string[];
+  variants?: ProductVariant[];
   sku: string;
   stock: number | null;
   min_stock: number;
@@ -861,6 +973,9 @@ const loading = ref(false);
 const uploadingImages = ref(false);
 const selectedFiles = ref<File[]>([]);
 const newColorInput = ref("");
+const newVariantSize = ref("");
+const newVariantPrice = ref<number | null>(null);
+const newVariantStock = ref<number | null>(null);
 const isEditing = computed(() => !!props.product);
 
 // Categorias disponíveis
@@ -915,6 +1030,7 @@ const form = reactive<Product>({
   brand: "",
   model: "",
   color: [],
+  variants: [],
   sku: "",
   stock: null,
   min_stock: 5,
@@ -1111,6 +1227,61 @@ const removeColor = (index: number) => {
   info('Cor removida', `A cor "${removedColor}" foi removida`);
 };
 
+// Métodos para gerenciar variações de tamanho
+const addVariant = () => {
+  const sizeToAdd = newVariantSize.value.trim();
+  const priceToAdd = newVariantPrice.value;
+
+  if (!sizeToAdd || !priceToAdd || priceToAdd <= 0) {
+    const { error } = useNotifications();
+    error('Campos obrigatórios', 'Digite o tamanho e preço válidos para adicionar a variação');
+    return;
+  }
+
+  // Garantir que form.variants seja um array
+  if (!form.variants || !Array.isArray(form.variants)) {
+    form.variants = [];
+  }
+
+  // Verificar se tamanho já existe
+  if (form.variants.some(v => v.size.toLowerCase() === sizeToAdd.toLowerCase())) {
+    const { warning } = useNotifications();
+    warning('Tamanho duplicado', `O tamanho "${sizeToAdd}" já foi adicionado!`);
+    return;
+  }
+
+  // Adicionar variação ao array
+  const newVariant: ProductVariant = {
+    size: sizeToAdd,
+    price: priceToAdd,
+    stock: newVariantStock.value || undefined
+  };
+
+  form.variants.push(newVariant);
+
+  // Limpar campos
+  newVariantSize.value = '';
+  newVariantPrice.value = null;
+  newVariantStock.value = null;
+
+  // Mostrar feedback de sucesso
+  const { success } = useNotifications();
+  success('Variação adicionada!', `Tamanho "${sizeToAdd}" - R$ ${priceToAdd.toFixed(2)}`);
+};
+
+const removeVariant = (index: number) => {
+  if (!form.variants || !Array.isArray(form.variants)) {
+    return;
+  }
+
+  const removedVariant = form.variants[index];
+  form.variants.splice(index, 1);
+
+  // Mostrar feedback de remoção
+  const { info } = useNotifications();
+  info('Variação removida', `Tamanho "${removedVariant.size}" foi removido`);
+};
+
 // Submit do formulário
 const handleSubmit = async (event?: Event) => {
   if (event) {
@@ -1122,14 +1293,23 @@ const handleSubmit = async (event?: Event) => {
 
   try {
     // Validações básicas
+    const hasVariations = form.variants && form.variants.length > 0;
+
     if (
       !form.name ||
       !form.slug ||
       !form.sku ||
       !form.category_id ||
-      !form.price
+      (!hasVariations && !form.price)
     ) {
-      alert("Por favor, preencha todos os campos obrigatórios");
+      const requiredFields = [];
+      if (!form.name) requiredFields.push("Nome");
+      if (!form.slug) requiredFields.push("URL/Slug");
+      if (!form.sku) requiredFields.push("SKU");
+      if (!form.category_id) requiredFields.push("Categoria");
+      if (!hasVariations && !form.price) requiredFields.push("Preço base (necessário quando não há variações)");
+
+      alert(`Por favor, preencha os campos obrigatórios: ${requiredFields.join(", ")}`);
       return;
     }
 
@@ -1167,6 +1347,7 @@ const handleSubmit = async (event?: Event) => {
       brand: form.brand || undefined,
       model: form.model || undefined,
       color: form.color && form.color.length > 0 ? form.color : undefined,
+      variants: form.variants && form.variants.length > 0 ? form.variants : undefined,
       sku: form.sku,
       stock: form.stock || 0,
       min_stock: form.min_stock || 5,

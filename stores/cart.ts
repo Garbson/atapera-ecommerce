@@ -20,6 +20,9 @@ export interface CartItem {
   selectedInstallments?: number;
   selectedColor?: string; // Cor selecionada do produto
   availableColors?: string[]; // Cores disponíveis do produto
+  selectedSize?: string; // Tamanho selecionado do produto
+  availableSizes?: Array<{size: string; price: number; stock?: number}>; // Variações disponíveis
+  variantPrice?: number; // Preço específico da variação selecionada
   products?: {
     categories?: {
       slug: string;
@@ -56,28 +59,31 @@ export const useCartStore = defineStore("cart", {
     // Valor total do carrinho (baseado na forma de pagamento)
     totalValue: (state) => {
       return state.items.reduce((total, item) => {
-        const itemPrice = state.paymentMethod === 'credit' 
-          ? (item.parceladoPrice || item.price)
-          : (item.avistaPrice || item.price);
+        // Usar preço da variação se selecionada, senão usar preços normais
+        const basePrice = item.variantPrice || item.price;
+        const itemPrice = state.paymentMethod === 'credit'
+          ? (item.parceladoPrice || basePrice)
+          : (item.avistaPrice || basePrice);
         return total + itemPrice * item.quantity;
       }, 0);
     },
 
     // Valor total original (sem desconto de forma de pagamento)
     originalTotalValue: (state) => {
-      return state.items.reduce(
-        (total, item) => total + (item.parceladoPrice || item.price) * item.quantity,
-        0
-      );
+      return state.items.reduce((total, item) => {
+        const basePrice = item.variantPrice || item.price;
+        return total + (item.parceladoPrice || basePrice) * item.quantity;
+      }, 0);
     },
 
     // Desconto total da forma de pagamento
     paymentDiscount: (state) => {
       if (state.paymentMethod === 'credit') return 0;
-      
+
       return state.items.reduce((discount, item) => {
-        const originalPrice = item.parceladoPrice || item.price;
-        const discountedPrice = item.avistaPrice || item.price;
+        const basePrice = item.variantPrice || item.price;
+        const originalPrice = item.parceladoPrice || basePrice;
+        const discountedPrice = item.avistaPrice || basePrice;
         return discount + (originalPrice - discountedPrice) * item.quantity;
       }, 0);
     },
@@ -139,7 +145,8 @@ export const useCartStore = defineStore("cart", {
         }, 3000);
         
       } catch (error: any) {
-        error(
+        const { error: showError } = useNotifications();
+        showError(
           "Erro ao adicionar produto",
           error.message || "Não foi possível adicionar o produto ao carrinho"
         );
@@ -183,6 +190,11 @@ export const useCartStore = defineStore("cart", {
           updateData["Product-Color"] = product.selectedColor;
         }
 
+        // Se há tamanho selecionado no produto, atualizar também
+        if (product.selectedSize) {
+          updateData["selected_size"] = product.selectedSize;
+        }
+
         const { error: updateError } = await supabase
           .from("cart_items")
           .update(updateData)
@@ -202,6 +214,11 @@ export const useCartStore = defineStore("cart", {
         // Incluir cor selecionada se disponível
         if (product.selectedColor) {
           insertData["Product-Color"] = product.selectedColor;
+        }
+
+        // Incluir tamanho selecionado se disponível
+        if (product.selectedSize) {
+          insertData["selected_size"] = product.selectedSize;
         }
 
         const { error: insertError } = await supabase
@@ -364,6 +381,7 @@ export const useCartStore = defineStore("cart", {
          category_id,
          requires_license,
          color,
+         variants,
          categories!inner(slug, name)
        )
      `
@@ -392,6 +410,12 @@ export const useCartStore = defineStore("cart", {
             }
 
 
+            // Buscar variação selecionada se existir
+            const selectedSize = item["selected_size"];
+            const availableSizes = item.products.variants || [];
+            const selectedVariant = selectedSize ? availableSizes.find(v => v.size === selectedSize) : null;
+            const variantPrice = selectedVariant ? selectedVariant.price : null;
+
             const cartItem = {
               id: item.products.id,
               name: item.products.name,
@@ -407,6 +431,9 @@ export const useCartStore = defineStore("cart", {
               category: item.products.categories?.slug,
               availableColors: item.products.color || [], // Cores disponíveis do produto
               selectedColor: item["Product-Color"] || undefined, // Cor selecionada do banco
+              availableSizes: availableSizes, // Variações disponíveis
+              selectedSize: selectedSize || undefined, // Tamanho selecionado do banco
+              variantPrice: variantPrice || undefined, // Preço da variação selecionada
               products: {
                 categories: {
                   slug: item.products.categories?.slug
@@ -591,6 +618,41 @@ export const useCartStore = defineStore("cart", {
             }
           } catch (error) {
             console.error("❌ Erro ao atualizar cor no banco:", error);
+          }
+        }
+      }
+    },
+
+    // ✅ ATUALIZAR TAMANHO DO ITEM
+    async updateItemSize(productId: string, selectedSize: string) {
+      const item = this.items.find((item) => item.id === productId);
+      if (item) {
+        // Encontrar a variação correspondente ao tamanho selecionado
+        const selectedVariant = item.availableSizes?.find(v => v.size === selectedSize);
+
+        // Atualizar o item no estado local
+        item.selectedSize = selectedSize;
+        item.variantPrice = selectedVariant ? selectedVariant.price : undefined;
+
+        // Se usuário está logado, também atualizar no Supabase
+        const auth = useAuth();
+        if (auth.user.value) {
+          try {
+            const supabase = useSupabase();
+            const { error } = await supabase
+              .from("cart_items")
+              .update({
+                "selected_size": selectedSize,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("product_id", productId)
+              .eq("user_id", auth.user.value.id);
+
+            if (error) {
+              console.error("❌ Erro ao atualizar tamanho no banco:", error);
+            }
+          } catch (error) {
+            console.error("❌ Erro ao atualizar tamanho no banco:", error);
           }
         }
       }

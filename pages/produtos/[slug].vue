@@ -116,7 +116,7 @@
                     {{ formatCurrency(product.price) }}
                   </span>
                   <span class="text-2xl text-red-700 font-normal">
-                    {{ formatCurrency(pricing.avistaPrice) }}
+                    {{ formatCurrency(displayPrice) }}
                   </span>
                 </div>
               </div>
@@ -212,7 +212,7 @@
             <!-- Preços na Sidebar -->
             <div class="space-y-2 mb-4">
               <div class="text-xl text-red-700 font-normal">
-                {{ formatCurrency(pricing.avistaPrice) }}
+                {{ formatCurrency(displayPrice) }}
               </div>
               <div class="text-sm text-gray-600">
                 {{
@@ -228,6 +228,34 @@
               >
                 {{ formatDiscount(pricing.discountPercentage) }} com PIX/Débito
               </div>
+            </div>
+
+            <!-- Seletor de Tamanho -->
+            <div v-if="hasVariants" class="mb-4">
+              <label class="block text-sm font-medium text-gray-900 mb-2">
+                Tamanho:
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  v-for="variant in product.variants"
+                  :key="variant.size"
+                  @click="selectedSize = variant.size"
+                  class="px-4 py-3 border-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md"
+                  :class="
+                    selectedSize === variant.size
+                      ? 'border-orange-500 bg-orange-50 text-orange-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  "
+                >
+                  <div class="text-center">
+                    <div class="font-semibold">{{ variant.size }}</div>
+                    <div class="text-xs text-gray-600">{{ formatCurrency(variant.price) }}</div>
+                  </div>
+                </button>
+              </div>
+              <p v-if="!selectedSize && hasVariants" class="text-sm text-red-600 mt-2">
+                Por favor, selecione um tamanho
+              </p>
             </div>
 
             <!-- Seletor de Cor -->
@@ -288,7 +316,7 @@
             <div class="space-y-2">
               <button
                 @click="addToCart"
-                :disabled="loading"
+                :disabled="loading || (hasVariants && !selectedSize)"
                 class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium py-2 px-4 rounded-full transition-colors disabled:opacity-50"
               >
                 {{ loading ? "Adicionando..." : "Adicionar ao carrinho" }}
@@ -583,6 +611,7 @@ const quantity = ref(1);
 const loading = ref(false);
 const activeTab = ref("description");
 const selectedColor = ref("");
+const selectedSize = ref("");
 
 // Computed
 const pricing = computed(() =>
@@ -602,6 +631,22 @@ const hasDiscount = computed(() => {
   return (
     product.value?.sale_price && product.value.sale_price < product.value.price
   );
+});
+
+const hasVariants = computed(() => {
+  return product.value?.variants && product.value.variants.length > 0;
+});
+
+const selectedVariant = computed(() => {
+  if (!selectedSize.value || !product.value?.variants) return null;
+  return product.value.variants.find(v => v.size === selectedSize.value);
+});
+
+const displayPrice = computed(() => {
+  if (selectedVariant.value) {
+    return selectedVariant.value.price;
+  }
+  return pricing.value.avistaPrice;
 });
 
 const tabs = computed(() => [
@@ -691,20 +736,30 @@ const addToCart = async () => {
     return;
   }
 
+  // Validar se tamanho foi selecionado quando há variações disponíveis
+  if (hasVariants.value && !selectedSize.value) {
+    const { error } = useNotifications();
+    error("Selecione um tamanho", "Por favor, escolha um tamanho antes de adicionar ao carrinho");
+    return;
+  }
+
   loading.value = true;
   try {
     const cartItem = {
       id: product.value.id,
       name: product.value.name,
-      price: pricing.value.parceladoPrice, // Preço padrão (parcelado)
-      avistaPrice: pricing.value.avistaPrice,
-      parceladoPrice: pricing.value.parceladoPrice,
+      price: selectedVariant.value ? selectedVariant.value.price : pricing.value.parceladoPrice,
+      avistaPrice: selectedVariant.value ? selectedVariant.value.price : pricing.value.avistaPrice,
+      parceladoPrice: selectedVariant.value ? selectedVariant.value.price : pricing.value.parceladoPrice,
       image: product.value.images?.[0] || "/placeholder-product.jpg",
       category: product.value.categories?.slug || "produto",
       product_id: product.value.id,
       slug: product.value.slug,
       selectedColor: selectedColor.value, // Incluir cor selecionada
       availableColors: product.value.color || [], // Incluir cores disponíveis
+      selectedSize: selectedSize.value, // Incluir tamanho selecionado
+      availableSizes: product.value.variants || [], // Incluir variações disponíveis
+      variantPrice: selectedVariant.value?.price, // Preço da variação
       products: {
         categories: {
           slug: product.value.categories?.slug,
@@ -713,14 +768,15 @@ const addToCart = async () => {
       },
     };
 
-
     await cartStore.addItem(cartItem, quantity.value);
 
     // Feedback
     const { success } = useNotifications();
+    const sizeText = selectedSize.value ? ` (${selectedSize.value})` : '';
+    const colorText = selectedColor.value ? ` - ${selectedColor.value}` : '';
     success(
       "Produto adicionado!",
-      `${product.value.name} foi adicionado ao carrinho`
+      `${product.value.name}${sizeText}${colorText} foi adicionado ao carrinho`
     );
   } catch (error: any) {
     console.error("Erro ao adicionar ao carrinho:", error);
