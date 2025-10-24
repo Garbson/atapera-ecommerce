@@ -22,17 +22,9 @@ export const useAuth = () => {
     return result;
   });
 
-  // ✅ COMPUTED para admin
+  // ✅ COMPUTED para admin - usa a coluna role da tabela user_profiles
   const isAdmin = computed(() => {
-    const adminEmails = [
-      "admin@atapera.shop",
-      "contato@atapera.shop",
-      "garbsonsouza2602@gmail.com",
-    ];
-    return (
-      adminEmails.includes(user.value?.email || "") ||
-      user.value?.user_metadata?.role === "admin"
-    );
+    return profile.value?.role === true;
   });
 
   // ✅ Inicialização
@@ -62,10 +54,10 @@ export const useAuth = () => {
         startPeriodicCheck();
       }
 
-      // 🚧 TEMPORARIAMENTE DESABILITADO para debug
-      // if (user.value) {
-      //   await getUserProfile();
-      // }
+      // Buscar perfil se usuário logado
+      if (user.value) {
+        await getUserProfile();
+      }
 
       // ✅ Listener para mudanças
       supabase.auth.onAuthStateChange(async (event, newSession) => {
@@ -74,8 +66,9 @@ export const useAuth = () => {
 
 
         if (event === "SIGNED_IN" && newSession?.user) {
-          // 🚧 TEMPORARIAMENTE DESABILITADO para debug
-          // await createOrUpdateProfile(newSession.user);
+          // Criar/atualizar perfil e buscar dados atualizados
+          await createOrUpdateProfile(newSession.user);
+          await getUserProfile();
 
           // Iniciar verificação periódica do token quando usuário faz login
           if (process.client) {
@@ -123,9 +116,16 @@ export const useAuth = () => {
     }
   };
 
-  // ✅ CORRIGIDO - Usar UPSERT para evitar duplicatas
+  // ✅ CORRIGIDO - Usar UPSERT para evitar duplicatas, preservando role
   const createOrUpdateProfile = async (authUser: User) => {
     try {
+      // Primeiro, tentar buscar o perfil existente para preservar o role
+      const { data: existingProfile } = await supabase
+        .from("user_profiles")
+        .select("role")
+        .eq("id", authUser.id)
+        .maybeSingle();
+
       // ✅ USAR UPSERT - Insert ou Update se já existir
       const { data: profileData, error: upsertError } = await supabase
         .from("user_profiles")
@@ -137,6 +137,8 @@ export const useAuth = () => {
             cpf: authUser.user_metadata?.cpf || null,
             phone: authUser.user_metadata?.phone || null,
             updated_at: new Date().toISOString(),
+            // Preservar o role existente ou usar false como padrão
+            role: existingProfile?.role ?? false,
           },
           {
             onConflict: "id", // Se conflitar no ID, fazer UPDATE
@@ -236,7 +238,7 @@ export const useAuth = () => {
   const signInWithGoogle = async () => {
     try {
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
