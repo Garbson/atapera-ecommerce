@@ -261,8 +261,8 @@ useHead({
   meta: [{ name: "description", content: "Acesso administrativo da Atapera" }],
 });
 
-// ✅ USAR O SISTEMA SUPABASE QUE JÁ FUNCIONA
-const authStore = useAuthStore();
+// ✅ USAR O SISTEMA USEAUTH CORRETO
+const { signIn, signOut, isLoggedIn, isAdmin } = useAuth();
 const router = useRouter();
 const route = useRoute();
 
@@ -351,34 +351,29 @@ const handleLogin = async () => {
   loading.value = true;
 
   try {
-    // ✅ CORREÇÃO: Usar o authStore e passar como objeto
-    const result = await authStore.signIn({
-      email: form.email,
-      password: form.password,
-    });
+    // ✅ CORREÇÃO: Usar o useAuth correto
+    const result = await signIn(form.email, form.password);
 
-    if (result.error) {
+    if (!result.success) {
       throw new Error(result.error);
     }
 
-    if (result.data?.user) {
-      // Verificar se tem permissão de admin
-      const isAdmin = await authStore.checkAdminRole();
-      
-      if (!isAdmin) {
-        await authStore.signOut();
-        error.value = "Acesso negado. Este usuário não tem permissões de administrador.";
-        return;
-      }
+    // Aguardar um momento para isAdmin carregar
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-      success.value = "Login realizado com sucesso!";
-
-      // Redirect após sucesso
-      setTimeout(() => {
-        const redirectTo = route.query.redirect || "/admin";
-        router.push(redirectTo);
-      }, 1500);
+    if (!isAdmin.value) {
+      await signOut();
+      error.value = "Acesso negado. Este usuário não tem permissões de administrador.";
+      return;
     }
+
+    success.value = "Login realizado com sucesso!";
+
+    // Redirect após sucesso
+    setTimeout(() => {
+      const redirectTo = route.query.redirect || "/admin";
+      router.push(redirectTo);
+    }, 1500);
   } catch (err) {
     console.error("[Admin Login] Erro no login:", err);
 
@@ -400,7 +395,7 @@ const handleLogin = async () => {
 // Lifecycle
 onMounted(() => {
   // Verificar se já está logado
-  if (authStore.isAuthenticated) {
+  if (isLoggedIn.value) {
     router.push("/admin");
     return;
   }

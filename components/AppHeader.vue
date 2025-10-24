@@ -86,7 +86,7 @@
                     Conta
                   </div>
                   <div class="text-sm text-white font-medium break-all">
-                    {{ authStore.userEmail }}
+                    {{ user?.email }}
                   </div>
                 </div>
 
@@ -477,14 +477,9 @@
 </template>
 
 <script setup lang="ts">
-// 🔧 SOLUÇÃO: Usar o authStore diretamente
-const authStore = useAuthStore();
+// 🔧 SOLUÇÃO: Usar o useAuth correto
+const { user, isLoggedIn, isAdmin, signOut } = useAuth();
 const cartStore = useCartStore();
-
-// 🔧 VERSÃO REATIVA - usar authStore
-const isLoggedIn = computed(() => authStore.isAuthenticated);
-const user = computed(() => authStore.profile);
-const isAdmin = computed(() => authStore.isAdmin);
 
 // Estados
 const searchQuery = ref("");
@@ -610,7 +605,7 @@ const closeMobileMenu = () => {
 
 const logout = async () => {
   try {
-    await authStore.signOut();
+    await signOut();
   } catch (error) {
     console.error("🐛 MINHA-CONTA - Erro no logout:", error);
   }

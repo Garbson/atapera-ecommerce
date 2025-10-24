@@ -325,6 +325,9 @@
         <slot />
       </main>
     </div>
+
+    <!-- Token Expiry Notification -->
+    <TokenExpiryNotification />
   </div>
 </template>
 

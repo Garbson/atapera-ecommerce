@@ -917,6 +917,7 @@ const { uploadImages, getProductImage } = useCloudinary();
 
 const productsStore = useProductsStore();
 const categoriesStore = useCategoriesStore();
+const { withTokenRefresh } = useTokenRefresh();
 
 interface ProductVariant {
   size: string;
@@ -1371,15 +1372,17 @@ const handleSubmit = async (event?: Event) => {
 
     if (isEditing.value) {
       try {
-        const updateFunction = productsStore.updateProduct;
-
-        result = await updateFunction(props.product!.id!, productData);
+        result = await withTokenRefresh(async () => {
+          return await productsStore.updateProduct(props.product!.id!, productData);
+        });
       } catch (updateError) {
         console.error("❌ Erro na chamada updateProduct:", updateError);
         throw updateError;
       }
     } else {
-      result = await productsStore.createProduct(productData);
+      result = await withTokenRefresh(async () => {
+        return await productsStore.createProduct(productData);
+      });
     }
 
     if (result && result.error) {

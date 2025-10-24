@@ -55,9 +55,12 @@ export const useAuth = () => {
       // ✅ Atualizar estados
       session.value = currentSession;
       user.value = currentSession?.user || null;
-      
 
-
+      // Se já há um usuário logado, iniciar verificação periódica
+      if (currentSession?.user && process.client) {
+        const { startPeriodicCheck } = useTokenRefresh();
+        startPeriodicCheck();
+      }
 
       // 🚧 TEMPORARIAMENTE DESABILITADO para debug
       // if (user.value) {
@@ -68,11 +71,17 @@ export const useAuth = () => {
       supabase.auth.onAuthStateChange(async (event, newSession) => {
         session.value = newSession;
         user.value = newSession?.user || null;
-        
+
 
         if (event === "SIGNED_IN" && newSession?.user) {
           // 🚧 TEMPORARIAMENTE DESABILITADO para debug
           // await createOrUpdateProfile(newSession.user);
+
+          // Iniciar verificação periódica do token quando usuário faz login
+          if (process.client) {
+            const { startPeriodicCheck } = useTokenRefresh();
+            startPeriodicCheck();
+          }
         }
 
         if (event === "SIGNED_OUT") {

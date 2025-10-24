@@ -1,25 +1,29 @@
 // middleware/admin-auth.ts
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  const authStore = useAuthStore();
+  // Só executar no client
+  if (process.server) return;
 
-  // Aguardar carregamento da autenticação
-  if (authStore.loading) {
-    return;
+  const { user, isAdmin, loading } = useAuth();
+
+  // Aguardar auth carregar se necessário (máximo 2 segundos)
+  if (loading.value) {
+    let attempts = 0;
+    while (loading.value && attempts < 20) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
   }
 
   // Verificar se está logado
-  if (!authStore.isAuthenticated) {
-    return navigateTo("/admin/login");
+  if (!user.value) {
+    return navigateTo("/auth/login");
   }
 
-  // Verificar role de admin
-  const isAdmin = await authStore.checkAdminRole();
-  
-  if (!isAdmin) {
+  // Verificar se é admin
+  if (!isAdmin.value) {
     throw createError({
       statusCode: 403,
-      statusMessage:
-        "Acesso negado. Você não tem permissão para acessar esta área.",
+      statusMessage: "Acesso negado. Você não tem permissão para acessar esta área.",
     });
   }
 });
