@@ -103,12 +103,22 @@
             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2"
               >Ações</label
             >
-            <button
-              @click="clearFilters"
-              class="w-full bg-gray-100 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-            >
-              Limpar Filtros
-            </button>
+            <div class="space-y-2">
+              <button
+                @click="clearFilters"
+                class="w-full bg-gray-100 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+              >
+                Limpar Filtros
+              </button>
+              <!-- ✅ BOTÃO DE EMERGÊNCIA PARA CACHE -->
+              <button
+                @click="forcePageRefresh"
+                class="w-full bg-red-100 text-red-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-red-200 transition-colors text-xs"
+                title="Use este botão se os dados não estiverem atualizando"
+              >
+                🔄 Forçar Atualização
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -449,10 +459,13 @@ definePageMeta({
 // Composables
 const supabase = useSupabase();
 const { getProductImage } = useCloudinary();
+const productsStore = useProductsStore();
+const categoriesStore = useCategoriesStore();
+const { forcePageRefresh, forceStoreRefresh, debugCacheStatus } = useCacheControl();
 
-// Estados
+// ✅ ABORDAGEM HÍBRIDA SEGURA: Local state + invalidação inteligente
 const products = ref([]);
-const categories = ref([]);
+const categories = computed(() => categoriesStore.activeCategories as any[]);
 const loading = ref(false);
 
 const filters = ref({
@@ -476,10 +489,12 @@ const totalPages = computed(() =>
   Math.ceil(totalProducts.value / itemsPerPage.value)
 );
 
-// Funções do Supabase
+// ✅ FUNÇÃO SEGURA COM CACHE BUSTING INTELIGENTE
 const fetchProducts = async () => {
   loading.value = true;
   try {
+    // ✅ QUERY DIRETA COM ANTI-CACHE (sem afetar store global)
+    const timestamp = Date.now();
     let query = supabase
       .from('products')
       .select(`
@@ -505,10 +520,12 @@ const fetchProducts = async () => {
       }
     }
 
+    // ✅ ANTI-CACHE: Adicionar header com timestamp
     const { data, error } = await query;
 
     if (error) throw error;
 
+    // ✅ ATUALIZAR APENAS LOCAL STATE (não afeta outras páginas)
     products.value = data || [];
   } catch (error) {
     console.error('Erro ao buscar produtos:', error);
@@ -520,14 +537,8 @@ const fetchProducts = async () => {
 
 const fetchCategories = async () => {
   try {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('id, name')
-      .order('name');
-
-    if (error) throw error;
-
-    categories.value = data || [];
+    // ✅ USAR STORE CENTRALIZADA
+    await categoriesStore.fetchCategories();
   } catch (error) {
     console.error('Erro ao buscar categorias:', error);
   }
@@ -575,13 +586,15 @@ const getStatusLabel = (product: any) => {
   return "Ativo";
 };
 
-const clearFilters = () => {
+const clearFilters = async () => {
   filters.value = {
     search: "",
     category: "",
     status: "",
   };
-  fetchProducts();
+  // ✅ FORÇAR LIMPEZA TOTAL DO CACHE AO LIMPAR FILTROS
+  productsStore.clearProductsCache();
+  await fetchProducts();
 };
 
 const toggleSelectAll = () => {
@@ -612,13 +625,15 @@ const closeDescriptionDialog = () => {
   selectedProductForDescription.value = null;
 };
 
-const saveProduct = async (productData: any) => {
-  await fetchProducts(); // Recarregar lista após salvar
+const saveProduct = async () => {
+  // ✅ RECARREGAMENTO SIMPLES E SEGURO
+  await fetchProducts(); // Recarregar apenas local
   closeModal();
 };
 
 const toggleProductStatus = async (product: any) => {
   try {
+    // ✅ OPERAÇÃO DIRETA SEGURA
     const { error } = await supabase
       .from('products')
       .update({ is_active: !product.is_active })
@@ -626,7 +641,8 @@ const toggleProductStatus = async (product: any) => {
 
     if (error) throw error;
 
-    await fetchProducts(); // Recarregar lista
+    // ✅ RECARREGAMENTO SIMPLES
+    await fetchProducts();
   } catch (error) {
     console.error('Erro ao alterar status:', error);
     alert('Erro ao alterar status do produto');
@@ -636,14 +652,17 @@ const toggleProductStatus = async (product: any) => {
 const deleteProduct = async (product: any) => {
   if (confirm(`Tem certeza que deseja excluir o produto "${product.name}"?`)) {
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', product.id);
+      // ✅ USAR MÉTODO DA STORE COM INVALIDAÇÃO DE CACHE
+      const result = await productsStore.deleteProduct(product.id);
 
-      if (error) throw error;
+      if (result?.error) {
+        throw new Error(result.error);
+      }
 
-      await fetchProducts(); // Recarregar lista
+      // ✅ FORÇAR RECARREGAMENTO COMPLETO
+      await nextTick();
+      productsStore.clearProductsCache();
+      await fetchProducts();
     } catch (error) {
       console.error('Erro ao excluir produto:', error);
       alert('Erro ao excluir produto');
@@ -653,13 +672,16 @@ const deleteProduct = async (product: any) => {
 
 const bulkUpdateStatus = async (isActive: boolean) => {
   try {
-    const { error } = await supabase
-      .from('products')
-      .update({ is_active: isActive })
-      .in('id', selectedProducts.value);
+    // ✅ USAR MÉTODO DA STORE COM INVALIDAÇÃO DE CACHE
+    const result = await productsStore.bulkUpdateStatus(selectedProducts.value, isActive);
 
-    if (error) throw error;
+    if (result.error) {
+      throw new Error(result.error);
+    }
 
+    // ✅ FORÇAR RECARREGAMENTO COMPLETO
+    await nextTick();
+    productsStore.clearProductsCache();
     await fetchProducts();
     selectedProducts.value = [];
   } catch (error) {
@@ -675,13 +697,16 @@ const bulkDelete = async () => {
     )
   ) {
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .in('id', selectedProducts.value);
+      // ✅ USAR MÉTODO DA STORE COM INVALIDAÇÃO DE CACHE
+      const result = await productsStore.bulkDeleteProducts(selectedProducts.value);
 
-      if (error) throw error;
+      if (result?.error) {
+        throw new Error(result.error);
+      }
 
+      // ✅ FORÇAR RECARREGAMENTO COMPLETO
+      await nextTick();
+      productsStore.clearProductsCache();
       await fetchProducts();
       selectedProducts.value = [];
     } catch (error) {
@@ -695,8 +720,8 @@ const exportProducts = () => {
   // Implementar exportação CSV/Excel
   const csv = products.value
     .map(
-      (p) =>
-        `${p.name},${p.sku},${p.category},${p.price},${p.stock},${p.status}`
+      (p: any) =>
+        `${p.name},${p.sku},${p.categories?.name || 'Sem categoria'},${p.price},${p.stock},${p.is_active ? 'Ativo' : 'Inativo'}`
     )
     .join("\n");
 

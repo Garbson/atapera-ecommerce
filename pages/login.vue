@@ -189,12 +189,13 @@
           <!-- Submit Button -->
           <button
             type="submit"
-            :disabled="loading || !isFormValid"
+            @click.prevent="handleLogin"
+            :disabled="loading"
             class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200"
             :class="{
               'bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500':
                 !loading && isFormValid,
-              'bg-gray-400 cursor-not-allowed': loading || !isFormValid,
+              'bg-gray-400 cursor-not-allowed': loading,
             }"
           >
             <svg
@@ -303,6 +304,11 @@ useHead({
 
 // Imports
 const { signIn, signInWithGoogle } = useAuth();
+import {
+  clearSupabaseCache,
+  getRememberPreference,
+  setRememberPreference,
+} from "~/composables/useSupabase";
 const router = useRouter();
 const route = useRoute();
 
@@ -384,22 +390,22 @@ const handleLogin = async () => {
 
   // Validate form
   if (!validateForm()) {
+    error.value = "Verifique os campos e tente novamente.";
     return;
   }
 
   loading.value = true;
 
   try {
+    // Definir persistência conforme "Lembrar-me" e reinicializar cliente
+    setRememberPreference(!!form.remember);
+    clearSupabaseCache();
     const result = await signIn(form.email, form.password);
 
     if (result.success) {
-      success.value = "Login realizado com sucesso!";
-
-      // Redirect após sucesso
-      setTimeout(() => {
-        const redirectTo = route.query.redirect || "/minha-conta";
-        router.push(redirectTo);
-      }, 1500);
+      const redirectTo = route.query.redirect || "/minha-conta";
+      await router.push(redirectTo);
+      return;
     } else {
       error.value = result.error || "Email ou senha inválidos";
     }
@@ -439,6 +445,10 @@ onMounted(() => {
       emailInput.focus();
     }
   });
+  // Sincroniza o checkbox com a preferência salva
+  try {
+    form.remember = getRememberPreference();
+  } catch {}
 });
 </script>
 

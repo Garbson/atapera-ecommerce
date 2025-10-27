@@ -264,10 +264,24 @@
                   @click="addColor"
                   class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-medium"
                   :disabled="!newColorInput.trim()"
-                  :title="newColorInput.trim() ? `Adicionar cor '${newColorInput.trim()}'` : 'Digite uma cor para adicionar'"
+                  :title="
+                    newColorInput.trim()
+                      ? `Adicionar cor '${newColorInput.trim()}'`
+                      : 'Digite uma cor para adicionar'
+                  "
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                   Adicionar
                 </button>
@@ -277,8 +291,18 @@
               <div v-if="form.color && form.color.length > 0" class="space-y-3">
                 <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
                   <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    <svg
+                      class="w-4 h-4 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                     <span class="text-sm font-medium text-green-800">
                       {{ form.color.length }} cor(es) disponível(is)
@@ -297,25 +321,51 @@
                         class="text-gray-500 hover:text-red-600 transition-colors p-1 rounded hover:bg-red-50"
                         title="Remover cor"
                       >
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          class="w-3 h-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
                   </div>
                   <p class="text-xs text-green-700 mt-2">
-                    Os clientes poderão escolher entre essas cores na página do produto
+                    Os clientes poderão escolher entre essas cores na página do
+                    produto
                   </p>
                 </div>
               </div>
 
               <!-- Estado vazio -->
-              <div v-else class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <div
+                v-else
+                class="p-3 bg-gray-50 border border-gray-200 rounded-lg"
+              >
                 <div class="flex items-center gap-2">
-                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  <svg
+                    class="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                    />
                   </svg>
-                  <span class="text-sm text-gray-500">Nenhuma cor adicionada ainda</span>
+                  <span class="text-sm text-gray-500"
+                    >Nenhuma cor adicionada ainda</span
+                  >
                 </div>
               </div>
 
@@ -339,7 +389,10 @@
                   placeholder="Ex: P, M, G, 10cm, 20cm..."
                 />
                 <div class="relative">
-                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R$</span>
+                  <span
+                    class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    >R$</span
+                  >
                   <input
                     v-model="newVariantPrice"
                     type="number"
@@ -361,22 +414,55 @@
                   type="button"
                   @click="addVariant"
                   class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-medium"
-                  :disabled="!newVariantSize.trim() || !newVariantPrice || newVariantPrice <= 0"
-                  :title="newVariantSize.trim() && newVariantPrice && newVariantPrice > 0 ? `Adicionar variação '${newVariantSize.trim()}'` : 'Preencha tamanho e preço'"
+                  :disabled="
+                    !newVariantSize.trim() ||
+                    !newVariantPrice ||
+                    newVariantPrice <= 0
+                  "
+                  :title="
+                    newVariantSize.trim() &&
+                    newVariantPrice &&
+                    newVariantPrice > 0
+                      ? `Adicionar variação '${newVariantSize.trim()}'`
+                      : 'Preencha tamanho e preço'
+                  "
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                   Adicionar
                 </button>
               </div>
 
               <!-- Lista de variações adicionadas -->
-              <div v-if="form.variants && form.variants.length > 0" class="space-y-3">
+              <div
+                v-if="form.variants && form.variants.length > 0"
+                class="space-y-3"
+              >
                 <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    <svg
+                      class="w-4 h-4 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                     <span class="text-sm font-medium text-blue-800">
                       {{ form.variants.length }} variação(ões) de tamanho
@@ -389,9 +475,16 @@
                       class="flex items-center justify-between p-3 bg-white text-gray-800 rounded-lg border border-blue-300 shadow-sm"
                     >
                       <div class="flex items-center gap-3">
-                        <span class="text-sm font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ variant.size }}</span>
-                        <span class="text-sm font-semibold text-green-600">R$ {{ variant.price.toFixed(2) }}</span>
-                        <span v-if="variant.stock" class="text-xs text-gray-500">(Est: {{ variant.stock }})</span>
+                        <span
+                          class="text-sm font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                          >{{ variant.size }}</span
+                        >
+                        <span class="text-sm font-semibold text-green-600"
+                          >R$ {{ variant.price.toFixed(2) }}</span
+                        >
+                        <span v-if="variant.stock" class="text-xs text-gray-500"
+                          >(Est: {{ variant.stock }})</span
+                        >
                       </div>
                       <button
                         type="button"
@@ -399,30 +492,57 @@
                         class="text-gray-500 hover:text-red-600 transition-colors p-1 rounded hover:bg-red-50"
                         title="Remover variação"
                       >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
                   </div>
                   <p class="text-xs text-blue-700 mt-2">
-                    Os clientes poderão escolher entre esses tamanhos na página do produto
+                    Os clientes poderão escolher entre esses tamanhos na página
+                    do produto
                   </p>
                 </div>
               </div>
 
               <!-- Estado vazio -->
-              <div v-else class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <div
+                v-else
+                class="p-3 bg-gray-50 border border-gray-200 rounded-lg"
+              >
                 <div class="flex items-center gap-2">
-                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  <svg
+                    class="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                    />
                   </svg>
-                  <span class="text-sm text-gray-500">Nenhuma variação de tamanho adicionada</span>
+                  <span class="text-sm text-gray-500"
+                    >Nenhuma variação de tamanho adicionada</span
+                  >
                 </div>
               </div>
 
               <p class="text-xs text-gray-500 mt-2">
-                Deixe vazio se o produto não tiver variações de tamanho. O preço base será usado.
+                Deixe vazio se o produto não tiver variações de tamanho. O preço
+                base será usado.
               </p>
             </div>
 
@@ -526,11 +646,18 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Preço Base <span v-if="!form.variants || form.variants.length === 0" class="text-red-500">*</span>
+                  Preço Base
+                  <span
+                    v-if="!form.variants || form.variants.length === 0"
+                    class="text-red-500"
+                    >*</span
+                  >
                   <span class="text-xs text-gray-500">
-                    {{ form.variants && form.variants.length > 0
-                      ? '(opcional quando há variações de tamanho)'
-                      : '(obrigatório quando não há variações)' }}
+                    {{
+                      form.variants && form.variants.length > 0
+                        ? "(opcional quando há variações de tamanho)"
+                        : "(obrigatório quando não há variações)"
+                    }}
                   </span>
                 </label>
                 <div class="relative">
@@ -578,11 +705,23 @@
                 Preços Específicos (Opcional)
               </h4>
               <div class="text-xs text-blue-700 mb-4 space-y-1">
-                <p>Se preenchidos, estes preços serão usados em vez do cálculo automático:</p>
+                <p>
+                  Se preenchidos, estes preços serão usados em vez do cálculo
+                  automático:
+                </p>
                 <ul class="list-disc list-inside pl-2 space-y-1">
-                  <li>Se apenas o <strong>preço parcelado</strong> for definido, o preço base será usado como preço à vista</li>
-                  <li>Se apenas o <strong>preço à vista</strong> for definido, o parcelado será calculado automaticamente</li>
-                  <li>Se ambos forem definidos, serão usados exatamente como informado</li>
+                  <li>
+                    Se apenas o <strong>preço parcelado</strong> for definido, o
+                    preço base será usado como preço à vista
+                  </li>
+                  <li>
+                    Se apenas o <strong>preço à vista</strong> for definido, o
+                    parcelado será calculado automaticamente
+                  </li>
+                  <li>
+                    Se ambos forem definidos, serão usados exatamente como
+                    informado
+                  </li>
                 </ul>
               </div>
 
@@ -875,7 +1014,7 @@
             <button
               type="submit"
               @click="handleSubmit"
-              :disabled="loading || uploadingImages"
+              :disabled="loading || uploadingImages || isSubmitting"
               class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               <svg
@@ -918,6 +1057,7 @@ const { uploadImages, getProductImage } = useCloudinary();
 const productsStore = useProductsStore();
 const categoriesStore = useCategoriesStore();
 const { withTokenRefresh } = useTokenRefresh();
+const { forceStoreRefresh } = useCacheControl();
 
 interface ProductVariant {
   size: string;
@@ -972,6 +1112,7 @@ const emit = defineEmits<{
 
 const loading = ref(false);
 const uploadingImages = ref(false);
+const isSubmitting = ref(false); // ✅ Evitar duplo submit
 const selectedFiles = ref<File[]>([]);
 const newColorInput = ref("");
 const newVariantSize = ref("");
@@ -980,15 +1121,17 @@ const newVariantStock = ref<number | null>(null);
 const isEditing = computed(() => !!props.product);
 
 // Categorias disponíveis
-const availableCategories = computed(() => {
-  return categoriesStore.activeCategories || [];
+const availableCategories = computed<any[]>(() => {
+  return (categoriesStore as any).activeCategories || [];
 });
 
 // Mapeamento dinâmico de IDs de categoria para slugs
-const categoryIdToSlug = computed(() => {
-  const mapping = {};
-  availableCategories.value.forEach((category) => {
-    mapping[category.id] = category.slug;
+const categoryIdToSlug = computed<Record<string, string>>(() => {
+  const mapping: Record<string, string> = {};
+  availableCategories.value.forEach((category: any) => {
+    if (category?.id && category?.slug) {
+      mapping[String(category.id)] = String(category.slug);
+    }
   });
   return mapping;
 });
@@ -997,7 +1140,7 @@ const categoryIdToSlug = computed(() => {
 const availableSubcategories = computed(() => {
   if (!form.category_id) return [];
 
-  const categorySlug = categoryIdToSlug.value[form.category_id];
+  const categorySlug = categoryIdToSlug.value[form.category_id as any];
   if (!categorySlug) return [];
 
   const categoryConfig = getCategoryConfig(categorySlug);
@@ -1051,11 +1194,15 @@ if (props.product) {
   Object.assign(form, props.product);
 
   // Converter color de string para array se necessário (compatibilidade)
-  if (props.product.color) {
-    if (typeof props.product.color === 'string') {
-      form.color = props.product.color.split(',').map(c => c.trim()).filter(c => c);
-    } else if (Array.isArray(props.product.color)) {
-      form.color = props.product.color;
+  if ((props.product as any).color) {
+    const colorVal: any = (props.product as any).color;
+    if (typeof colorVal === "string") {
+      form.color = colorVal
+        .split(",")
+        .map((c: string) => c.trim())
+        .filter((c: string) => c);
+    } else if (Array.isArray(colorVal)) {
+      form.color = colorVal as string[];
     }
   }
 
@@ -1149,9 +1296,9 @@ const generateSKU = () => {
   let skuParts = [];
 
   // 1. Prefixo da categoria
-  const categorySlug = categoryIdToSlug.value[form.category_id];
+  const categorySlug = categoryIdToSlug.value[form.category_id as any];
   const categoryPrefix = categorySlug
-    ? slugToPrefixes[categorySlug] || "PROD"
+    ? (slugToPrefixes as any)[categorySlug] || "PROD"
     : "PROD";
   skuParts.push(categoryPrefix);
 
@@ -1187,7 +1334,7 @@ const addColor = () => {
   if (!colorToAdd) {
     // Mostrar feedback se campo estiver vazio
     const { error } = useNotifications();
-    error('Campo vazio', 'Digite o nome de uma cor antes de adicionar');
+    error("Campo vazio", "Digite o nome de uma cor antes de adicionar");
     return;
   }
 
@@ -1199,7 +1346,7 @@ const addColor = () => {
   // Verificar se cor já existe
   if (form.color.includes(colorToAdd)) {
     const { warning } = useNotifications();
-    warning('Cor duplicada', `A cor "${colorToAdd}" já foi adicionada!`);
+    warning("Cor duplicada", `A cor "${colorToAdd}" já foi adicionada!`);
     return;
   }
 
@@ -1207,11 +1354,14 @@ const addColor = () => {
   form.color.push(colorToAdd);
 
   // Limpar campo
-  newColorInput.value = '';
+  newColorInput.value = "";
 
   // Mostrar feedback de sucesso
   const { success } = useNotifications();
-  success('Cor adicionada!', `A cor "${colorToAdd}" foi adicionada com sucesso`);
+  success(
+    "Cor adicionada!",
+    `A cor "${colorToAdd}" foi adicionada com sucesso`
+  );
 };
 
 const removeColor = (index: number) => {
@@ -1225,7 +1375,7 @@ const removeColor = (index: number) => {
 
   // Mostrar feedback de remoção
   const { info } = useNotifications();
-  info('Cor removida', `A cor "${removedColor}" foi removida`);
+  info("Cor removida", `A cor "${removedColor}" foi removida`);
 };
 
 // Métodos para gerenciar variações de tamanho
@@ -1235,7 +1385,10 @@ const addVariant = () => {
 
   if (!sizeToAdd || !priceToAdd || priceToAdd <= 0) {
     const { error } = useNotifications();
-    error('Campos obrigatórios', 'Digite o tamanho e preço válidos para adicionar a variação');
+    error(
+      "Campos obrigatórios",
+      "Digite o tamanho e preço válidos para adicionar a variação"
+    );
     return;
   }
 
@@ -1245,9 +1398,11 @@ const addVariant = () => {
   }
 
   // Verificar se tamanho já existe
-  if (form.variants.some(v => v.size.toLowerCase() === sizeToAdd.toLowerCase())) {
+  if (
+    form.variants.some((v) => v.size.toLowerCase() === sizeToAdd.toLowerCase())
+  ) {
     const { warning } = useNotifications();
-    warning('Tamanho duplicado', `O tamanho "${sizeToAdd}" já foi adicionado!`);
+    warning("Tamanho duplicado", `O tamanho "${sizeToAdd}" já foi adicionado!`);
     return;
   }
 
@@ -1255,19 +1410,22 @@ const addVariant = () => {
   const newVariant: ProductVariant = {
     size: sizeToAdd,
     price: priceToAdd,
-    stock: newVariantStock.value || undefined
+    stock: newVariantStock.value || undefined,
   };
 
   form.variants.push(newVariant);
 
   // Limpar campos
-  newVariantSize.value = '';
+  newVariantSize.value = "";
   newVariantPrice.value = null;
   newVariantStock.value = null;
 
   // Mostrar feedback de sucesso
   const { success } = useNotifications();
-  success('Variação adicionada!', `Tamanho "${sizeToAdd}" - R$ ${priceToAdd.toFixed(2)}`);
+  success(
+    "Variação adicionada!",
+    `Tamanho "${sizeToAdd}" - R$ ${priceToAdd.toFixed(2)}`
+  );
 };
 
 const removeVariant = (index: number) => {
@@ -1280,7 +1438,7 @@ const removeVariant = (index: number) => {
 
   // Mostrar feedback de remoção
   const { info } = useNotifications();
-  info('Variação removida', `Tamanho "${removedVariant.size}" foi removido`);
+  info("Variação removida", `Tamanho "${removedVariant.size}" foi removido`);
 };
 
 // Submit do formulário
@@ -1290,6 +1448,13 @@ const handleSubmit = async (event?: Event) => {
     event.stopPropagation();
   }
 
+  // ✅ EVITAR DUPLO SUBMIT
+  if (isSubmitting.value) {
+    console.log("🚫 Já existe um submit em andamento");
+    return;
+  }
+
+  isSubmitting.value = true;
   loading.value = true;
 
   try {
@@ -1308,9 +1473,14 @@ const handleSubmit = async (event?: Event) => {
       if (!form.slug) requiredFields.push("URL/Slug");
       if (!form.sku) requiredFields.push("SKU");
       if (!form.category_id) requiredFields.push("Categoria");
-      if (!hasVariations && !form.price) requiredFields.push("Preço base (necessário quando não há variações)");
+      if (!hasVariations && !form.price)
+        requiredFields.push("Preço base (necessário quando não há variações)");
 
-      alert(`Por favor, preencha os campos obrigatórios: ${requiredFields.join(", ")}`);
+      alert(
+        `Por favor, preencha os campos obrigatórios: ${requiredFields.join(
+          ", "
+        )}`
+      );
       return;
     }
 
@@ -1320,14 +1490,20 @@ const handleSubmit = async (event?: Event) => {
     // 1. Fazer upload das novas imagens se houver
     let newImageUrls: string[] = [];
     if (selectedFiles.value.length > 0) {
+      console.log(
+        "📷 Iniciando upload de",
+        selectedFiles.value.length,
+        "imagens..."
+      );
       uploadingImages.value = true;
 
       try {
         newImageUrls = await uploadImages(selectedFiles.value, productId);
+        console.log("✅ Upload concluído:", newImageUrls);
       } catch (error) {
         console.error("❌ Erro no upload:", error);
         alert("Erro no upload das imagens. Tente novamente.");
-        return;
+        return; // ❌ PROBLEMA: Return aqui impede salvamento
       } finally {
         uploadingImages.value = false;
       }
@@ -1335,8 +1511,10 @@ const handleSubmit = async (event?: Event) => {
 
     // 2. Combinar imagens existentes com as novas
     const allImages = [...(form.images || []), ...newImageUrls];
+    console.log("🖼️ Total de imagens:", allImages.length);
 
     // 3. Preparar dados para a store
+    console.log("📝 Preparando dados do produto...");
     const productData = {
       name: form.name,
       slug: form.slug,
@@ -1348,7 +1526,8 @@ const handleSubmit = async (event?: Event) => {
       brand: form.brand || undefined,
       model: form.model || undefined,
       color: form.color && form.color.length > 0 ? form.color : undefined,
-      variants: form.variants && form.variants.length > 0 ? form.variants : undefined,
+      variants:
+        form.variants && form.variants.length > 0 ? form.variants : undefined,
       sku: form.sku,
       stock: form.stock || 0,
       min_stock: form.min_stock || 5,
@@ -1370,19 +1549,36 @@ const handleSubmit = async (event?: Event) => {
 
     let result;
 
+    console.log(
+      "💾 Iniciando salvamento...",
+      isEditing.value ? "EDITANDO" : "CRIANDO"
+    );
+
     if (isEditing.value) {
       try {
+        console.log("🔄 Atualizando produto ID:", props.product!.id!);
         result = await withTokenRefresh(async () => {
-          return await productsStore.updateProduct(props.product!.id!, productData);
+          return await productsStore.updateProduct(
+            props.product!.id!,
+            productData
+          );
         });
+        console.log("✅ Produto atualizado:", result);
       } catch (updateError) {
         console.error("❌ Erro na chamada updateProduct:", updateError);
         throw updateError;
       }
     } else {
-      result = await withTokenRefresh(async () => {
-        return await productsStore.createProduct(productData);
-      });
+      try {
+        console.log("🆕 Criando novo produto...");
+        result = await withTokenRefresh(async () => {
+          return await productsStore.createProduct(productData);
+        });
+        console.log("✅ Produto criado:", result);
+      } catch (createError) {
+        console.error("❌ Erro na chamada createProduct:", createError);
+        throw createError;
+      }
     }
 
     if (result && result.error) {
@@ -1390,17 +1586,51 @@ const handleSubmit = async (event?: Event) => {
       throw new Error(result.error);
     }
 
+    console.log("🎉 Salvamento concluído com sucesso!");
+
     // Limpar arquivos selecionados
     selectedFiles.value = [];
+
+    // ✅ Atualizar somente as stores necessárias após salvar
+    if (process.client) {
+      const { forceStoreRefresh } = useCacheControl();
+      await forceStoreRefresh("products");
+    }
 
     emit("save", result?.data);
     emit("close");
   } catch (error: any) {
     console.error("❌ Erro ao salvar produto:", error);
+
+    // ✅ SE FOR ERRO DE TIMEOUT RECORRENTE, OFERECER RELOAD AUTOMÁTICO
+    if (error.message?.includes("página será recarregada automaticamente")) {
+      const shouldReload = confirm(
+        "Detectamos um problema de conexão. Deseja recarregar a página automaticamente para resolver? (Recomendado)"
+      );
+
+      if (shouldReload) {
+        console.log("🔄 Recarregando página automaticamente...");
+        if (process.client) {
+          window.location.reload();
+        }
+        return; // Não mostrar alert se vai recarregar
+      }
+    }
+
+    // ✅ SE FOR PROBLEMA CRÍTICO, INFORMAR SOBRE SALVAMENTO PARCIAL
+    if (error.message?.includes("Falha crítica")) {
+      alert(
+        `${error.message}\n\nNOTA: Se o problema persistir, tente salvar o produto SEM imagens primeiro, depois edite para adicionar as imagens.`
+      );
+      return;
+    }
+
     alert(`Erro ao salvar produto: ${error.message || "Erro desconhecido"}`);
   } finally {
     loading.value = false;
     uploadingImages.value = false;
+    isSubmitting.value = false; // ✅ Permitir novos submits
+    console.log("🏁 [Modal] handleSubmit finalizado");
   }
 };
 </script>

@@ -100,28 +100,38 @@ export const useTokenRefresh = () => {
     operation: () => Promise<T>,
     retryCount = 0
   ): Promise<T> => {
+    console.log(`🔐 [withTokenRefresh] Iniciando (tentativa ${retryCount + 1})`);
+
     try {
       // Verificar se precisa renovar o token antes da requisição
       if (session.value && isTokenExpiringSoon(session.value)) {
-        console.log("⏰ Token expirando em breve, renovando...");
+        console.log("⏰ [withTokenRefresh] Token expirando em breve, renovando...");
         await refreshToken();
       }
 
       // Executar a operação
-      return await operation();
+      console.log("🔄 [withTokenRefresh] Executando operação...");
+      const result = await operation();
+      console.log("✅ [withTokenRefresh] Operação concluída com sucesso");
+      return result;
     } catch (error: any) {
+      console.error("❌ [withTokenRefresh] Erro capturado:", error);
+
       // Se o erro for de token expirado e ainda não tentamos fazer retry
       if (retryCount === 0 && isTokenError(error)) {
-        console.log("🔄 Token expirado detectado, tentando renovar...");
+        console.log("🔄 [withTokenRefresh] Token expirado detectado, tentando renovar...");
 
         const refreshSuccess = await refreshToken();
 
         if (refreshSuccess) {
-          console.log("🔄 Fazendo retry da operação...");
+          console.log("🔄 [withTokenRefresh] Fazendo retry da operação...");
           return await withTokenRefresh(operation, retryCount + 1);
+        } else {
+          console.error("❌ [withTokenRefresh] Falha no refresh do token");
         }
       }
 
+      console.error("❌ [withTokenRefresh] Relançando erro:", error);
       throw error;
     }
   };

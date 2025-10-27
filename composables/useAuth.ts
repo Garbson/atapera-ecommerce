@@ -1,5 +1,5 @@
 // composables/useAuth.ts - VERSÃO FINAL DEFINITIVA - CORRIGIDA PGRST116
-import type { Session, User } from "@supabase/supabase-js";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 
 // ✅ SINGLETON - Estados globais compartilhados
 const globalUser = ref<User | null>(null);
@@ -8,7 +8,8 @@ const globalLoading = ref(true);
 const globalProfile = ref<any>(null);
 
 export const useAuth = () => {
-  const supabase = useSupabase();
+  // Sempre obtenha a instância atual do cliente (respeita "Lembrar-me")
+  const getSupabase = () => useSupabase();
 
   // Estados reativos (usando refs globais)
   const user = globalUser;
@@ -36,13 +37,12 @@ export const useAuth = () => {
       const {
         data: { session: currentSession },
         error,
-      } = await supabase.auth.getSession();
+      } = await getSupabase().auth.getSession();
 
       if (error) {
         console.error("❌ Erro ao buscar sessão:", error);
         throw error;
       }
-
 
       // ✅ Atualizar estados
       session.value = currentSession;
@@ -60,27 +60,28 @@ export const useAuth = () => {
       }
 
       // ✅ Listener para mudanças
-      supabase.auth.onAuthStateChange(async (event, newSession) => {
-        session.value = newSession;
-        user.value = newSession?.user || null;
+      getSupabase().auth.onAuthStateChange(
+        async (event: AuthChangeEvent, newSession: Session | null) => {
+          session.value = newSession;
+          user.value = newSession?.user || null;
 
+          if (event === "SIGNED_IN" && newSession?.user) {
+            // Criar/atualizar perfil e buscar dados atualizados
+            await createOrUpdateProfile(newSession.user);
+            await getUserProfile();
 
-        if (event === "SIGNED_IN" && newSession?.user) {
-          // Criar/atualizar perfil e buscar dados atualizados
-          await createOrUpdateProfile(newSession.user);
-          await getUserProfile();
+            // Iniciar verificação periódica do token quando usuário faz login
+            if (process.client) {
+              const { startPeriodicCheck } = useTokenRefresh();
+              startPeriodicCheck();
+            }
+          }
 
-          // Iniciar verificação periódica do token quando usuário faz login
-          if (process.client) {
-            const { startPeriodicCheck } = useTokenRefresh();
-            startPeriodicCheck();
+          if (event === "SIGNED_OUT") {
+            profile.value = null;
           }
         }
-
-        if (event === "SIGNED_OUT") {
-          profile.value = null;
-        }
-      });
+      );
     } catch (error) {
       console.error("❌ Erro initAuth:", error);
       user.value = null;
@@ -96,9 +97,8 @@ export const useAuth = () => {
     if (!user.value) return;
 
     try {
-
       // ✅ USAR .maybeSingle() em vez de .single()
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from("user_profiles")
         .select("*")
         .eq("id", user.value.id)
@@ -120,14 +120,14 @@ export const useAuth = () => {
   const createOrUpdateProfile = async (authUser: User) => {
     try {
       // Primeiro, tentar buscar o perfil existente para preservar o role
-      const { data: existingProfile } = await supabase
+      const { data: existingProfile } = await getSupabase()
         .from("user_profiles")
         .select("role")
         .eq("id", authUser.id)
         .maybeSingle();
 
       // ✅ USAR UPSERT - Insert ou Update se já existir
-      const { data: profileData, error: upsertError } = await supabase
+      const { data: profileData, error: upsertError } = await getSupabase()
         .from("user_profiles")
         .upsert(
           {
@@ -166,25 +166,26 @@ export const useAuth = () => {
     loading.value = true;
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data, error: signInError } =
+        await getSupabase().auth.signInWithPassword({
+          email,
+          password,
+        });
 
       if (signInError) throw signInError;
 
-      notify(
-        'Login realizado!',
-        `Bem-vindo de volta, ${user.value?.email}!`
-      );
+      notify("Login realizado!", `Bem-vindo de volta, ${user.value?.email}!`);
 
+      // Re-inicializa para garantir listeners e estados com o cliente atual
+      await initAuth();
       return { success: true, data };
     } catch (signInError: any) {
       console.error("❌ Erro signIn:", signInError);
       error(
-        'Erro no login',
-        signInError.message === 'Invalid login credentials' ? 
-          'Email ou senha incorretos' : signInError.message
+        "Erro no login",
+        signInError.message === "Invalid login credentials"
+          ? "Email ou senha incorretos"
+          : signInError.message
       );
       return { success: false, error: signInError.message };
     } finally {
@@ -206,7 +207,7 @@ export const useAuth = () => {
     loading.value = true;
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await getSupabase().auth.signUp({
         email,
         password,
         options: {
@@ -216,18 +217,12 @@ export const useAuth = () => {
 
       if (signUpError) throw signUpError;
 
-      notify(
-        'Conta criada!',
-        'Verifique seu email para ativar sua conta'
-      );
+      notify("Conta criada!", "Verifique seu email para ativar sua conta");
 
       return { success: true, data };
     } catch (signUpError: any) {
       console.error("❌ Erro signUp:", signUpError);
-      error(
-        'Erro no cadastro',
-        signUpError.message
-      );
+      error("Erro no cadastro", signUpError.message);
       return { success: false, error: signUpError.message };
     } finally {
       loading.value = false;
@@ -237,8 +232,7 @@ export const useAuth = () => {
   // ✅ Login com Google
   const signInWithGoogle = async () => {
     try {
-
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { error } = await getSupabase().auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
@@ -259,7 +253,7 @@ export const useAuth = () => {
     const { success: notify } = useNotifications();
 
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await getSupabase().auth.signOut();
       if (error) throw error;
 
       // ✅ Limpar estados imediatamente
@@ -267,10 +261,7 @@ export const useAuth = () => {
       session.value = null;
       profile.value = null;
 
-      notify(
-        'Logout realizado!',
-        'Você foi desconectado com sucesso'
-      );
+      notify("Logout realizado!", "Você foi desconectado com sucesso");
 
       await navigateTo("/");
       return { success: true };
@@ -287,8 +278,7 @@ export const useAuth = () => {
   // ✅ Reset senha
   const resetPassword = async (email: string) => {
     try {
-
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
 
@@ -312,8 +302,7 @@ export const useAuth = () => {
     }
 
     try {
-
-      const { error } = await supabase
+      const { error } = await getSupabase()
         .from("user_profiles")
         .update({
           ...updates,

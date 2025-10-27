@@ -1,5 +1,5 @@
-// lib/supabase.ts - VERSÃO CORRIGIDA
-import { createClient } from "@supabase/supabase-js";
+// lib/supabase.ts
+// Mantém apenas os tipos Database para tipagem compartilhada
 
 // Tipos TypeScript para o banco de dados
 export interface Database {
@@ -172,64 +172,4 @@ export interface Database {
 }
 
 // ✅ CORREÇÃO: Criar função para inicializar o cliente
-export function createSupabaseClient() {
-  // Buscar variáveis de ambiente
-  const supabaseUrl = process.env.NUXT_PUBLIC_SUPABASE_URL || "";
-  const supabaseAnonKey = process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || "";
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase URL e Anon Key são obrigatórios");
-  }
-
-  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  });
-}
-
-// ✅ Cliente padrão (pode ser usado fora de contextos Nuxt)
-export const supabase = createSupabaseClient();
-
-// ✅ HELPER FUNCTIONS para substituir track_stock logic
-export const productHelpers = {
-  // Verifica se produto está disponível (substitui track_stock = true)
-  isAvailable: (product: Database["public"]["Tables"]["products"]["Row"]) => {
-    return product.manage_stock && product.is_active && product.stock > 0;
-  },
-
-  // Verifica se produto está em estoque
-  inStock: (product: Database["public"]["Tables"]["products"]["Row"]) => {
-    return product.stock > 0;
-  },
-
-  // Status do estoque
-  getStockStatus: (
-    product: Database["public"]["Tables"]["products"]["Row"]
-  ) => {
-    if (!product.is_active) return "inactive";
-    if (product.stock === 0) return "out_of_stock";
-    if (product.stock <= product.min_stock) return "low_stock";
-    return "in_stock";
-  },
-};
-
-// ✅ QUERY BUILDERS corretos
-export const productQueries = {
-  // Em vez de WHERE track_stock = true
-  getAvailableProducts: () =>
-    supabase
-      .from("products")
-      .select("*")
-      .eq("is_active", true)
-      .eq("manage_stock", true)
-      .gt("stock", 0),
-
-  // Produtos em estoque
-  getInStockProducts: () =>
-    supabase.from("products").select("*").eq("is_active", true).gt("stock", 0),
-};
-
-export default supabase;
+// Observação: a instância do Supabase é criada apenas via composable useSupabase
