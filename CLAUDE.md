@@ -41,6 +41,9 @@ Gerenciamento de estado com Pinia:
 Funções reutilizáveis:
 - `useAuth.ts` - Sistema de autenticação com Supabase (singleton global)
 - `useSupabase.ts` - Cliente Supabase configurado
+- `useEnsureAuth.ts` - Garantir autenticação em páginas/componentes
+- `useSupabaseWithAutoReconnect.ts` - Cliente Supabase com reconexão automática
+- `useAuthDebug.ts` - Debug e diagnóstico de problemas de autenticação
 - `useStripe.ts` - Integração com Stripe
 - `useCloudinary.ts` - Upload e gerenciamento de imagens
 - `useApiClient.ts` - Cliente HTTP personalizado
@@ -120,3 +123,52 @@ APIs Nuxt server:
 - Pinia configurado com auto-import de stores
 - Estados persistentes para carrinho e autenticação
 - Stores organizados por domínio (produtos, auth, cart, etc.)
+
+### Sistema de Autenticação Robusto
+
+#### Características
+- **Singleton Global**: Estados de autenticação compartilhados entre toda a aplicação
+- **Persistência Automática**: Sessão mantida entre navegações e reloads
+- **Reconexão Automática**: Detecta e restaura sessões perdidas automaticamente
+- **Middleware Global**: Verificação de sessão em todas as navegações
+- **Debug Integrado**: Ferramentas de diagnóstico disponíveis em desenvolvimento
+
+#### Plugins do Sistema
+- `auth-system.client.ts` - Plugin principal que inicializa o sistema
+- `token-refresh.client.ts` - Renovação automática de tokens
+- `session-check.global.ts` - Middleware para verificação em todas as rotas
+
+#### Composables Disponíveis
+
+**useAuth()** - Composable principal de autenticação
+```typescript
+const { session, user, isLoggedIn, signIn, signOut, checkAndRestoreSession } = useAuth()
+```
+
+**useEnsureAuth()** - Para páginas que precisam garantir autenticação
+```typescript
+const { isAuthenticated, sessionWatcher } = useEnsureAuth()
+```
+
+**useSupabaseWithAutoReconnect()** - Cliente Supabase com recuperação automática
+```typescript
+const { withAutoReconnect, query } = useSupabaseWithAutoReconnect()
+```
+
+**useAuthDebug()** - Debug em desenvolvimento (disponível em window.authDebug)
+```typescript
+// No console do navegador:
+window.authDebug.state()  // Ver estado atual
+window.authDebug.test()   // Testar conectividade
+window.authDebug.sync()   // Forçar sincronização
+window.authDebug.reset()  // Reinicializar sistema
+```
+
+#### Correções Implementadas
+1. **Verificação automática** de sessão em todas as navegações
+2. **Middleware global** que restaura sessão perdida
+3. **Listeners únicos** para evitar duplicações
+4. **Comparação de tokens** para detectar sessões desatualizadas
+5. **Interceptação de erros** com tentativa automática de recuperação
+6. **Verificação periódica** da sessão (30 segundos)
+7. **Sistema de debug** para diagnóstico de problemas

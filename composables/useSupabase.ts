@@ -26,6 +26,13 @@ export const clearSupabaseCache = () => {
   supabaseInstances.clear();
 };
 
+// ✅ FUNÇÃO PARA FORÇAR NOVA INSTÂNCIA (útil para problemas de sessão)
+export const refreshSupabaseInstance = () => {
+  console.log("🔄 Forçando nova instância do Supabase...");
+  clearSupabaseCache();
+  return useSupabase();
+};
+
 export const useSupabase = () => {
   const config = useRuntimeConfig();
   const isClient = typeof window !== "undefined";

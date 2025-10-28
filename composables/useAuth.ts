@@ -7,6 +7,27 @@ const globalSession = ref<Session | null>(null);
 const globalLoading = ref(true);
 const globalProfile = ref<any>(null);
 
+// Flag para evitar múltiplas inicializações
+let isInitialized = false;
+let authUnsubscribe: (() => void) | null = null;
+
+// Queue para operações que precisam ser executadas fora do callback
+const deferredOperations = ref<Array<() => Promise<void>>>([]);
+
+// Processador de operações defer
+const processDeferredOperations = async () => {
+  while (deferredOperations.value.length > 0) {
+    const operation = deferredOperations.value.shift();
+    if (operation) {
+      try {
+        await operation();
+      } catch (error) {
+        console.error("❌ Erro em operação diferida:", error);
+      }
+    }
+  }
+};
+
 export const useAuth = () => {
   // Sempre obtenha a instância atual do cliente (respeita "Lembrar-me")
   const getSupabase = () => useSupabase();
@@ -28,11 +49,24 @@ export const useAuth = () => {
     return profile.value?.role === true;
   });
 
-  // ✅ Inicialização
+  // ✅ Inicialização (singleton com proteção contra múltiplas execuções)
   const initAuth = async () => {
+    // Evitar múltiplas inicializações
+    if (isInitialized) {
+      console.log("🔄 Auth já inicializado, retornando...");
+      return;
+    }
+
     loading.value = true;
+    console.log("🔧 Inicializando sistema de autenticação...");
 
     try {
+      // Remover listener anterior se existir
+      if (authUnsubscribe) {
+        authUnsubscribe();
+        authUnsubscribe = null;
+      }
+
       // Buscar sessão atual
       const {
         data: { session: currentSession },
@@ -48,40 +82,79 @@ export const useAuth = () => {
       session.value = currentSession;
       user.value = currentSession?.user || null;
 
-      // Se já há um usuário logado, iniciar verificação periódica
-      if (currentSession?.user && process.client) {
-        const { startPeriodicCheck } = useTokenRefresh();
-        startPeriodicCheck();
-      }
+      console.log("📝 Sessão atual:", currentSession ? "Usuário logado" : "Sem sessão");
 
       // Buscar perfil se usuário logado
       if (user.value) {
         await getUserProfile();
       }
 
-      // ✅ Listener para mudanças
-      getSupabase().auth.onAuthStateChange(
-        async (event: AuthChangeEvent, newSession: Session | null) => {
+      // ✅ Configurar listener seguindo práticas oficiais do Supabase
+      const { data: { subscription } } = getSupabase().auth.onAuthStateChange(
+        (event: AuthChangeEvent, newSession: Session | null) => {
+          console.log(`🔐 Auth state changed: ${event}`, newSession ? "Sessão ativa" : "Sem sessão");
+
+          // Atualização síncrona de estado (recomendação oficial)
           session.value = newSession;
           user.value = newSession?.user || null;
 
-          if (event === "SIGNED_IN" && newSession?.user) {
-            // Criar/atualizar perfil e buscar dados atualizados
-            await createOrUpdateProfile(newSession.user);
-            await getUserProfile();
+          // Operações específicas por evento
+          switch (event) {
+            case 'INITIAL_SESSION':
+              if (newSession?.user) {
+                // Diferir operações pesadas para fora do callback
+                deferredOperations.value.push(async () => {
+                  await createOrUpdateProfile(newSession.user);
+                  await getUserProfile();
+                });
+                setTimeout(processDeferredOperations, 0);
+              }
+              break;
 
-            // Iniciar verificação periódica do token quando usuário faz login
-            if (process.client) {
-              const { startPeriodicCheck } = useTokenRefresh();
-              startPeriodicCheck();
-            }
-          }
+            case 'SIGNED_IN':
+              if (newSession?.user) {
+                // Diferir operações pesadas
+                deferredOperations.value.push(async () => {
+                  await createOrUpdateProfile(newSession.user);
+                  await getUserProfile();
+                });
+                setTimeout(processDeferredOperations, 0);
+              }
+              break;
 
-          if (event === "SIGNED_OUT") {
-            profile.value = null;
+            case 'SIGNED_OUT':
+              // Limpeza síncrona
+              profile.value = null;
+              break;
+
+            case 'TOKEN_REFRESHED':
+              console.log("✅ Token renovado automaticamente pelo Supabase");
+              // Não precisa fazer nada - o Supabase já atualizou a sessão
+              break;
+
+            case 'USER_UPDATED':
+              // Atualizar perfil se necessário
+              if (newSession?.user) {
+                deferredOperations.value.push(() => getUserProfile());
+                setTimeout(processDeferredOperations, 0);
+              }
+              break;
           }
         }
       );
+
+      // Guardar função para cancelar subscription
+      authUnsubscribe = () => subscription.unsubscribe();
+
+      // Se já há um usuário logado, iniciar verificação periódica
+      if (currentSession?.user && process.client) {
+        const { startPeriodicCheck } = useTokenRefresh();
+        startPeriodicCheck();
+      }
+
+      isInitialized = true;
+      console.log("✅ Sistema de autenticação inicializado com sucesso");
+
     } catch (error) {
       console.error("❌ Erro initAuth:", error);
       user.value = null;
@@ -291,6 +364,77 @@ export const useAuth = () => {
     }
   };
 
+  // ✅ Função para forçar reinicialização (útil para debug ou problemas de sessão)
+  const reinitAuth = async () => {
+    console.log("🔄 Forçando reinicialização do sistema de auth...");
+
+    // Limpar estado atual
+    if (authUnsubscribe) {
+      authUnsubscribe();
+      authUnsubscribe = null;
+    }
+
+    isInitialized = false;
+    loading.value = true;
+
+    // Reinicializar
+    await initAuth();
+  };
+
+  // ✅ Verificação simples de sessão seguindo práticas Supabase
+  const checkAndRestoreSession = async () => {
+    if (!isInitialized) {
+      console.log("🔧 Sistema não inicializado, inicializando...");
+      await initAuth();
+      return;
+    }
+
+    try {
+      console.log("🔍 Verificando sessão no Supabase...");
+
+      // getSession() é confiável e tem auto-refresh automático (doc oficial)
+      const { data: { session: currentSession }, error } = await getSupabase().auth.getSession();
+
+      if (error) {
+        console.error("❌ Erro ao buscar sessão:", error);
+
+        // Se erro de rede, tentar uma vez com nova instância
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          console.log("🔄 Tentando com nova instância...");
+          const { refreshSupabaseInstance } = await import('./useSupabase');
+          refreshSupabaseInstance();
+
+          // Uma tentativa adicional
+          const { data: { session: retrySession }, error: retryError } = await getSupabase().auth.getSession();
+          if (!retryError && retrySession) {
+            session.value = retrySession;
+            user.value = retrySession.user;
+            return;
+          }
+        }
+
+        // Limpar estado em caso de erro persistente
+        session.value = null;
+        user.value = null;
+        profile.value = null;
+        return;
+      }
+
+      // Atualizar estado com sessão atual (Supabase é a fonte da verdade)
+      session.value = currentSession;
+      user.value = currentSession?.user || null;
+
+      console.log("✅ Sessão verificada:", currentSession ? "Ativa" : "Inativa");
+
+    } catch (error) {
+      console.error("❌ Erro na verificação de sessão:", error);
+      // Em caso de erro, limpar estado local
+      session.value = null;
+      user.value = null;
+      profile.value = null;
+    }
+  };
+
   // ✅ CORRIGIDO - Atualizar perfil
   const updateProfile = async (updates: {
     name?: string;
@@ -344,5 +488,7 @@ export const useAuth = () => {
     resetPassword,
     updateProfile,
     getUserProfile,
+    reinitAuth,
+    checkAndRestoreSession,
   };
 };
