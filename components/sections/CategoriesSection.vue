@@ -186,6 +186,17 @@ const categories = [
     productCount: 280,
     features: ["Roupas táticas", "Calçados outdoor", "Resistente e durável"],
   },
+  {
+    id: 7,
+    name: "Motores",
+    description:
+      "Motores de popa, estacionários, motobombas e acessórios. Equipamentos completos para embarcações, geradores e bombas d'água.",
+    image: "/images/motoresBg.jpg",
+    bgClass: "bg-gradient-to-br from-teal-600 to-teal-800",
+    link: "/categoria/motores",
+    productCount: 85,
+    features: ["Motores de popa", "Motores estacionários", "Motobombas e geradores"],
+  },
 ];
 </script>
 
@@ -225,5 +236,8 @@ const categories = [
 }
 .group:nth-child(6) {
   animation-delay: 0.5s;
+}
+.group:nth-child(7) {
+  animation-delay: 0.6s;
 }
 </style>

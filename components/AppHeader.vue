@@ -25,7 +25,7 @@
             />
             <button
               @click="performSearch"
-              class="absolute right-0 top-0 h-full border border-white  px-6 bg-red-600 text-white rounded-r-lg hover:bg-red-700 transition-colors"
+              class="absolute right-0 top-0 h-full border border-white px-6 bg-red-600 text-white rounded-r-lg hover:bg-red-700 transition-colors"
             >
               <svg
                 class="w-5 h-5"
@@ -121,7 +121,7 @@
                     >
                     Endereços
                   </button>
-                  
+
                   <!-- Admin Panel Option -->
                   <button
                     v-if="isAdmin"
@@ -176,7 +176,6 @@
                     Criar Conta
                   </button>
                 </div>
-
               </template>
             </div>
           </div>
@@ -240,50 +239,57 @@
           <li>
             <NuxtLink
               to="/categoria/armas-fogo"
-              class=" hover:text-red-600 font-medium transition-colors"
+              class="hover:text-red-600 font-medium transition-colors"
               >Armas de Fogo</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/armas-pressao"
-              class=" hover:text-red-600 font-medium transition-colors"
+              class="hover:text-red-600 font-medium transition-colors"
               >Armas de Pressão</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/pesca"
-              class=" hover:text-red-600 font-medium transition-colors"
+              class="hover:text-red-600 font-medium transition-colors"
               >Pesca</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/airsoft"
-              class=" hover:text-red-600 font-medium transition-colors"
+              class="hover:text-red-600 font-medium transition-colors"
               >Airsoft</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/caca"
-              class=" hover:text-red-600 font-medium transition-colors"
+              class="hover:text-red-600 font-medium transition-colors"
               >Caça</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/vestuario"
-              class=" hover:text-red-600 font-medium transition-colors"
+              class="hover:text-red-600 font-medium transition-colors"
               >Vestuário</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               to="/categoria/camping"
-              class=" hover:text-red-600 font-medium transition-colors"
+              class="hover:text-red-600 font-medium transition-colors"
               >Camping</NuxtLink
+            >
+          </li>
+          <li>
+            <NuxtLink
+              to="/categoria/motores"
+              class="hover:text-red-600 font-medium transition-colors"
+              >Motores</NuxtLink
             >
           </li>
           <li>
@@ -299,13 +305,13 @@
       <!-- Mobile Search -->
       <div v-if="showMobileSearch" class="md:hidden mt-4">
         <div class="flex">
-            <input
+          <input
             v-model="searchQuery"
             type="text"
             placeholder="Buscar produtos..."
             class="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-red-500 placeholder-white"
             @keyup.enter="performSearch"
-            />
+          />
           <button
             @click="performSearch"
             class="px-6 bg-red-600 text-white rounded-r-lg hover:bg-red-700 transition-colors"
@@ -371,8 +377,12 @@
             class="group p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 hover:from-red-100 hover:to-red-200 transition-all duration-200"
           >
             <div class="flex items-center gap-2 mb-2">
-              <div class="w-2 h-2 bg-red-500 rounded-full group-hover:scale-125 transition-transform"></div>
-              <span class="font-semibold text-gray-800 text-sm">Armas de Fogo</span>
+              <div
+                class="w-2 h-2 bg-red-500 rounded-full group-hover:scale-125 transition-transform"
+              ></div>
+              <span class="font-semibold text-gray-800 text-sm"
+                >Armas de Fogo</span
+              >
             </div>
             <span class="text-xs text-gray-600">Pistolas, Rifles</span>
           </NuxtLink>
@@ -383,8 +393,12 @@
             class="group p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:from-blue-100 hover:to-blue-200 transition-all duration-200"
           >
             <div class="flex items-center gap-2 mb-2">
-              <div class="w-2 h-2 bg-blue-500 rounded-full group-hover:scale-125 transition-transform"></div>
-              <span class="font-semibold text-gray-800 text-sm">Armas Pressão</span>
+              <div
+                class="w-2 h-2 bg-blue-500 rounded-full group-hover:scale-125 transition-transform"
+              ></div>
+              <span class="font-semibold text-gray-800 text-sm"
+                >Armas Pressão</span
+              >
             </div>
             <span class="text-xs text-gray-600">Chumbinho, CO2</span>
           </NuxtLink>
@@ -395,7 +409,9 @@
             class="group p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200 hover:from-cyan-100 hover:to-cyan-200 transition-all duration-200"
           >
             <div class="flex items-center gap-2 mb-2">
-              <div class="w-2 h-2 bg-cyan-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <div
+                class="w-2 h-2 bg-cyan-500 rounded-full group-hover:scale-125 transition-transform"
+              ></div>
               <span class="font-semibold text-gray-800 text-sm">Pesca</span>
             </div>
             <span class="text-xs text-gray-600">Varas, Iscas</span>
@@ -407,7 +423,9 @@
             class="group p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-200"
           >
             <div class="flex items-center gap-2 mb-2">
-              <div class="w-2 h-2 bg-green-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <div
+                class="w-2 h-2 bg-green-500 rounded-full group-hover:scale-125 transition-transform"
+              ></div>
               <span class="font-semibold text-gray-800 text-sm">Airsoft</span>
             </div>
             <span class="text-xs text-gray-600">Réplicas, BBs</span>
@@ -419,7 +437,9 @@
             class="group p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 hover:from-amber-100 hover:to-amber-200 transition-all duration-200"
           >
             <div class="flex items-center gap-2 mb-2">
-              <div class="w-2 h-2 bg-amber-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <div
+                class="w-2 h-2 bg-amber-500 rounded-full group-hover:scale-125 transition-transform"
+              ></div>
               <span class="font-semibold text-gray-800 text-sm">Caça</span>
             </div>
             <span class="text-xs text-gray-600">Equipamentos</span>
@@ -431,7 +451,9 @@
             class="group p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-200"
           >
             <div class="flex items-center gap-2 mb-2">
-              <div class="w-2 h-2 bg-purple-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <div
+                class="w-2 h-2 bg-purple-500 rounded-full group-hover:scale-125 transition-transform"
+              ></div>
               <span class="font-semibold text-gray-800 text-sm">Vestuário</span>
             </div>
             <span class="text-xs text-gray-600">Roupas, Botas</span>
@@ -443,10 +465,26 @@
             class="group p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200 hover:from-emerald-100 hover:to-emerald-200 transition-all duration-200"
           >
             <div class="flex items-center gap-2 mb-2">
-              <div class="w-2 h-2 bg-emerald-500 rounded-full group-hover:scale-125 transition-transform"></div>
+              <div
+                class="w-2 h-2 bg-emerald-500 rounded-full group-hover:scale-125 transition-transform"
+              ></div>
               <span class="font-semibold text-gray-800 text-sm">Camping</span>
             </div>
             <span class="text-xs text-gray-600">Barracas, Mochilas</span>
+          </NuxtLink>
+
+          <NuxtLink
+            to="/categoria/motores"
+            @click="closeMobileMenu"
+            class="group p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl border border-teal-200 hover:from-teal-100 hover:to-teal-200 transition-all duration-200"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div
+                class="w-2 h-2 bg-teal-500 rounded-full group-hover:scale-125 transition-transform"
+              ></div>
+              <span class="font-semibold text-gray-800 text-sm">Motores</span>
+            </div>
+            <span class="text-xs text-gray-600">Motores, Acessórios</span>
           </NuxtLink>
 
           <NuxtLink
@@ -455,11 +493,17 @@
             class="group p-4 bg-gradient-to-br from-red-100 to-red-200 rounded-xl border-2 border-red-300 hover:from-red-200 hover:to-red-300 transition-all duration-200 relative overflow-hidden"
           >
             <div class="flex items-center gap-2 mb-2">
-              <div class="w-2 h-2 bg-red-600 rounded-full group-hover:scale-125 transition-transform animate-pulse"></div>
+              <div
+                class="w-2 h-2 bg-red-600 rounded-full group-hover:scale-125 transition-transform animate-pulse"
+              ></div>
               <span class="font-bold text-red-800 text-sm">🔥 Ofertas</span>
             </div>
-            <span class="text-xs text-red-700 font-medium">Promoções especiais</span>
-            <div class="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+            <span class="text-xs text-red-700 font-medium"
+              >Promoções especiais</span
+            >
+            <div
+              class="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+            >
               <span class="text-white text-xs font-bold">%</span>
             </div>
           </NuxtLink>
@@ -645,5 +689,4 @@ watch(
 
 // Inicialização removida para evitar sobrecarga
 // A inicialização deve ser feita apenas uma vez no plugin ou layout principal
-
 </script>

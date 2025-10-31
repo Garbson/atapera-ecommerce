@@ -381,36 +381,47 @@
               </label>
 
               <!-- Input para adicionar nova variação -->
-              <div class="flex gap-2 mb-3">
-                <input
-                  v-model="newVariantSize"
-                  type="text"
-                  class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  placeholder="Ex: P, M, G, 10cm, 20cm..."
-                />
-                <div class="relative">
-                  <span
-                    class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                    >R$</span
-                  >
+              <div class="space-y-3 mb-3">
+                <div class="flex gap-2">
                   <input
-                    v-model="newVariantPrice"
+                    v-model="newVariantSize"
+                    type="text"
+                    class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="Ex: P, M, G, 10cm, 20cm..."
+                  />
+                  <div class="relative">
+                    <span
+                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                      >R$</span
+                    >
+                    <input
+                      v-model="newVariantPrice"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      class="w-32 pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      placeholder="0,00"
+                    />
+                  </div>
+                  <input
+                    v-model="newVariantStock"
                     type="number"
-                    step="0.01"
                     min="0"
-                    class="w-32 pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    placeholder="0,00"
+                    class="w-20 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="Est."
+                    title="Estoque (opcional)"
                   />
                 </div>
-                <input
-                  v-model="newVariantStock"
-                  type="number"
-                  min="0"
-                  class="w-20 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  placeholder="Est."
-                  title="Estoque (opcional)"
-                />
-                <button
+                <div class="flex items-center justify-between">
+                  <label class="flex items-center gap-2">
+                    <input
+                      v-model="newVariantForOrder"
+                      type="checkbox"
+                      class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                    />
+                    <span class="text-sm text-gray-700">Apenas por encomenda</span>
+                  </label>
+                  <button
                   type="button"
                   @click="addVariant"
                   class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-medium"
@@ -442,6 +453,7 @@
                   </svg>
                   Adicionar
                 </button>
+                </div>
               </div>
 
               <!-- Lista de variações adicionadas -->
@@ -484,6 +496,9 @@
                         >
                         <span v-if="variant.stock" class="text-xs text-gray-500"
                           >(Est: {{ variant.stock }})</span
+                        >
+                        <span v-if="variant.for_order" class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded"
+                          >Por Encomenda</span
                         >
                       </div>
                       <button
@@ -895,6 +910,17 @@
                   >Requer Licença</span
                 >
               </label>
+
+              <label class="flex items-center gap-2">
+                <input
+                  v-model="form.for_order"
+                  type="checkbox"
+                  class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                />
+                <span class="text-sm font-medium text-gray-700"
+                  >Apenas por Encomenda</span
+                >
+              </label>
             </div>
 
             <!-- Tipo de Licença (se aplicável) -->
@@ -1064,6 +1090,7 @@ interface ProductVariant {
   price: number;
   stock?: number;
   sku?: string;
+  for_order?: boolean;
 }
 
 interface Product {
@@ -1097,6 +1124,7 @@ interface Product {
   caliber?: string;
   is_active: boolean;
   is_featured: boolean;
+  for_order: boolean;
   meta_title?: string;
   meta_description?: string;
 }
@@ -1118,6 +1146,7 @@ const newColorInput = ref("");
 const newVariantSize = ref("");
 const newVariantPrice = ref<number | null>(null);
 const newVariantStock = ref<number | null>(null);
+const newVariantForOrder = ref(false);
 const isEditing = computed(() => !!props.product);
 
 // Categorias disponíveis
@@ -1185,6 +1214,7 @@ const form = reactive<Product>({
   caliber: "",
   is_active: true,
   is_featured: false,
+  for_order: false,
   meta_title: "",
   meta_description: "",
 });
@@ -1411,6 +1441,7 @@ const addVariant = () => {
     size: sizeToAdd,
     price: priceToAdd,
     stock: newVariantStock.value || undefined,
+    for_order: newVariantForOrder.value || undefined,
   };
 
   form.variants.push(newVariant);
@@ -1419,6 +1450,7 @@ const addVariant = () => {
   newVariantSize.value = "";
   newVariantPrice.value = null;
   newVariantStock.value = null;
+  newVariantForOrder.value = false;
 
   // Mostrar feedback de sucesso
   const { success } = useNotifications();
@@ -1543,6 +1575,7 @@ const handleSubmit = async (event?: Event) => {
       caliber: form.caliber || undefined,
       is_active: form.is_active,
       is_featured: form.is_featured,
+      for_order: form.for_order,
       meta_title: form.meta_title || undefined,
       meta_description: form.meta_description || undefined,
     };

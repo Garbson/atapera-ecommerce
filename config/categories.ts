@@ -320,6 +320,40 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
     ],
   },
 
+  motores: {
+    slug: "motores",
+    title: "Motores",
+    backgroundImage: "/images/motoSerraBg.jpg",
+    description:
+      "Motores de popa, estacionários, motobombas e acessórios. Equipamentos completos para embarcações, geradores e bombas d'água.",
+    color: "blue",
+    filters: [
+      {
+        key: "subcategory",
+        label: "Categoria",
+        placeholder: "Todas as Categorias",
+        options: [
+          { value: "motores-popa", label: "Motores de Popa" },
+          { value: "motores-estacionarios", label: "Motores Estacionários" },
+          { value: "motobombas", label: "Motobombas" },
+          { value: "geradores", label: "Geradores" },
+          { value: "pecas", label: "Peças" },
+          { value: "acessorios", label: "Acessórios" },
+        ],
+      },
+      {
+        key: "brand",
+        label: "Marca",
+        placeholder: "Todas as Marcas",
+        options: [
+          { value: "mercury", label: "Mercury" },
+          { value: "yamaha", label: "Yamaha" },
+          { value: "honda", label: "Honda" },
+        ],
+      },
+    ],
+  },
+
   vestuario: {
     slug: "vestuario",
     title: "Vestuário",

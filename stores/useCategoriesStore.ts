@@ -86,7 +86,7 @@ export const useCategoriesStore = defineStore("categories", () => {
 
             return {
               ...category,
-              products_count: count || 0,
+              product_count: count || 0,
             };
           })
         );
