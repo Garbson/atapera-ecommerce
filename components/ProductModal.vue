@@ -497,7 +497,7 @@
                         <span v-if="variant.stock" class="text-xs text-gray-500"
                           >(Est: {{ variant.stock }})</span
                         >
-                        <span v-if="variant.for_order" class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded"
+                        <span v-if="variant.forOrder" class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded"
                           >Por Encomenda</span
                         >
                       </div>
@@ -913,7 +913,7 @@
 
               <label class="flex items-center gap-2">
                 <input
-                  v-model="form.for_order"
+                  v-model="form.forOrder"
                   type="checkbox"
                   class="rounded border-gray-300 text-red-600 focus:ring-red-500"
                 />
@@ -1090,7 +1090,7 @@ interface ProductVariant {
   price: number;
   stock?: number;
   sku?: string;
-  for_order?: boolean;
+  forOrder?: boolean;
 }
 
 interface Product {
@@ -1124,7 +1124,7 @@ interface Product {
   caliber?: string;
   is_active: boolean;
   is_featured: boolean;
-  for_order: boolean;
+  forOrder: boolean;
   meta_title?: string;
   meta_description?: string;
 }
@@ -1214,7 +1214,7 @@ const form = reactive<Product>({
   caliber: "",
   is_active: true,
   is_featured: false,
-  for_order: false,
+  forOrder: false,
   meta_title: "",
   meta_description: "",
 });
@@ -1441,7 +1441,7 @@ const addVariant = () => {
     size: sizeToAdd,
     price: priceToAdd,
     stock: newVariantStock.value || undefined,
-    for_order: newVariantForOrder.value || undefined,
+    forOrder: newVariantForOrder.value || undefined,
   };
 
   form.variants.push(newVariant);
@@ -1575,7 +1575,7 @@ const handleSubmit = async (event?: Event) => {
       caliber: form.caliber || undefined,
       is_active: form.is_active,
       is_featured: form.is_featured,
-      for_order: form.for_order,
+      forOrder: form.forOrder,
       meta_title: form.meta_title || undefined,
       meta_description: form.meta_description || undefined,
     };

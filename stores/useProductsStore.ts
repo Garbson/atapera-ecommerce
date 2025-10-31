@@ -17,7 +17,7 @@ export const useProductsStore = defineStore("products", () => {
     price: number;
     stock?: number;
     sku?: string;
-    for_order?: boolean;
+    forOrder?: boolean;
   }
 
   interface Product {
@@ -48,7 +48,7 @@ export const useProductsStore = defineStore("products", () => {
     caliber?: string;
     is_active: boolean;
     is_featured: boolean;
-    for_order: boolean;
+    forOrder: boolean;
     meta_title?: string;
     meta_description?: string;
     created_at?: string;

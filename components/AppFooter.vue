@@ -17,8 +17,8 @@
           </div>
           <p class="text-gray-300 text-sm leading-relaxed max-w-sm">
             Mais de 10 anos fornecendo equipamentos de qualidade para
-            aventureiros, caçadores esportivos e pescadores.
-            Produtos certificados e atendimento especializado.
+            aventureiros, caçadores esportivos e pescadores. Produtos
+            certificados e atendimento especializado.
           </p>
         </div>
 
@@ -61,17 +61,6 @@
                   class="w-2 h-2 bg-red-500 rounded-full group-hover:bg-red-400 transition-colors"
                 ></span>
                 FAQ
-              </NuxtLink>
-            </li>
-            <li>
-              <NuxtLink
-                to="/rastreamento"
-                class="text-gray-300 hover:text-red-400 transition-all duration-300 text-sm flex items-center gap-3 group"
-              >
-                <span
-                  class="w-2 h-2 bg-red-500 rounded-full group-hover:bg-red-400 transition-colors"
-                ></span>
-                Rastreamento
               </NuxtLink>
             </li>
             <li>

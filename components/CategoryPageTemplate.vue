@@ -602,7 +602,7 @@ const enhancedFilters = computed(() => {
   if (!props.categoryData?.filters) return [];
   
   // Categorias que suportam filtros dinâmicos
-  const categoriesWithDynamicFilters = ['armas-fogo', 'armas-pressao', 'airsoft', 'pesca', 'caca', 'vestuario'];
+  const categoriesWithDynamicFilters = ['armas-fogo', 'armas-pressao', 'airsoft', 'pesca', 'caca', 'vestuario', 'motores'];
   const hasDynamicFilters = categoriesWithDynamicFilters.includes(props.categoryData.slug);
   
   return props.categoryData.filters.map(filter => {
@@ -663,7 +663,8 @@ const fetchDynamicFilters = async () => {
       'airsoft': 'b8ce0b20-63ad-44a2-b0a0-f383d5f8ec32',
       'pesca': '3b6c5fb9-e0f3-474b-8cc2-e36dd327d2aa',
       'caca': 'e3afc893-b4c0-43a6-9900-c1208b1372ed',
-      'vestuario': '2a6c0a33-0025-4cce-a306-db578a19a4f2'
+      'vestuario': '2a6c0a33-0025-4cce-a306-db578a19a4f2',
+      'motores': 'd64fe34d-3996-40c7-adf6-e530f259f4ee'
     };
     
     const categoryUUID = categoryUUIDs[props.categoryData?.slug];

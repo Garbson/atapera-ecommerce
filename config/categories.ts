@@ -335,8 +335,10 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
         options: [
           { value: "motores-popa", label: "Motores de Popa" },
           { value: "motores-estacionarios", label: "Motores Estacionários" },
-          { value: "motobombas", label: "Motobombas" },
+          { value: "motobombas", label: "Moto bomba" },
           { value: "geradores", label: "Geradores" },
+          { value: "moto-serra", label: "Moto Serra" },
+          { value: "furadeira", label: "Furadeira" },
           { value: "pecas", label: "Peças" },
           { value: "acessorios", label: "Acessórios" },
         ],
@@ -345,11 +347,7 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
         key: "brand",
         label: "Marca",
         placeholder: "Todas as Marcas",
-        options: [
-          { value: "mercury", label: "Mercury" },
-          { value: "yamaha", label: "Yamaha" },
-          { value: "honda", label: "Honda" },
-        ],
+        options: [], // Será preenchido dinamicamente
       },
     ],
   },
