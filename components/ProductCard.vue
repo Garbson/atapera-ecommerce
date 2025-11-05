@@ -158,7 +158,7 @@
               />
             </svg>
             <span class="font-medium"
-              >Requer {{ product.license_type || "documentação" }}</span
+              >Requer Autorização emitida pelo Orgão competente Sinarm/Sigma</span
             >
           </div>
         </div>

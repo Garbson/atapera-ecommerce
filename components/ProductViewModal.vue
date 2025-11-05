@@ -106,7 +106,7 @@
                 <div>
                   <h4 class="font-medium text-yellow-800">Documentação Necessária</h4>
                   <p class="text-sm text-yellow-700 mt-1">
-                    Este produto requer {{ product.license_type || 'documentação especial' }} para compra.
+                    Este produto requer Autorização emitida pelo Orgão competente Sinarm/Sigma para compra.
                   </p>
                 </div>
               </div>

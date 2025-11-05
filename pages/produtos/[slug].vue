@@ -152,22 +152,21 @@
               </div>
             </div>
 
-            <!-- Características Principais -->
-            <div
-              v-if="mainFeatures.length > 0"
-              class="border-t border-gray-200 pt-4"
-            >
+            <!-- Destaques do Produto -->
+            <div class="border-t border-gray-200 pt-4">
               <h3 class="text-lg font-medium text-gray-900 mb-3">
-                Sobre este produto
+                Destaques do produto
               </h3>
               <ul class="space-y-2">
                 <li
-                  v-for="feature in mainFeatures"
-                  :key="feature"
-                  class="flex items-start gap-2 text-sm"
+                  v-for="highlight in productHighlights"
+                  :key="highlight"
+                  class="flex items-start gap-3 text-sm"
                 >
-                  <span class="text-gray-400 mt-1">•</span>
-                  <span class="text-gray-700">{{ feature }}</span>
+                  <svg class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-gray-700">{{ highlight }}</span>
                 </li>
               </ul>
             </div>
@@ -194,8 +193,7 @@
                     Requer Documentação
                   </h4>
                   <p class="text-sm text-yellow-700 mt-1">
-                    Este produto requer
-                    {{ product.license_type || "documentação específica" }} para
+                    Este produto requer Autorização emitida pelo Orgão competente Sinarm/Sigma para
                     compra.
                   </p>
                 </div>
@@ -367,69 +365,124 @@
           </div>
 
           <div class="mt-6">
-            <!-- Descrição -->
-            <div v-if="activeTab === 'description'" class="prose max-w-none">
-              <div
-                v-if="product.description"
-                v-html="product.description"
-              ></div>
-              <div v-else-if="product.short_description" class="text-gray-700">
-                {{ product.short_description }}
+            <!-- Descrição Completa -->
+            <div v-if="activeTab === 'description'" class="space-y-6">
+              <!-- Descrição formatada com tópicos -->
+              <div v-if="product.description" class="space-y-6">
+                <div class="formatted-description" v-html="formatDescription(product.description)"></div>
               </div>
-              <div v-else class="text-gray-500 italic">
-                Descrição não disponível para este produto.
+              <div v-else-if="product.short_description" class="space-y-4">
+                <div class="text-gray-700 leading-relaxed text-lg">
+                  {{ product.short_description }}
+                </div>
+              </div>
+              <div v-else class="text-center py-12">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p class="text-gray-500 italic text-lg">Descrição detalhada será adicionada em breve.</p>
+              </div>
+
+              <!-- Informações importantes -->
+              <div v-if="product.requires_license" class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                <div class="flex items-start">
+                  <svg class="w-6 h-6 text-yellow-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  <div>
+                    <h4 class="text-lg font-semibold text-yellow-800 mb-2">Documentação Necessária</h4>
+                    <p class="text-yellow-700">
+                      Este produto requer Autorização emitida pelo Orgão competente Sinarm/Sigma para compra.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Especificações -->
+            <!-- Especificações Técnicas -->
             <div v-else-if="activeTab === 'specs'" class="space-y-6">
               <!-- Informações Básicas -->
               <div v-if="basicSpecs.length > 0">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                  <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                  </svg>
                   Informações do Produto
                 </h3>
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                  <dl class="divide-y divide-gray-200">
                     <div
-                      v-for="spec in basicSpecs"
+                      v-for="(spec, index) in basicSpecs"
                       :key="spec.label"
-                      class="flex justify-between"
+                      class="px-6 py-4 flex justify-between items-center"
+                      :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
                     >
-                      <dt class="text-sm text-gray-600">{{ spec.label }}:</dt>
-                      <dd class="text-sm font-medium text-gray-900">
-                        {{ spec.value }}
-                      </dd>
+                      <dt class="text-sm font-medium text-gray-600">{{ spec.label }}</dt>
+                      <dd class="text-sm text-gray-900 font-semibold">{{ spec.value }}</dd>
                     </div>
                   </dl>
                 </div>
               </div>
 
-              <!-- Especificações Técnicas -->
+              <!-- Especificações Técnicas Avançadas -->
               <div
                 v-if="
                   product.specifications &&
                   Object.keys(product.specifications).length > 0
                 "
               >
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                  <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                  </svg>
                   Especificações Técnicas
                 </h3>
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                  <dl class="divide-y divide-gray-200">
                     <div
-                      v-for="(value, key) in product.specifications"
+                      v-for="(value, key, index) in product.specifications"
                       :key="key"
-                      class="flex justify-between"
+                      class="px-6 py-4 flex justify-between items-center"
+                      :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
                     >
-                      <dt class="text-sm text-gray-600">
-                        {{ formatSpecKey(key) }}:
+                      <dt class="text-sm font-medium text-gray-600">
+                        {{ formatSpecKey(key) }}
                       </dt>
-                      <dd class="text-sm font-medium text-gray-900">
-                        {{ value }}
-                      </dd>
+                      <dd class="text-sm text-gray-900 font-semibold">{{ value }}</dd>
                     </div>
                   </dl>
                 </div>
+              </div>
+
+              <!-- Dimensões e Peso -->
+              <div v-if="dimensionsSpecs.length > 0">
+                <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                  <svg class="w-5 h-5 text-purple-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15 13.586V12a1 1 0 011-1z" clip-rule="evenodd" />
+                  </svg>
+                  Dimensões e Peso
+                </h3>
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                  <dl class="divide-y divide-gray-200">
+                    <div
+                      v-for="(spec, index) in dimensionsSpecs"
+                      :key="spec.label"
+                      class="px-6 py-4 flex justify-between items-center"
+                      :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
+                    >
+                      <dt class="text-sm font-medium text-gray-600">{{ spec.label }}</dt>
+                      <dd class="text-sm text-gray-900 font-semibold">{{ spec.value }}</dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+
+              <!-- Aviso de especificações vazias -->
+              <div v-if="basicSpecs.length === 0 && dimensionsSpecs.length === 0 && (!product.specifications || Object.keys(product.specifications).length === 0)" class="text-center py-8">
+                <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <p class="text-gray-500 italic">Especificações técnicas serão adicionadas em breve.</p>
               </div>
             </div>
 
@@ -650,22 +703,75 @@ const displayPrice = computed(() => {
 });
 
 const tabs = computed(() => [
-  { id: "description", name: "Descrição" },
-  { id: "specs", name: "Especificações" },
+  { id: "description", name: "Descrição Completa" },
+  { id: "specs", name: "Especificações Técnicas" },
   { id: "reviews", name: "Avaliações (0)" },
 ]);
 
-const mainFeatures = computed(() => {
+// Destaques principais para a seção superior
+const productHighlights = computed(() => {
+  const highlights = [];
+
+  // Adicionar destaques baseados na categoria e especificações
+  if (product.value?.brand && product.value?.model) {
+    highlights.push(`${product.value.brand} ${product.value.model} original`);
+  } else if (product.value?.brand) {
+    highlights.push(`Produto da marca ${product.value.brand}`);
+  }
+
+  if (product.value?.caliber) {
+    highlights.push(`Calibre ${product.value.caliber}`);
+  }
+
+  if (product.value?.color && product.value.color.length > 1) {
+    highlights.push(`Disponível em ${product.value.color.length} cores`);
+  }
+
+  if (product.value?.variants && product.value.variants.length > 0) {
+    highlights.push(`${product.value.variants.length} opções de tamanho`);
+  }
+
+  if (product.value?.weight) {
+    highlights.push(`Peso: ${product.value.weight}kg`);
+  }
+
+  // Adicionar destaque de garantia/qualidade baseado na categoria
+  highlights.push("Produto com garantia de qualidade");
+  highlights.push("Entrega rápida e segura");
+
+  return highlights.slice(0, 6); // Máximo 6 destaques
+});
+
+// Características detalhadas para a aba
+const detailedFeatures = computed(() => {
   const features = [];
-  if (product.value?.brand) features.push(`Marca: ${product.value.brand}`);
-  if (product.value?.model) features.push(`Modelo: ${product.value.model}`);
-  if (selectedColor.value) features.push(`Cor: ${selectedColor.value}`);
-  if (product.value?.caliber)
-    features.push(`Calibre: ${product.value.caliber}`);
-  if (product.value?.weight) features.push(`Peso: ${product.value.weight}kg`);
-  if (product.value?.short_description)
-    features.push(product.value.short_description);
-  return features.slice(0, 5); // Máximo 5 características
+
+  if (product.value?.short_description) {
+    // Dividir a descrição curta em pontos se contiver quebras de linha ou pontos
+    const description = product.value.short_description;
+    if (description.includes('\n')) {
+      features.push(...description.split('\n').filter(line => line.trim()));
+    } else if (description.includes('.') && description.length > 100) {
+      features.push(...description.split('.').filter(sentence => sentence.trim()).map(s => s.trim() + '.'));
+    } else {
+      features.push(description);
+    }
+  }
+
+  // Adicionar características baseadas nos dados do produto
+  if (product.value?.brand) {
+    features.push(`Fabricado pela ${product.value.brand}`);
+  }
+
+  if (product.value?.caliber) {
+    features.push(`Disponível no calibre ${product.value.caliber}`);
+  }
+
+  if (product.value?.requires_license) {
+    features.push("Requer autorização emitida pelo orgão competente Sinarm/Sigma");
+  }
+
+  return features;
 });
 
 const basicSpecs = computed(() => {
@@ -685,6 +791,29 @@ const basicSpecs = computed(() => {
   if (product.value?.weight)
     specs.push({ label: "Peso", value: `${product.value.weight}kg` });
 
+
+  return specs;
+});
+
+// Especificações de dimensões e peso
+const dimensionsSpecs = computed(() => {
+  const specs = [];
+
+  if (product.value?.weight) {
+    specs.push({ label: "Peso", value: `${product.value.weight}kg` });
+  }
+
+  if (product.value?.dimensions?.length) {
+    specs.push({ label: "Comprimento", value: `${product.value.dimensions.length}cm` });
+  }
+
+  if (product.value?.dimensions?.width) {
+    specs.push({ label: "Largura", value: `${product.value.dimensions.width}cm` });
+  }
+
+  if (product.value?.dimensions?.height) {
+    specs.push({ label: "Altura", value: `${product.value.dimensions.height}cm` });
+  }
 
   return specs;
 });
@@ -804,6 +933,37 @@ const formatSpecKey = (key: string) => {
   return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
+// Formatador de descrição com tópicos
+const formatDescription = (description: string) => {
+  if (!description) return '';
+
+  let result = description
+    // Remover emojis dos tópicos primeiro
+    .replace(/([\u{1F300}-\u{1F5FF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])\s*/gu, '')
+    // Converter **texto** para títulos e preparar conteúdo
+    .replace(/\*\*(.*?)\*\*/g, '|||TITLE|||$1|||/TITLE|||')
+    // Processar cada linha separadamente
+    .split('\n')
+    .map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return '';
+
+      if (trimmed.includes('|||TITLE|||')) {
+        const title = trimmed.replace(/\|\|\|TITLE\|\|\|(.*?)\|\|\|\/TITLE\|\|\|/, '$1');
+        return `<h3 class="topic-title">${title}</h3>`;
+      } else if (trimmed.startsWith('•')) {
+        const content = trimmed.replace(/^•\s*/, '');
+        return `<div class="topic-item">• ${content}</div>`;
+      } else {
+        return `<div class="topic-text">${trimmed}</div>`;
+      }
+    })
+    .filter(line => line)
+    .join('');
+
+  return `<div class="formatted-description">${result}</div>`;
+};
+
 const getFirstProductImage = (images: string[]) => {
   if (!images || images.length === 0) {
     return "/placeholder-product.jpg";
@@ -902,5 +1062,37 @@ if (product.value) {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-clamp: 2;
+}
+
+/* Estilos para descrição formatada */
+:deep(.formatted-description) {
+  line-height: 1.4;
+}
+
+:deep(.topic-title) {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 1rem 0 0.25rem 0;
+  line-height: 1.2;
+}
+
+:deep(.topic-title:first-child) {
+  margin-top: 0;
+}
+
+:deep(.topic-item) {
+  margin: 0.125rem 0 0.125rem 1rem;
+  line-height: 1.4;
+}
+
+:deep(.topic-text) {
+  margin: 0.125rem 0 0.125rem 1rem;
+  line-height: 1.4;
+}
+
+:deep(.topic-text:empty) {
+  display: none;
 }
 </style>

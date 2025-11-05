@@ -620,34 +620,151 @@
             </div>
           </div>
 
-          <!-- Descrições -->
-          <div class="space-y-4">
+          <!-- Descrições por Tópicos -->
+          <div class="space-y-6">
+            <div class="border-t border-gray-200 pt-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                Descrição do Produto por Tópicos
+              </h3>
+              <p class="text-sm text-gray-600 mb-6">
+                Organize as informações do produto em tópicos. A descrição final será formatada automaticamente.
+              </p>
+            </div>
+
+            <!-- Descrição Curta -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Descrição Curta
+                Descrição Resumida
+                <span class="text-xs text-gray-500">(aparecerá no topo da página)</span>
               </label>
               <textarea
                 v-model="form.short_description"
                 rows="2"
                 maxlength="500"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Descrição breve do produto (até 500 caracteres)"
+                placeholder="Resumo breve do produto que aparecerá no topo da página"
               ></textarea>
               <p class="text-xs text-gray-500 mt-1">
                 {{ form.short_description?.length || 0 }}/500 caracteres
               </p>
             </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Descrição Completa
-              </label>
-              <textarea
-                v-model="form.description"
-                rows="4"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Descrição detalhada do produto"
-              ></textarea>
+            <!-- Tópicos da Descrição -->
+            <div class="space-y-4">
+              <!-- Descrição -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  📝 Descrição
+                </label>
+                <textarea
+                  v-model="form.topic_description"
+                  rows="3"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Descrição geral do produto, suas funcionalidades principais..."
+                ></textarea>
+              </div>
+
+              <!-- Características -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  ✨ Características
+                </label>
+                <textarea
+                  v-model="form.topic_features"
+                  rows="4"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="- Característica 1\n- Característica 2\n- Característica 3\n(uma por linha)"
+                ></textarea>
+              </div>
+
+              <!-- Especificações Técnicas -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  🔧 Especificações Técnicas
+                </label>
+                <textarea
+                  v-model="form.topic_specifications"
+                  rows="4"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Material: Aço inoxidável\nDimensões: 30x20x10cm\nPeso: 2.5kg\n(uma especificação por linha)"
+                ></textarea>
+              </div>
+
+              <!-- Informações Adicionais -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  📌 Informações Adicionais
+                </label>
+                <textarea
+                  v-model="form.topic_additional_info"
+                  rows="3"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Garantia, cuidados especiais, instruções de uso..."
+                ></textarea>
+              </div>
+
+              <!-- Acompanha -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  📦 Acompanha
+                </label>
+                <textarea
+                  v-model="form.topic_includes"
+                  rows="3"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="- Manual de instruções\n- Certificado de garantia\n- Acessórios incluíos\n(um item por linha)"
+                ></textarea>
+              </div>
+
+              <!-- Tópicos Personalizados -->
+              <div class="border rounded-lg p-4 bg-gray-50">
+                <div class="flex items-center justify-between mb-3">
+                  <label class="block text-sm font-semibold text-gray-800">📚 Tópicos Personalizados</label>
+                  <button
+                    type="button"
+                    class="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    @click="addCustomTopic"
+                  >
+                    Adicionar tópico
+                  </button>
+                </div>
+                <p class="text-xs text-gray-600 mb-3">Crie quantos tópicos quiser. Eles serão combinados automaticamente na descrição final como um texto único, já formatado.</p>
+
+                <div v-if="customTopics.length === 0" class="text-xs text-gray-500">Nenhum tópico personalizado adicionado.</div>
+
+                <div v-for="(topic, idx) in customTopics" :key="idx" class="mb-3 bg-white border border-gray-200 rounded-lg p-3">
+                  <div class="flex items-center gap-2 mb-2">
+                    <input
+                      v-model="topic.title"
+                      type="text"
+                      class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      placeholder="Título do tópico (ex: Garantia, Como usar, Cuidados...)"
+                    />
+                    <button
+                      type="button"
+                      class="text-red-600 text-sm hover:underline"
+                      @click="removeCustomTopic(idx)"
+                      title="Remover tópico"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                  <textarea
+                    v-model="topic.content"
+                    rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="Conteúdo do tópico..."
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preview da Descrição -->
+            <div v-if="generatedDescription" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 class="text-sm font-medium text-blue-900 mb-2">
+                👁️ Preview da Descrição Final:
+              </h4>
+              <div class="text-sm text-blue-800 whitespace-pre-line">{{ generatedDescription }}</div>
             </div>
           </div>
 
@@ -907,7 +1024,7 @@
                   class="rounded border-gray-300 text-red-600 focus:ring-red-500"
                 />
                 <span class="text-sm font-medium text-gray-700"
-                  >Requer Licença</span
+                  >Requer Autorização emitida pelo Orgão competente Sinarm/Sigma</span
                 >
               </label>
 
@@ -1099,6 +1216,12 @@ interface Product {
   slug: string;
   description?: string;
   short_description?: string;
+  // Novos campos de tópicos
+  topic_description?: string;
+  topic_features?: string;
+  topic_specifications?: string;
+  topic_additional_info?: string;
+  topic_includes?: string;
   price: number;
   sale_price?: number;
   avista_price?: number;
@@ -1147,6 +1270,7 @@ const newVariantSize = ref("");
 const newVariantPrice = ref<number | null>(null);
 const newVariantStock = ref<number | null>(null);
 const newVariantForOrder = ref(false);
+const customTopics = ref<{ title: string; content: string }[]>([]);
 const isEditing = computed(() => !!props.product);
 
 // Categorias disponíveis
@@ -1194,6 +1318,12 @@ const form = reactive<Product>({
   slug: "",
   description: "",
   short_description: "",
+  // Novos campos de tópicos
+  topic_description: "",
+  topic_features: "",
+  topic_specifications: "",
+  topic_additional_info: "",
+  topic_includes: "",
   price: 0,
   sale_price: 0,
   avista_price: 0,
@@ -1249,6 +1379,118 @@ watch(
   }
 );
 
+// Gerar descrição automaticamente com base nos tópicos
+const generatedDescription = computed(() => {
+  let description = "";
+
+  if (form.topic_description?.trim()) {
+    description += `📝 **Descrição**\n${form.topic_description.trim()}\n\n`;
+  }
+
+  if (form.topic_features?.trim()) {
+    description += `✨ **Características**\n`;
+    const features = form.topic_features.trim().split('\n').filter(line => line.trim());
+    features.forEach(feature => {
+      const cleanFeature = feature.trim().replace(/^-\s*/, '');
+      if (cleanFeature) {
+        description += `• ${cleanFeature}\n`;
+      }
+    });
+    description += '\n';
+  }
+
+  if (form.topic_specifications?.trim()) {
+    description += `🔧 **Especificações Técnicas**\n`;
+    const specs = form.topic_specifications.trim().split('\n').filter(line => line.trim());
+    specs.forEach(spec => {
+      const cleanSpec = spec.trim();
+      if (cleanSpec) {
+        if (cleanSpec.includes(':')) {
+          description += `• ${cleanSpec}\n`;
+        } else {
+          description += `• ${cleanSpec}\n`;
+        }
+      }
+    });
+    description += '\n';
+  }
+
+  if (form.topic_additional_info?.trim()) {
+    description += `📌 **Informações Adicionais**\n${form.topic_additional_info.trim()}\n\n`;
+  }
+
+  if (form.topic_includes?.trim()) {
+    description += `📦 **Acompanha**\n`;
+    const includes = form.topic_includes.trim().split('\n').filter(line => line.trim());
+    includes.forEach(item => {
+      const cleanItem = item.trim().replace(/^-\s*/, '');
+      if (cleanItem) {
+        description += `• ${cleanItem}\n`;
+      }
+    });
+    description += '\n';
+  }
+
+  // Tópicos personalizados
+  if (customTopics.value.length > 0) {
+    customTopics.value.forEach((topic) => {
+      const title = (topic.title || '').trim();
+      const content = (topic.content || '').trim();
+      if (title || content) {
+        description += `🔹 **${title || 'Tópico'}**\n`;
+        if (content) description += `${content}\n\n`;
+      }
+    });
+  }
+
+  return description.trim();
+});
+
+// Atualizar o campo description sempre que os tópicos mudarem
+// (só se pelo menos um tópico estiver preenchido)
+watch(
+  () => [
+    form.topic_description,
+    form.topic_features,
+    form.topic_specifications,
+    form.topic_additional_info,
+    form.topic_includes,
+  ],
+  () => {
+    // Só gerar descrição automaticamente se algum tópico estiver preenchido
+    const hasTopics = form.topic_description?.trim() ||
+                     form.topic_features?.trim() ||
+                     form.topic_specifications?.trim() ||
+                     form.topic_additional_info?.trim() ||
+                     form.topic_includes?.trim() ||
+                     customTopics.value.some(t => t.title?.trim() || t.content?.trim());
+
+    if (hasTopics) {
+      form.description = generatedDescription.value;
+    }
+  },
+  { immediate: true }
+);
+
+// Atualizar descrição ao alterar tópicos personalizados (deep)
+watch(
+  customTopics,
+  () => {
+    // Só gerar descrição automaticamente se algum tópico estiver preenchido
+    const hasTopics = form.topic_description?.trim() ||
+                     form.topic_features?.trim() ||
+                     form.topic_specifications?.trim() ||
+                     form.topic_additional_info?.trim() ||
+                     form.topic_includes?.trim() ||
+                     customTopics.value.some(t => t.title?.trim() || t.content?.trim());
+
+    if (hasTopics) {
+      form.description = generatedDescription.value;
+    }
+  },
+  { deep: true }
+);
+
 // Carregar categorias ao montar o componente
 onMounted(async () => {
   await categoriesStore.fetchCategories();
@@ -1294,6 +1536,14 @@ const removeExistingImage = (index: number) => {
 
 const getFilePreview = (file: File): string => {
   return URL.createObjectURL(file);
+};
+
+const addCustomTopic = () => {
+  customTopics.value.push({ title: "", content: "" });
+};
+
+const removeCustomTopic = (index: number) => {
+  customTopics.value.splice(index, 1);
 };
 
 // Gerar slug automaticamente
@@ -1555,6 +1805,7 @@ const handleSubmit = async (event?: Event) => {
       price: form.price,
       sale_price: form.sale_price || undefined,
       category_id: form.category_id,
+      subcategory: form.subcategory || undefined,
       brand: form.brand || undefined,
       model: form.model || undefined,
       color: form.color && form.color.length > 0 ? form.color : undefined,
