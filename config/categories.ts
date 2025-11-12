@@ -469,6 +469,45 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
     ],
   },
 
+  lazer: {
+    slug: "lazer",
+    title: "Lazer",
+    description:
+      "Equipamentos de lazer e entretenimento para atividades recreativas, hobbies diversos e momentos de diversão para toda a família.",
+    color: "purple",
+    backgroundImage: "/images/lazer.jpg",
+    filters: [
+      {
+        key: "subcategory",
+        label: "Categoria",
+        placeholder: "Todas as Categorias",
+        options: [
+          { value: "jogos", label: "Jogos e Brinquedos" },
+          { value: "esportes", label: "Esportes Recreativos" },
+          { value: "hobbies", label: "Hobbies e Coleções" },
+          { value: "bicicletas", label: "Bicicletas e Acessórios" },
+          { value: "fitness", label: "Fitness e Academia" },
+          { value: "nauticos", label: "Esportes Náuticos" },
+          { value: "acessorios", label: "Acessórios" },
+        ],
+      },
+      {
+        key: "brand",
+        label: "Marca",
+        placeholder: "Todas as Marcas",
+        options: [], // Será preenchido dinamicamente
+      },
+    ],
+    quickCategories: [
+      { id: 1, name: "Jogos", icon: "🎮", value: "jogos" },
+      { id: 2, name: "Esportes", icon: "⚽", value: "esportes" },
+      { id: 3, name: "Hobbies", icon: "🎨", value: "hobbies" },
+      { id: 4, name: "Bicicletas", icon: "🚲", value: "bicicletas" },
+      { id: 5, name: "Fitness", icon: "🏋️", value: "fitness" },
+      { id: 6, name: "Náuticos", icon: "🏄", value: "nauticos" },
+    ],
+  },
+
   ofertas: {
     slug: "ofertas",
     title: "Ofertas Especiais",
@@ -489,6 +528,7 @@ export const categoriesConfig: Record<string, CategoryConfig> = {
           { value: "caca", label: "Caça" },
           { value: "vestuario", label: "Vestuário" },
           { value: "camping", label: "Camping" },
+          { value: "lazer", label: "Lazer" },
         ],
       },
       {

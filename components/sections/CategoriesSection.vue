@@ -13,7 +13,24 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Loading State -->
         <div
+          v-if="loading"
+          v-for="i in 6"
+          :key="i"
+          class="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse"
+        >
+          <div class="h-48 bg-gray-200"></div>
+          <div class="p-6">
+            <div class="h-6 bg-gray-200 rounded mb-3"></div>
+            <div class="h-4 bg-gray-200 rounded mb-2"></div>
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+          </div>
+        </div>
+
+        <!-- Categories -->
+        <div
+          v-else
           v-for="category in categories"
           :key="category.id"
           class="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
@@ -106,15 +123,16 @@
 </template>
 
 <script setup>
-const categories = [
-  {
-    id: 1,
-    name: "Armas de Fogo",
+const categoriesStore = useCategoriesStore()
+const loading = ref(true)
+
+// Dados padrão das categorias para exibição
+const categoriesData = {
+  1: {
     description:
       "Pistolas, revólveres e rifles registrados com documentação completa e suporte especializado.",
     image: "/images/armas.jpg",
     bgClass: "bg-gradient-to-br from-gray-800 to-gray-900",
-    link: "/categoria/armas-fogo",
     productCount: 250,
     badge: "Licença Req.",
     features: [
@@ -123,14 +141,11 @@ const categories = [
       "Suporte especializado",
     ],
   },
-  {
-    id: 2,
-    name: "Armas de Pressão",
+  2: {
     description:
       "Carabinas e pistolas de pressão certificadas pelo Exército brasileiro para tiro esportivo.",
     image: "/images/cacaC.jpg",
     bgClass: "bg-gradient-to-br from-blue-600 to-blue-800",
-    link: "/categoria/armas-pressao",
     productCount: 180,
     features: [
       "Certificadas pelo Exército",
@@ -138,25 +153,19 @@ const categories = [
       "Várias potências",
     ],
   },
-  {
-    id: 3,
-    name: "Equipamentos de Pesca",
+  3: {
     description:
       "Varas, molinetes, iscas e acessórios para pesca em água doce, salgada e esportiva.",
     image: "/images/pescaC.jpg",
     bgClass: "bg-gradient-to-br from-green-600 to-green-800",
-    link: "/categoria/pesca",
     productCount: 420,
     features: ["Água doce e salgada", "Pesca esportiva", "Marcas premium"],
   },
-  {
-    id: 4,
-    name: "Airsoft",
+  4: {
     description:
       "Equipamentos táticos, réplicas e acessórios para airsoft e simulação militar.",
     image: "/images/airsoftC.jpg",
     bgClass: "bg-gradient-to-br from-purple-600 to-purple-800",
-    link: "/categoria/airsoft",
     productCount: 320,
     features: [
       "Réplicas realistas",
@@ -164,40 +173,54 @@ const categories = [
       "Acessórios completos",
     ],
   },
-  {
-    id: 5,
-    name: "Caça",
+  5: {
     description:
-      "Arco e flecha, equipamentos e acessórios para caça esportiva e modalidades tradicionais.",
-    image: "/images/caca4.jpg",
-    bgClass: "bg-gradient-to-br from-orange-600 to-orange-800",
-    link: "/categoria/caca",
-    productCount: 150,
-    features: ["Arco e flecha", "Caça tradicional", "Equipamentos premium"],
+      "Equipamentos de lazer e entretenimento para atividades recreativas e hobbies diversos.",
+    image: "/images/lazer.jpg",
+    bgClass: "bg-gradient-to-br from-indigo-600 to-indigo-800",
+    productCount: 0,
+    features: ["Entretenimento", "Hobbies diversos", "Qualidade garantida"],
   },
-  {
-    id: 6,
-    name: "Vestuário Outdoor",
+  6: {
     description:
       "Roupas táticas, calçados e equipamentos para aventuras outdoor e atividades ao ar livre.",
     image: "/images/vestuarioC.jpg",
     bgClass: "bg-gradient-to-br from-yellow-600 to-yellow-800",
-    link: "/categoria/vestuario",
     productCount: 280,
     features: ["Roupas táticas", "Calçados outdoor", "Resistente e durável"],
   },
-  {
-    id: 7,
-    name: "Motores",
+  7: {
     description:
       "Motores de popa, estacionários, motobombas e acessórios. Equipamentos completos para embarcações, geradores e bombas d'água.",
     image: "/images/motoresBg.jpg",
     bgClass: "bg-gradient-to-br from-teal-600 to-teal-800",
-    link: "/categoria/motores",
     productCount: 85,
     features: ["Motores de popa", "Motores estacionários", "Motobombas e geradores"],
   },
-];
+}
+
+// Computar categorias para exibição
+const categories = computed(() => {
+  return categoriesStore.activeCategories.map(category => {
+    const categoryData = categoriesData[category.id] || {}
+    return {
+      ...category,
+      ...categoryData,
+      link: `/categoria/${category.slug}`,
+    }
+  })
+})
+
+// Carregar categorias ao montar o componente
+onMounted(async () => {
+  try {
+    await categoriesStore.fetchCategories()
+  } catch (error) {
+    console.error('Erro ao carregar categorias:', error)
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <style scoped>

@@ -1,38 +1,31 @@
 <template>
-  <CategoryPageTemplate 
+  <CategoryPageTemplate
     :key="route.params.slug"
-    :category-data="categoryConfig" 
+    :category-data="categoryConfig"
     :quick-categories="categoryConfig?.quickCategories || []"
   />
 </template>
 
 <script setup lang="ts">
-import { getCategoryConfig } from '~/config/categories.ts';
+import { getCategoryConfig } from '~/config/categories';
 
 const route = useRoute();
 
-// Configuração da categoria reativa baseada na rota
-const categoryConfig = computed(() => {
-  const slug = route.params.slug as string;
-  return getCategoryConfig(slug);
-});
+// Obter configuração da categoria
+const categoryConfig = getCategoryConfig(route.params.slug as string);
 
 // Verificar se a categoria existe
-if (!categoryConfig.value) {
+if (!categoryConfig) {
   throw createError({
     statusCode: 404,
     statusMessage: 'Categoria não encontrada'
   });
 }
 
-// SEO reativo
-watchEffect(() => {
-  if (categoryConfig.value) {
-    useSeoMeta({
-      title: `${categoryConfig.value.title} | Atapera`,
-      description: categoryConfig.value.description,
-      keywords: categoryConfig.value.slug
-    });
-  }
+// SEO
+useSeoMeta({
+  title: `${categoryConfig.title} | Atapera`,
+  description: categoryConfig.description,
+  keywords: categoryConfig.slug
 });
 </script>

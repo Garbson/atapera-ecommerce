@@ -273,6 +273,13 @@
           </li>
           <li>
             <NuxtLink
+              to="/categoria/lazer"
+              class="hover:text-red-600 font-medium transition-colors"
+              >Lazer</NuxtLink
+            >
+          </li>
+          <li>
+            <NuxtLink
               to="/categoria/vestuario"
               class="hover:text-red-600 font-medium transition-colors"
               >Vestuário</NuxtLink
@@ -443,6 +450,19 @@
               <span class="font-semibold text-gray-800 text-sm">Caça</span>
             </div>
             <span class="text-xs text-gray-600">Equipamentos</span>
+          </NuxtLink>
+
+          <NuxtLink
+            to="/categoria/lazer"
+            @click="closeMobileMenu"
+            class="group p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl border border-indigo-200 hover:from-indigo-100 hover:to-indigo-200 transition-all duration-200"
+          >
+            <div class="flex items-center gap-2">
+              <div
+                class="w-2 h-2 bg-indigo-500 rounded-full group-hover:scale-125 transition-transform"
+              ></div>
+              <span class="font-semibold text-gray-800 text-sm">Lazer</span>
+            </div>
           </NuxtLink>
 
           <NuxtLink

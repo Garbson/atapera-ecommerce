@@ -131,7 +131,7 @@ const loading = ref(true);
 const showFilters = ref(false);
 const products = ref([]);
 const categories = ref([]);
-const brands = ref([]);
+const brands = ref<string[]>([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
 
@@ -253,8 +253,37 @@ const fetchProducts = async () => {
   }
 };
 
+// Carregar categorias e marcas para filtros
+const loadFilters = async () => {
+  try {
+    const supabase = useSupabase();
+
+    // Carregar categorias
+    const { data: categoriesData } = await supabase
+      .from("categories")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name");
+
+    categories.value = categoriesData || [];
+
+    // Carregar marcas únicas
+    const { data: brandsData } = await supabase
+      .from("products")
+      .select("brand")
+      .not("brand", "is", null)
+      .eq("is_active", true);
+
+    const uniqueBrands = [...new Set(brandsData?.map((p: any) => p.brand))].filter(Boolean) as string[];
+    brands.value = uniqueBrands.sort();
+  } catch (error) {
+    console.error("Erro ao carregar filtros:", error);
+  }
+};
+
 // Lifecycle
 onMounted(() => {
+  loadFilters();
   fetchProducts();
 });
 
